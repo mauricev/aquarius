@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../model/aquarium_manager_facilities_model.dart';
 import '../model/aquarium_manager_notes_model.dart';
 import '../model/aquarium_manager_tanks_model.dart';
 import '../views/utility.dart';
 import '../views/facility_grid.dart';
+import 'package:aquarium_manager/views/consts.dart';
 
-import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 enum tankStringsEnum { tankLine, numberOfFish, generation }
 
@@ -750,7 +750,7 @@ class _MyAquariumManagerTankControllerState
 ^FO20,20^BQN,2,8^FH^FDMA:${rackFkString};${absolutePositionString}^FS 
 ^XZ
 """;
-    final rep = ZebraSdk.printZPLOverTCPIP('192.168.1.163', data: zplCode);
+    //final rep = ZebraSdk.printZPLOverTCPIP('192.168.1.163', data: zplCode);
   }
 
   @override
@@ -761,108 +761,108 @@ class _MyAquariumManagerTankControllerState
     Tank? currentTank = tankModel.returnCurrentTank();
 
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
         title: Text(kProgramName),
-      ),
+        ),
       body: Column(
-        children: [
-          BuildOuterLabel(context, "Select Rack (top view)"),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: FacilityGrid(tankMode: cFacilityClickableGrid),
-              ),
-            ],
-          ),
-          BuildOuterLabel(context, "Select Tank (facing view)"),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              RackGrid(),
-              buildParkedTank(context),
-            ],
-          ),
-          BuildOuterLabel(context, "Tank Info"),
-          Row(
-            children: [
-              // we nee a width parameter
-              buildInnerLabel("Tank Line", controllerForTankLine, tankModel,
-                  tankStringsEnum.tankLine, 300),
-              drawDateOfBirth(tankModel, currentTank, currentTank?.getBirthDate,
-                  currentTank?.setBirthDate),
-              buildCheckBox(
-                  tankModel,
-                  currentTank,
-                  "Screen Positive",
-                  currentTank?.getScreenPositive,
-                  currentTank?.setScreenPositive),
-            ],
-          ),
-          Row(
-            children: [
-              buildInnerLabel("Number of Fish", controllerForNumberOfFish,
-                  tankModel, tankStringsEnum.numberOfFish),
-              buildCheckBox(tankModel, currentTank, "Small Tank",
-                  currentTank?.getSmallTank, currentTank?.setSmallTank),
-              buildInnerLabel("Generation", controllerForGeneration, tankModel,
-                  tankStringsEnum.generation),
-            ],
-          ),
-          Row(
-            children: [
-              ((currentTank?.absolutePosition == cParkedRackAbsPosition) ||
-                      (currentTank == null) ||
-                      tankModel.isThereAParkedTank())
-                  ? Container()
-                  : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero, // remove any padding
+          children: [
+            BuildOuterLabel(context, "Select Rack (top view)"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: FacilityGrid(tankMode: cFacilityClickableGrid),
+                ),
+              ],
+            ),
+            BuildOuterLabel(context, "Select Tank (facing view)"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                RackGrid(),
+                buildParkedTank(context),
+              ],
+            ),
+            BuildOuterLabel(context, "Tank Info"),
+            Row(
+              children: [
+                // we nee a width parameter
+                buildInnerLabel("Tank Line", controllerForTankLine, tankModel,
+                    tankStringsEnum.tankLine, 300),
+                drawDateOfBirth(tankModel, currentTank, currentTank?.getBirthDate,
+                    currentTank?.setBirthDate),
+                buildCheckBox(
+                    tankModel,
+                    currentTank,
+                    "Screen Positive",
+                    currentTank?.getScreenPositive,
+                    currentTank?.setScreenPositive),
+              ],
+            ),
+            Row(
+              children: [
+                buildInnerLabel("Number of Fish", controllerForNumberOfFish,
+                    tankModel, tankStringsEnum.numberOfFish),
+                buildCheckBox(tankModel, currentTank, "Small Tank",
+                    currentTank?.getSmallTank, currentTank?.setSmallTank),
+                buildInnerLabel("Generation", controllerForGeneration, tankModel,
+                    tankStringsEnum.generation),
+              ],
+            ),
+            Row(
+              children: [
+                ((currentTank?.absolutePosition == cParkedRackAbsPosition) ||
+                        (currentTank == null) ||
+                        tankModel.isThereAParkedTank())
+                    ? Container()
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.zero, // remove any padding
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            currentTank.parkIt();
+                            MyAquariumManagerFacilityModel facilityModel =
+                                Provider.of<MyAquariumManagerFacilityModel>(
+                                    context,
+                                    listen: false);
+                            tankModel.saveExistingTank(facilityModel.document_id,
+                                cParkedRackAbsPosition);
+                          });
+                        },
+                        child: Text("Park it"),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          currentTank.parkIt();
-                          MyAquariumManagerFacilityModel facilityModel =
-                              Provider.of<MyAquariumManagerFacilityModel>(
-                                  context,
-                                  listen: false);
-                          tankModel.saveExistingTank(facilityModel.document_id,
-                              cParkedRackAbsPosition);
-                        });
-                      },
-                      child: Text("Park it"),
-                    ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 30,
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 30,
+                  ),
+                  child: TextButton(
+                    onPressed: (currentTank == null)
+                        ? null
+                        : () {
+                            currentTank?.notes.loadNotes().then((_) {
+                              notesDialog(context, tankModel, currentTank);
+                            }).catchError((error) {});
+                          },
+                    child: Text("Notes…"), // this is the button text
+                  ),
                 ),
-                child: TextButton(
-                  onPressed: (currentTank == null)
-                      ? null
-                      : () {
-                          currentTank?.notes.loadNotes().then((_) {
-                            notesDialog(context, tankModel, currentTank);
-                          }).catchError((error) {});
-                        },
-                  child: Text("Notes…"), // this is the button text
+                SizedBox(
+                  width: 565, //space for the note
+                  child: Text(currentTank?.notes?.returnCurrentNoteText() ??
+                      "No current note"),
                 ),
-              ),
-              SizedBox(
-                width: 565, //space for the note
-                child: Text(currentTank?.notes?.returnCurrentNoteText() ??
-                    "No current note"),
-              ),
-              ElevatedButton(
-                  onPressed: (currentTank == null)
-                      ? null
-                      : () {
-                          PrintTank(currentTank);
-                        },
-                  child: Text("Print")),
-            ],
-          ),
-        ],
-      ),
+                ElevatedButton(
+                    onPressed: (currentTank == null)
+                        ? null
+                        : () {
+                            PrintTank(currentTank);
+                          },
+                    child: Text("Print")),
+              ],
+            ),
+          ],
+        ),
     );
   }
 }

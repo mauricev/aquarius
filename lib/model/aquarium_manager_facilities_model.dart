@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'package:aquarium_manager/model/sessionKey.dart';
-
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
-
-const String cFacilityCollection = '63eefc630814627ea850';
-const String cRackCollection = '63f97b76c200d9237cea';
-const String cTankCollection = '6408223c577dec6908e7';
-const String cNotesCollection = '64239dc4f03b6125e61d';
+import 'package:aquarium_manager/views/consts.dart';
 
 class Rack {
   int absolutePosition = 0;
@@ -76,7 +70,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
       Query.equal("facility_name", facilityName),
     ];
     print("about to query facility list for this specific facility name");
-    return await _manageSession.queryDocument(cFacilityCollection, query);
+    return await _manageSession.queryDocument(kFacilityCollection, query);
   }
 
   Future<models.DocumentList> returnAssociatedRackList(
@@ -134,7 +128,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
       ];
 
       models.DocumentList theFacilityList = await _manageSession.queryDocument(
-          cFacilityCollection, facilityQuery);
+          kFacilityCollection, facilityQuery);
       models.Document theFacility = theFacilityList.documents[0];
 
       document_id = theFacility.$id;
@@ -191,10 +185,10 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     if (document_id == "") {
       // this is a new facility; give it a new id
       theFacility = await _manageSession.createDocument(
-          theFacilityMap, cFacilityCollection);
+          theFacilityMap, kFacilityCollection);
     } else {
       theFacility = await _manageSession.updateDocument(
-          theFacilityMap, cFacilityCollection, document_id);
+          theFacilityMap, kFacilityCollection, document_id);
 
       // query all the associated racks and delete them all by putting this in the future list
       models.DocumentList theRackList =

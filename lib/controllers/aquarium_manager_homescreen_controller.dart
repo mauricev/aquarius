@@ -1,19 +1,15 @@
-import 'package:aquarium_manager/controllers/aquarium_manager_qrcode_controller.dart';
 import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../model/aquarium_manager_model.dart';
 import 'aquarium_manager_facilities_controller.dart';
 import '../model/aquarium_manager_facilities_model.dart';
-
 import 'aquarium_manager_search_controller.dart';
-
 import 'aquarium_manager_tanks_controller.dart';
-
 import 'package:mobile_scanner/mobile_scanner.dart';
-
 import '../views/utility.dart';
+import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
 
 class AquariumManagerHomeScreenController extends StatefulWidget {
   const AquariumManagerHomeScreenController({Key? key}) : super(key: key);
@@ -36,41 +32,39 @@ class _AquariumManagerHomeScreenControllerState
         future: model.getFacilityNames(), // we return this as a future
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return snapshot.hasData
-              ? Container(
-                  child: DropdownButton<String>(
-                    value: snapshot.data.contains(model.selectedFacility)
-                        ? model.selectedFacility
-                        : null,
-                    icon: const Icon(Icons.arrow_downward),
-                    elevation: 16,
-                    style: const TextStyle(color: Colors.deepPurple),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        print("is setstate even being called");
-                        if (snapshot.data.contains(value)) {
-                          model.setSelectedFacility(value!);
-                        } else if (snapshot.data.isNotEmpty) {
-                          model.setSelectedFacility(snapshot.data.first);
-                          print("do we come here");
-                        } else {
-                          model.setSelectedFacility(null);
-                        }
-                      });
-                    },
-                    items: snapshot.data.map<DropdownMenuItem<String>>((value) {
-                      print(value.runtimeType);
-                      // we could append the data here to our data structure, item by item
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                )
+              ? DropdownButton<String>(
+                value: snapshot.data.contains(model.selectedFacility)
+                    ? model.selectedFacility
+                    : null,
+                icon: const Icon(Icons.arrow_downward),
+                elevation: 16,
+                style: const TextStyle(color: Colors.deepPurple),
+                underline: Container(
+                  height: 2,
+                  color: Colors.deepPurpleAccent,
+                ),
+                onChanged: (String? value) {
+                  setState(() {
+                    print("is setstate even being called");
+                    if (snapshot.data.contains(value)) {
+                      model.setSelectedFacility(value!);
+                    } else if (snapshot.data.isNotEmpty) {
+                      model.setSelectedFacility(snapshot.data.first);
+                      print("do we come here");
+                    } else {
+                      model.setSelectedFacility(null);
+                    }
+                  });
+                },
+                items: snapshot.data.map<DropdownMenuItem<String>>((value) {
+                  print(value.runtimeType);
+                  // we could append the data here to our data structure, item by item
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              )
               : Container();
         });
   }
@@ -88,13 +82,19 @@ class _AquariumManagerHomeScreenControllerState
     }
 
     facilitiesModel.getFacilityInfo(whichFacility).then((data) {
-      // are we wrong to assume this will be filled in?
       Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
                   MyAquariumManagerFacilitiesController()) // this will read from facility model, which has already been updated
           ).then((data) {});
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => MyAquariumManagerFacilitiesController(),
+      //     settings: RouteSettings(name: '/facilitiesscreen'), // Use the appropriate route name here
+      //   ),
+      // ).then((data) {});
     });
   }
 
@@ -123,7 +123,7 @@ class _AquariumManagerHomeScreenControllerState
   // because of https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
   // we pass build context and wrap the navigator.push/materialpageroute with
   // WidgetsBinding.instance!.addPostFrameCallback((_)
-  Future<void> TransferFromQrCodeToTank(BuildContext context2, MobileScannerController mobileScannerController, BarcodeCapture capture) async {
+  Future<void> transferFromQrCodeToTank(BuildContext context2, MobileScannerController mobileScannerController, BarcodeCapture capture) async {
     final List<Barcode> barcodes = capture.barcodes;
 
     await mobileScannerController.stop();
@@ -151,10 +151,12 @@ class _AquariumManagerHomeScreenControllerState
           ),
         );
       });
-    } else Navigator.pop(context);
+    } else {
+      Navigator.pop(context);
+    }
   }
 
-  Widget DisplayCameraForReadingQrCode(BuildContext context) {
+  Widget displayCameraForReadingQrCode(BuildContext context) {
     final MobileScannerController mobileScannerController = MobileScannerController(
       formats: [BarcodeFormat.qrCode],
       detectionSpeed: DetectionSpeed.noDuplicates,
@@ -165,7 +167,7 @@ class _AquariumManagerHomeScreenControllerState
     return MobileScanner(
       controller: mobileScannerController,
       onDetect: (capture) {
-        TransferFromQrCodeToTank(context,mobileScannerController, capture);
+        transferFromQrCodeToTank(context,mobileScannerController, capture);
       },
     );
   }
@@ -177,15 +179,12 @@ class _AquariumManagerHomeScreenControllerState
     MyAquariumManagerFacilityModel facilitiesModel =
         Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
 
-    MyAquariumManagerSearchModel searchModel =
-        Provider.of<MyAquariumManagerSearchModel>(context, listen: false);
-
     facilitiesModel.getFacilityInfo(model.selectedFacility).then((data) {
       // are we wrong to assume this will be filled in?
       showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          return DisplayCameraForReadingQrCode(context);
+          return displayCameraForReadingQrCode(context);
         },
       );
     });
@@ -210,25 +209,53 @@ class _AquariumManagerHomeScreenControllerState
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    MyAquariumManagerSearchController()) // this will read from facility model, which has already been updated
+                    const MyAquariumManagerSearchController()) // this will read from facility model, which has already been updated
             );
       });
     });
   }
 
+  void logoutController(BuildContext context) {
+    MyAquariumManagerModel model =
+    Provider.of<MyAquariumManagerModel>(context, listen: false);
+
+    Future<dynamic> result = model.logOut();
+    result
+        .then((response) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyAquariumManagerLoginController(),
+        ),
+      );
+    });
+  }
+
+  bool isAFacilitySelected(BuildContext context) {
+    MyAquariumManagerModel model =
+    Provider.of<MyAquariumManagerModel>(context, listen: false);
+    return model.returnSelectedFacility() != null;
+  }
+
+  bool pretendFacilityIsAlwaysSelected(BuildContext context) {
+    MyAquariumManagerModel model =
+    Provider.of<MyAquariumManagerModel>(context, listen: false);
+    return model.returnSelectedFacility() == null;
+  }
+
   Widget loadCommonButton(BuildContext context,
-      void Function(BuildContext) loadController, String buttonTitle) {
+      void Function(BuildContext) loadController, bool Function(BuildContext) disableOnPressed, String buttonTitle) {
     return Padding(
       padding: const EdgeInsets.only(
         left: 60,
       ),
       child: ElevatedButton(
-        onPressed: () {
+        onPressed: disableOnPressed(context) ? () { // if we return true, then enable the button; for new facility must return true
           loadController(context);
-        },
+        } : null,
         style: ButtonStyle(
           minimumSize: MaterialStateProperty.all(
-            Size(200, 50),
+            const Size(200, 50),
           ),
         ),
         child: Text(buttonTitle),
@@ -240,18 +267,19 @@ class _AquariumManagerHomeScreenControllerState
       BuildContext context,
       bool controllerState,
       void Function(BuildContext, bool) loadController,
+  bool Function(BuildContext) disableOnPressed,
       String buttonTitle) {
     return Padding(
       padding: const EdgeInsets.only(
         left: 160,
       ),
       child: ElevatedButton(
-        onPressed: () {
+        onPressed: disableOnPressed(context) ?  () {
           loadController(context, controllerState);
-        },
+        } : null,
         style: ButtonStyle(
           minimumSize: MaterialStateProperty.all(
-            Size(200, 50),
+            const Size(200, 50),
           ),
         ),
         child: Text(buttonTitle),
@@ -278,29 +306,29 @@ class _AquariumManagerHomeScreenControllerState
               facilityDropDown(context),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           BuildOuterLabel_HeadlineSmall(context, "Create"),
           Row(
             children: [
               loadCommonButtonWithParameter(
-                  context, cNewFacility, loadFacilitiesPage, "New Facility…"),
+                  context, cNewFacility, loadFacilitiesPage, pretendFacilityIsAlwaysSelected,"New Facility…"),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
           BuildOuterLabel_HeadlineSmall(context, "Manage"),
           Row(
             children: [
               loadCommonButtonWithParameter(
-                  context, cNotANewFacility, loadFacilitiesPage, "Facility…"),
+                  context, cNotANewFacility, loadFacilitiesPage, isAFacilitySelected, "Facility…"),
               loadCommonButton(
-                  context, loadTanksController, "Tanks…"),
+                  context, loadTanksController, isAFacilitySelected,"Tanks…"),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
           BuildOuterLabel_HeadlineSmall(context, "Search"),
@@ -308,9 +336,19 @@ class _AquariumManagerHomeScreenControllerState
             children: [
               // we might want to add an indent value to align this button with the above
               loadCommonButton(
-                  context, loadQRCodeController, "Scan a Tank’s Barcode…"),
+                  context, loadQRCodeController, isAFacilitySelected, "Scan a Tank’s Barcode…"),
               loadCommonButton(
-                  context, loadSearchController, "Search For a Tank…"),
+                  context, loadSearchController, isAFacilitySelected, "Search For a Tank…"),
+            ],
+          ),
+          const SizedBox(
+            height: 30,
+          ),
+          Row(
+            children: [
+              // we might want to add an indent value to align this button with the above
+              loadCommonButton(
+                  context, logoutController, isAFacilitySelected, "Logout"),
             ],
           ),
         ],
@@ -319,6 +357,15 @@ class _AquariumManagerHomeScreenControllerState
 
   @override
   Widget build(BuildContext context) {
-    return buildHomeScreen(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(kProgramName),
+      ),
+      body:buildHomeScreen(context),
+    );
   }
+
+  // Widget build(BuildContext context) {
+  //   return buildHomeScreen(context);
+  // }
 }

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../model/aquarium_manager_facilities_model.dart';
-
-const int kGridHSize = 650;
-const int kGridVSize = 500;
-const String kProgramName = 'Aquarius';
+import 'package:aquarium_manager/views/consts.dart';
 
 Widget BuildOuterLabel(BuildContext context, String labelText) {
   return Row(

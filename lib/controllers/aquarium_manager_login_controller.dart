@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:aquarium_manager/model/aquarium_manager_model.dart';
-
 import 'aquarium_manager_homescreen_controller.dart';
-
-import 'package:aquarium_manager/views/utility.dart';
+import 'package:aquarium_manager/views/consts.dart';
 
 part 'aquarium_manager_preparelogin_controller.dart';
 
@@ -67,10 +64,15 @@ class _MyAquariumManagerLoginControllerState
                       controllerForPassword.text)
                   .then((sessionValue) {
                 print("calling homescreen route");
-                // we are done with the login screens, remove them from the stack
-                // but we might be losing the scaffold
-                // and what happens if we add a new one?
-                Navigator.pushReplacementNamed(context, '/homescreen');
+                // we are done with the login screens, remove them from the navigation stack
+                // we can get it back by navigating to it again
+                //Navigator.pushReplacementNamed(context, '/homescreen');
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AquariumManagerHomeScreenController(),
+                  ),
+                );
               }).catchError((error) {
                 print("login session failed");
                 print(error.response);
@@ -151,6 +153,7 @@ class _MyAquariumManagerLoginControllerState
                               .registerUser(controllerForEmail.text,
                                   controllerForNewPassword1.text)
                               .then((registeredUserResult) {
+                                print("returning from register user, ${registeredUserResult}");
                             model.setDoesUserWantToRegister(false);
                           }).catchError((onError) {
                             model.setDoesUserWantToRegister(true);
@@ -176,17 +179,19 @@ class _MyAquariumManagerLoginControllerState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(kProgramName),),
+      appBar: AppBar(
+        title: const Text(kProgramName),
+      ),
       body: Center(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 120),
-            child: Column(
-              children: <Widget>[
-                prepareLoginScreen(context),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.only(top: 120),
+              child: Column(
+                children: <Widget>[
+                  prepareLoginScreen(context),
+                ],
+              ),
             ),
           ),
-        ),
     );
   }
 }

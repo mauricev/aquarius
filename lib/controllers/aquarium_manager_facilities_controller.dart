@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import '../model/aquarium_manager_facilities_model.dart';
 import '../views/facility_grid.dart';
 import '../views/utility.dart';
-
-
+import 'package:aquarium_manager/views/consts.dart';
 
 class MyAquariumManagerFacilitiesController extends StatefulWidget {
   MyAquariumManagerFacilitiesController({
@@ -111,7 +110,7 @@ class _MyAquariumManagerFacilitiesController
       String labelText,
       TextEditingController textController,
       MyAquariumManagerFacilityModel model,
-      facilityStringsEnum facilitystringValue) {
+      facilityStringsEnum facilitystringValue, double width) {
     return Padding(
       padding: const EdgeInsets.only(
         left: 40,
@@ -126,7 +125,7 @@ class _MyAquariumManagerFacilitiesController
             padding: const EdgeInsets.only(
               left: 20,
             ),
-            width: 200,
+            width: width,
             child: TextField(
                 keyboardType: returnTextInputType(facilitystringValue),
                 controller: textController,
@@ -181,32 +180,35 @@ class _MyAquariumManagerFacilitiesController
       ),
       body: Column(
         children: [
-          BuildOuterLabel(context,"Facility Identity"),
+          BuildOuterLabel_HeadlineSmall(context, "Facility Identity"),
           Row(
             children: [
               buildInnerLabel("Facility Name", controllerForFacilityName, model,
-                  facilityStringsEnum.facilityName),
+                  facilityStringsEnum.facilityName,kFullWidth),
               buildInnerLabel("Building", controllerForFacilityBuilding, model,
-                  facilityStringsEnum.facilityBuilding),
+                  facilityStringsEnum.facilityBuilding,kFullWidth),
             ],
           ),
           buildInnerLabel("Room", controllerForFacilityRoom, model,
-              facilityStringsEnum.facilityRoom),
-          BuildOuterLabel(context,"Racks"),
+              facilityStringsEnum.facilityRoom, kHalfWidth),
+          BuildOuterLabel_HeadlineSmall(context, "Racks"),
           Row(
             children: [
               buildInnerLabel("Max shelves per rack", controllerForMaxShelves,
-                  model, facilityStringsEnum.maxShelves),
+                  model, facilityStringsEnum.maxShelves, kNumberWidth),
               buildInnerLabel("Max tanks per shelf", controllerForMaxTanks,
-                  model, facilityStringsEnum.maxTanks),
+                  model, facilityStringsEnum.maxTanks, kNumberWidth),
             ],
+          ),
+          const SizedBox(
+            height: 30,
           ),
           Row(
             children: [
               buildInnerLabel("Max grid width", controllerForGridWidth, model,
-                  facilityStringsEnum.gridWidth),
+                  facilityStringsEnum.gridWidth, kNumberWidth),
               buildInnerLabel("Max grid height", controllerForGridHeight, model,
-                  facilityStringsEnum.gridHeight),
+                  facilityStringsEnum.gridHeight, kNumberWidth),
               ElevatedButton(
                 onPressed: gridLocked
                     ? null
@@ -220,6 +222,9 @@ class _MyAquariumManagerFacilitiesController
                 child: Text("Lock in Grid"),
               ),
             ],
+          ),
+          const SizedBox(
+            height: 30,
           ),
           (model.gridHeight == 0) || (model.gridWidth == 0)
               ? Container()
@@ -237,6 +242,9 @@ class _MyAquariumManagerFacilitiesController
                   Navigator.of(context).pop();
                 },
                 child: Text("Cancel"),
+              ),
+              const SizedBox(
+                width: 100,
               ),
               ElevatedButton(
                 onPressed: () {

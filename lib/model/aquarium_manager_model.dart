@@ -1,9 +1,8 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-
 import 'package:aquarium_manager/model/sessionKey.dart';
-
 import 'package:appwrite/models.dart' as models;
+import 'package:aquarium_manager/views/consts.dart';
 
 class MyAquariumManagerModel with ChangeNotifier {
   final cFacilityNameKey = "faciltyNameKey";
@@ -16,7 +15,6 @@ class MyAquariumManagerModel with ChangeNotifier {
   }
 
   MyAquariumManagerModel(this._manageSession ) {
-    print('aquarium_manager_model.dart ONE');
     AssignSavedFacility();
     notifyListeners();
   }
@@ -43,6 +41,7 @@ class MyAquariumManagerModel with ChangeNotifier {
   // even this class temporarily ignores the return string
   Future registerUser(String email, String password) {
     setFailedToRegister(false);
+    print("about to register 1");
     return _manageSession.registerUser(email, password);
   }
 
@@ -63,6 +62,14 @@ class MyAquariumManagerModel with ChangeNotifier {
 
   Future<models.User> modelRetrieveSession() async {
     return _manageSession.retrieveSession();
+  }
+
+  void callNotifyListeners() {
+    notifyListeners();
+  }
+
+  Future<dynamic> logOut() async {
+    return _manageSession.logOut();
   }
 
   bool checkSetBadUserPassword(String tempSessionValue) {
@@ -92,12 +99,16 @@ class MyAquariumManagerModel with ChangeNotifier {
     List<String>? query = [
       Query.notEqual("facility_name", [""]) // empty string should bring back all facilities
     ];
-    models.DocumentList documentList = await _manageSession.queryDocument("63eefc630814627ea850",query);
+    models.DocumentList documentList = await _manageSession.queryDocument(kFacilityCollection,query);
     // Extract the facility names from the list of documents
     List<String> facilityNames = documentList.documents
         .map((document) => document.data['facility_name'].toString())
         .toList();
 
     return facilityNames;
+  }
+
+  String? returnSelectedFacility() {
+   return selectedFacility;
   }
 }

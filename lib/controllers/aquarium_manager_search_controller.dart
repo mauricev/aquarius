@@ -1,12 +1,10 @@
 import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller.dart';
 import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
+import 'package:aquarium_manager/views/consts.dart';
 import 'package:flutter/material.dart';
-
 import '../views/utility.dart';
 import 'package:provider/provider.dart';
-
 import '../model/aquarium_manager_tanks_model.dart';
-
 import 'package:aquarium_manager/views/typography.dart';
 
 class MyAquariumManagerSearchController extends StatefulWidget {
@@ -109,17 +107,17 @@ class _MyAquariumManagerSearchControllerState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('My App'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            if (ModalRoute.of(context)?.settings.name == '/named_route') {
-              Navigator.popUntil(context, ModalRoute.withName('/home'));
-            } else {
-              Navigator.pop(context);
-            }
-          },
-        ),
+        title: Text(kProgramName),
+        // leading: IconButton(
+        //   icon: Icon(Icons.arrow_back),
+        //   onPressed: () {
+        //     if (ModalRoute.of(context)?.settings.name == '/named_route') {
+        //       Navigator.popUntil(context, ModalRoute.withName('/home'));
+        //     } else {
+        //       Navigator.pop(context);
+        //     }
+        //   },
+        // ),
       ),
       body: Column(
         children: [

@@ -1,13 +1,10 @@
 import 'package:appwrite/appwrite.dart';
-
 import 'package:aquarium_manager/model/sessionKey.dart';
-
 import 'package:appwrite/models.dart' as models;
 import 'package:intl/intl.dart';
-
 import '../views/utility.dart';
-import 'aquarium_manager_facilities_model.dart';
 import 'aquarium_manager_tanks_model.dart';
+import 'package:aquarium_manager/views/consts.dart';
 
 class Notes {
   final ManageSession manageSession;

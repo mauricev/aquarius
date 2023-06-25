@@ -1,15 +1,10 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-
 import 'package:aquarium_manager/model/sessionKey.dart';
-
 import 'package:appwrite/models.dart' as models;
-
 import 'aquarium_manager_facilities_model.dart';
 import 'aquarium_manager_notes_model.dart';
-
-const int cParkedRackAbsPosition = -2;
-const String cParkedRackFkAddress = "0";
+import 'package:aquarium_manager/views/consts.dart';
 
 class Tank {
   String? documentId;
