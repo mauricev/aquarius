@@ -88,7 +88,7 @@ final textTheme = TextTheme(
   ),
 );
 
-MaterialColor blueShades = MaterialColor(
+const MaterialColor blueShades = MaterialColor(
   0xFF2196F3,
   <int, Color>{
     50: Color(0xFFE3F2FD),
@@ -106,11 +106,14 @@ MaterialColor blueShades = MaterialColor(
 
 final aquarium_manager_theme = ThemeData(
   useMaterial3: true,
-  //primaryColor: Colors.lightBlue[800],
-  //primarySwatch: blueShades,
+  // primaryColor: Colors.lightBlue[800],
+  // primarySwatch: blueShades,
   textTheme: textTheme,
-  colorScheme: ColorScheme.fromSwatch(primarySwatch: blueShades,
-      primaryColorDark: blueShades.shade500,
-     ),
+  colorScheme: ColorScheme.fromSwatch(
+    primarySwatch: blueShades,
+  ).copyWith(
+    // Add the desired dark color for the primary color
+    primary: blueShades.shade500,
+  ),
   // other theme properties
 );

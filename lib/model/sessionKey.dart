@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-
-const kDatabaseId = '63eefc50e6d7b0cb4c4e';
+import 'package:aquarium_manager/views/consts.dart';
 
 enum loginStatus {
   loginNotYetAttempted,
@@ -26,16 +24,10 @@ class ManageSession {
 
   ManageSession._create() {
     print('sessionKey THREE, ManageSession._create');
-    _client.setEndpoint('http://192.168.1.96/v1');
-    _client.setProject('63e8651745c7c2a0353b');
+    _client.setEndpoint(kIPAddress);
+    _client.setProject(kProjectId);
     _client.setSelfSigned(status: true); // For self signed certificates, only use for development
   }
-
-  // ManageSession._create() {
-  //   print('sessionKey THREE, ManageSession._create');
-  //   _client.setEndpoint('https://aquarius.peredalab.com/v1');
-  //   _client.setProject('63e8651745c7c2a0353b');
-  // }
 
   Future<String?> RetrieveFromSecureStorage(String keyToRetrieve) async {
     return await _storage.read(key: keyToRetrieve);
@@ -81,7 +73,12 @@ class ManageSession {
     _userAccountJustCreated = true;
   }
 
-  void logOut() async {
+  Future<dynamic> logOut() async {
+    Account theAccount = Account(_client);
+
+     return theAccount.deleteSession(
+      sessionId: 'current',
+    );
   }
 
   Future<models.User> retrieveSession() async {
@@ -92,14 +89,18 @@ class ManageSession {
   }
 
   // this class intentionally ignores the return string
-  Future registerUser(String email, String password) {
+  Future<models.User> registerUser(String email, String password) async {
     Account theAccount = Account(_client);
 
-    return theAccount.create(
+    print("about to register 2");
+
+    models.User theUser = await theAccount.create(
       userId: ID.unique(),
       email: email,
       password: password,
     );
+    print("about to register 3, ${theUser}");
+    return theUser;
   }
 
   bool checkSetBadUserPassword(String tempSessionValue) {
@@ -134,7 +135,7 @@ class ManageSession {
     String theDocumentID = ID.unique();
     print("the document id is ${theDocumentID}");
     return theDatabase.createDocument(
-      databaseId: '63eefc50e6d7b0cb4c4e',
+      databaseId: kDatabaseId,
       collectionId: collectionId,
       documentId: theDocumentID,
       data: data, // we pass the data raw!
