@@ -152,13 +152,19 @@ class _MyAquariumManagerFacilitiesController
                       break;
                     case facilityStringsEnum.gridHeight:
                       if (textController.text != "") {
-                        model.gridHeight = int.parse(textController.text);
+                        setState(() {
+                          model.gridHeight = int.parse(textController.text);
+                        });
+                        print("gridheight is ${model.gridHeight}");
                       }
                       break;
                     case facilityStringsEnum.gridWidth:
                       // also have to block non-numeric characters
                       if (textController.text != "") {
-                        model.gridWidth = int.parse(textController.text);
+                        setState(() {
+                          model.gridWidth = int.parse(textController.text);
+                        });
+                        print("gridWidth is ${model.gridWidth}");
                       }
                       break;
                   }
@@ -226,39 +232,50 @@ class _MyAquariumManagerFacilitiesController
           const SizedBox(
             height: 30,
           ),
-          (model.gridHeight == 0) || (model.gridWidth == 0)
-              ? Container()
-              : Padding(
-                  padding: const EdgeInsets.only(
-                    top: 30,
-                    left: 150,
-                  ),
-                  child: FacilityGrid(tankMode: cFacilityEditableGrid),
-                ),
+          SizedBox(
+            width: kGridSize,
+            child: (model.gridHeight == 0) || (model.gridWidth == 0)
+                ? Container()
+                : FacilityGrid(tankMode: cFacilityEditableGrid),
+          ),
+          const SizedBox(
+            height: 30,
+          ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text("Cancel"),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Cancel"),
+                  ),
+                ),
               ),
               const SizedBox(
                 width: 100,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  print("inside save button");
-                  // we may be saving for the first time or for the 50th;
-                  // for subsequent saves, we have the document_id and we use that to determine how this function saves
-                    model.saveFacility().then((_) {
-                      print("facility and racks were saved");
-                      Navigator.of(context).pop();
-                    }).catchError((error) {
-                      print(error.response);
-                    });
-                },
-                child: Text("Submit"),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      print("inside save button");
+                      // we may be saving for the first time or for the 50th;
+                      // for subsequent saves, we have the document_id and we use that to determine how this function saves
+                        model.saveFacility().then((_) {
+                          print("facility and racks were saved");
+                          Navigator.of(context).pop();
+                        }).catchError((error) {
+                          print(error.response);
+                        });
+                    },
+                    child: Text("Submit"),
+                  ),
+                ),
               ),
             ],
           )

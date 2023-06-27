@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/aquarium_manager_facilities_model.dart';
 import '../model/aquarium_manager_tanks_model.dart';
+import 'package:aquarium_manager/views/consts.dart';
 
 enum facilityStringsEnum {
   facilityName,
@@ -146,7 +147,6 @@ class FacilityGrid extends StatefulWidget {
 // we draw based gridwidth and gridheight
 
 class _FacilityGridState extends State<FacilityGrid> {
-  final int kGridSize = 200;
 
   List<Widget> buildGridAcross(int absolutePosition,
       MyAquariumManagerFacilityModel model, bool tankMode) {
@@ -198,8 +198,10 @@ class _FacilityGridState extends State<FacilityGrid> {
     MyAquariumManagerFacilityModel model =
     Provider.of<MyAquariumManagerFacilityModel>(context);
 
-    return Center(
+    return Align(
+      alignment: Alignment.center,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: buildGridDown(model, widget.tankMode!),
       ),
     );

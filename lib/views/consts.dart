@@ -19,3 +19,4 @@ const double kFullWidth = 200;
 const double kHalfWidth  = 100;
 const double kNumberWidth = 50;
 
+const double kGridSize = 200;

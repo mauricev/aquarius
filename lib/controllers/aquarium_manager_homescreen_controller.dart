@@ -31,41 +31,47 @@ class _AquariumManagerHomeScreenControllerState
     return FutureBuilder(
         future: model.getFacilityNames(), // we return this as a future
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          return snapshot.hasData
-              ? DropdownButton<String>(
-                value: snapshot.data.contains(model.selectedFacility)
-                    ? model.selectedFacility
-                    : null,
-                icon: const Icon(Icons.arrow_downward),
-                elevation: 16,
-                style: const TextStyle(color: Colors.deepPurple),
-                underline: Container(
-                  height: 2,
-                  color: Colors.deepPurpleAccent,
-                ),
-                onChanged: (String? value) {
-                  setState(() {
-                    print("is setstate even being called");
-                    if (snapshot.data.contains(value)) {
-                      model.setSelectedFacility(value!);
-                    } else if (snapshot.data.isNotEmpty) {
-                      model.setSelectedFacility(snapshot.data.first);
-                      print("do we come here");
-                    } else {
-                      model.setSelectedFacility(null);
-                    }
-                  });
-                },
-                items: snapshot.data.map<DropdownMenuItem<String>>((value) {
-                  print(value.runtimeType);
-                  // we could append the data here to our data structure, item by item
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              )
-              : Container();
+          return DropdownButton<String>(
+            value: snapshot.data.contains(model.selectedFacility)
+                ? model.selectedFacility
+                : null,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            style: const TextStyle(color: Colors.deepPurple),
+            underline: Container(
+              height: 2,
+              color: Colors.deepPurpleAccent,
+            ),
+            onChanged: (String? value) {
+              setState(() {
+                if (value == null) {
+                  // Disable the dropdown if the dummy entry is chosen
+                  return;
+                }
+                if (snapshot.data.contains(value)) {
+                  model.setSelectedFacility(value!);
+                } else if (snapshot.data.isNotEmpty) {
+                  model.setSelectedFacility(snapshot.data.first);
+                } else {
+                  model.setSelectedFacility(null);
+                }
+              });
+            },
+            items: [
+              // Add dummy entry as the first item
+              const DropdownMenuItem<String>(
+                value: null,
+                child: Text('No facility selected'),
+              ),
+              ...snapshot.data.map<DropdownMenuItem<String>>((value) {
+                // we could append the data here to our data structure, item by item
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ],
+          );
         });
   }
 
@@ -87,14 +93,11 @@ class _AquariumManagerHomeScreenControllerState
           MaterialPageRoute(
               builder: (context) =>
                   MyAquariumManagerFacilitiesController()) // this will read from facility model, which has already been updated
-          ).then((data) {});
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => MyAquariumManagerFacilitiesController(),
-      //     settings: RouteSettings(name: '/facilitiesscreen'), // Use the appropriate route name here
-      //   ),
-      // ).then((data) {});
+          ).then((data) {
+            setState(() {
+              // does this work?, yes it does
+            });
+      });
     });
   }
 
