@@ -20,14 +20,14 @@ enum facilityStringsEnum {
 const cFacilityEditableGrid = false; // tankMode is false
 const cFacilityClickableGrid = true; // tankMode is true; we are on the tank page
 
-class FacilityGridCell extends StatefulWidget {
+class FacilityGridCell extends StatelessWidget {
   final int absolutePosition; // this can’t be altered
-  double height;
-  double width;
-  String relativePosition;
-  bool? tankMode;
+  final double height;
+  final double width;
+  final String relativePosition;
+  final bool? tankMode;
 
-  FacilityGridCell(
+  const FacilityGridCell(
       {Key? key,
         this.absolutePosition =
         0, // index starts at 1, so 0 means it’s not yet assigned, which is never the case
@@ -36,17 +36,8 @@ class FacilityGridCell extends StatefulWidget {
         this.relativePosition = "",
         this.tankMode})
       : super(key: key);
-  @override
-  State<FacilityGridCell> createState() => _FacilityGridCellState();
-}
 
-class _FacilityGridCellState extends State<FacilityGridCell> {
-  @override
-  initState() {
-    super.initState();
-  }
-
-  Color ReturnGridCellColor (bool isInFacility, int index, bool isRackCellSelected ) {
+  Color returnGridCellColor (bool isInFacility, int index, bool isRackCellSelected ) {
     Color returnColor  = Colors.transparent;
     switch(isInFacility) {
       case true:
@@ -73,10 +64,10 @@ class _FacilityGridCellState extends State<FacilityGridCell> {
     Provider.of<MyAquariumManagerTanksModel>(context);
 
     int index =
-    facilityModel.indexOfRackWithThisAbsolutePosition(widget.absolutePosition);
+    facilityModel.indexOfRackWithThisAbsolutePosition(absolutePosition);
     String relativePositionText = "";
     if (index != -1) {
-      relativePositionText = widget.relativePosition;
+      relativePositionText = relativePosition;
     }
 
     TextEditingController controllerForRelativePosition =
@@ -84,25 +75,25 @@ class _FacilityGridCellState extends State<FacilityGridCell> {
 
     return InkWell(
       onTap:
-      (widget.tankMode! && (index == -1)) ? null : () {
+      (tankMode! && (index == -1)) ? null : () {
         print("we are selecting a new rack");
         // POSSIBLE BUG; this is now async
-        tankModel.selectThisRackByAbsolutePosition(widget.tankMode, facilityModel,widget.absolutePosition);
+        tankModel.selectThisRackByAbsolutePosition(tankMode, facilityModel,absolutePosition);
       },
       child: Container(
-        height: widget.height,
-        width: widget.width,
+        height: height,
+        width: width,
         decoration: BoxDecoration(
           border: Border.all(),
-            color: ReturnGridCellColor(!widget.tankMode!,index, tankModel.isThisRackCellSelected( widget.absolutePosition)),
+            color: returnGridCellColor(!tankMode!,index, tankModel.isThisRackCellSelected( absolutePosition)),
         ),
         child: TextField(
           controller: controllerForRelativePosition,
-          enabled: !widget.tankMode!, // if tankMode is true, disable editing
+          enabled: !tankMode!, // if tankMode is true, disable editing
           onChanged: (value) {
 
             int index = facilityModel.indexOfRackWithThisAbsolutePosition(
-                widget.absolutePosition);
+                absolutePosition);
 
             if (controllerForRelativePosition.text == "") {
               if (index != -1) {
@@ -123,7 +114,7 @@ class _FacilityGridCellState extends State<FacilityGridCell> {
                 // 3
                 // if it’s not in the list, we add it and give its relative position
 
-                facilityModel.addRack(widget.absolutePosition,
+                facilityModel.addRack(absolutePosition,
                     controllerForRelativePosition.text);
               }
             }
@@ -134,22 +125,15 @@ class _FacilityGridCellState extends State<FacilityGridCell> {
   }
 }
 
-class FacilityGrid extends StatefulWidget {
+class FacilityGrid extends StatelessWidget {
   FacilityGrid({Key? key, this.tankMode}) : super(key: key);
 
-  List<Row> gridDown = <Row>[];
-  bool? tankMode;
-
-  @override
-  State<FacilityGrid> createState() => _FacilityGridState();
-}
-
-// we draw based gridwidth and gridheight
-
-class _FacilityGridState extends State<FacilityGrid> {
+  final bool? tankMode;
+  final List<Row> gridDown = <Row>[];
 
   List<Widget> buildGridAcross(int absolutePosition,
       MyAquariumManagerFacilityModel model, bool tankMode) {
+
     List<Widget> gridAcross = <FacilityGridCell>[];
 
     double height = kGridSize / model.gridHeight;
@@ -180,17 +164,17 @@ class _FacilityGridState extends State<FacilityGrid> {
 
   List<Widget> buildGridDown(
       MyAquariumManagerFacilityModel model, bool readOnly) {
-    widget.gridDown
+    gridDown
         .clear(); // we clear because this is a global variable, so we want to add starting fresh each time
 
     int offset = 0;
     for (int theIndex = 1; theIndex <= model.gridHeight; theIndex++) {
-      widget.gridDown.add(Row(
+      gridDown.add(Row(
         children: buildGridAcross(theIndex + offset, model, readOnly),
       ));
       offset = offset + (model.gridWidth - 1); // we are offsetting the index for each row
     }
-    return widget.gridDown;
+    return gridDown;
   }
 
   @override
@@ -202,7 +186,7 @@ class _FacilityGridState extends State<FacilityGrid> {
       alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: buildGridDown(model, widget.tankMode!),
+        children: buildGridDown(model, tankMode!),
       ),
     );
   }

@@ -1,6 +1,6 @@
 part of 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
 
-extension MyAquariumManagerControllerPrepareLogin
+extension _MyAquariumManagerControllerPrepareLogin
     on _MyAquariumManagerLoginControllerState {
 
   Widget registerLoginScreens(BuildContext context,MyAquariumManagerModel model) {
@@ -31,14 +31,14 @@ extension MyAquariumManagerControllerPrepareLogin
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AquariumManagerHomeScreenController(),
+                  builder: (context) => const AquariumManagerHomeScreenController(),
                 ),
               );
             });
           }
         }
         print("we are in circular progress");
-        return CircularProgressIndicator(); // awaiting login status
+        return const CircularProgressIndicator(); // awaiting login status
       },
     );
   }

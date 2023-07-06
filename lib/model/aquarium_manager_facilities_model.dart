@@ -16,7 +16,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   final ManageSession _manageSession;
   List<Rack> rackList = <Rack>[];
 
-  String? facilityName = null;
+  String? facilityName;
   String document_id = "";
   String facilitySite = "";
   String facilityBuilding = "";
@@ -26,8 +26,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   int gridHeight = 0;
   int gridWidth = 0;
 
-  MyAquariumManagerFacilityModel(this._manageSession) {
-  }
+  MyAquariumManagerFacilityModel(this._manageSession);
 
   void addRack(int absolutePosition, String relativePosition) {
     print(
@@ -65,14 +64,6 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     return -1;
   }
 
-  Future<models.DocumentList> isFacilityAlreadySaved() async {
-    List<String>? query = [
-      Query.equal("facility_name", facilityName),
-    ];
-    print("about to query facility list for this specific facility name");
-    return await _manageSession.queryDocument(kFacilityCollection, query);
-  }
-
   Future<models.DocumentList> returnAssociatedRackList(
       String document_Id) async {
 
@@ -99,7 +90,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     int absolutePosition = theRack.data["absolute_position"];
     print("rack absolutePosition is ${absolutePosition}");
 
-    return await absolutePosition;
+    return absolutePosition; // possible bug here, doesn't want await
   }
 
   Future<String?> returnSpecificRack(int absolutePosition) async {
@@ -167,7 +158,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   }
 
   //save facility is only for new facilities
-  Future<List<dynamic>> saveFacility() async {
+  Future<void> saveFacility() async {
     // need to update any existing facility
 
     Map<String, dynamic> theFacilityMap = {
@@ -179,37 +170,44 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
       'max_shelves': maxShelves,
       'max_tanks' : maxTanks,
     };
-    List<Future> theFutureList = [];
+
     models.Document theFacility;
     // we assigned document_id if there is one in this istheFacilitySaved function
     if (document_id == "") {
       // this is a new facility; give it a new id
-      theFacility = await _manageSession.createDocument(
-          theFacilityMap, kFacilityCollection);
+      theFacility = await _manageSession.createDocument(  // we have to await to get the new facility id
+          theFacilityMap, kFacilityCollection); // how does document_id get updated? elsewhere apparently
     } else {
-      theFacility = await _manageSession.updateDocument(
+      theFacility = await _manageSession.updateDocument( // since we are using facility id, we need to wait
           theFacilityMap, kFacilityCollection, document_id);
-
-      // query all the associated racks and delete them all by putting this in the future list
-      models.DocumentList theRackList =
-          await returnAssociatedRackList(document_id);
-      for (int theIndex = 0; theIndex < theRackList.total; theIndex++) {
-        await _manageSession.deleteDocument(
-            cRackCollection, theRackList.documents[theIndex].$id);
-      }
+      print("is facility id right? facility is ${theFacility.$id} and saved value is ${document_id}");
     }
-    // if there had been any saved racks, we have deleted them. Now we’re re-adding them.
+
     for (int theIndex = 0; theIndex < rackList.length; theIndex++) {
+
       Map<String, dynamic> theRackMap = {
         'relative_position': rackList[theIndex].relativePosition,
         'absolute_position': rackList[theIndex].absolutePosition,
         'facility_fk': theFacility.$id,
       };
 
-      theFutureList.add(Future.delayed(const Duration(milliseconds: 1000), () {
-        _manageSession.createDocument(theRackMap, cRackCollection);
-      }));
-    }
-    return Future.wait(theFutureList);
+      List<String>? rackQuery = [
+        Query.equal("facility_fk", theFacility.$id), //we need the facility id; it could be a new facility with a new id
+        Query.equal("absolute_position", rackList[theIndex].absolutePosition),
+      ];
+
+      print("the facility being saved is ${theFacility.$id}");
+
+      models.DocumentList theRackList = await _manageSession.queryDocument(cRackCollection, rackQuery);
+
+      if (theRackList.total > 0) { // racks are already existing
+        print("we found an existing rack, ${theRackList.documents[0].$id}");
+        await _manageSession.updateDocument(
+        theRackMap, cRackCollection, theRackList.documents[0].$id);
+      } else {
+        print('we are saving a new rack, ${rackList[theIndex].relativePosition}'); // how did this rack get created? we gave it a name.
+        await _manageSession.createDocument(theRackMap, cRackCollection); // if this fails, we created on an existing rack in error
+      }
+     }
   }
 }

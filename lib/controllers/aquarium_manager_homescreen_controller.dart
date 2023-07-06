@@ -29,10 +29,19 @@ class _AquariumManagerHomeScreenControllerState
         Provider.of<MyAquariumManagerModel>(context, listen: false);
 
     return FutureBuilder(
-        future: model.getFacilityNames(), // we return this as a future
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
+      future: model.getFacilityNames(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData && snapshot.data.isNotEmpty) {
+          List<DropdownMenuItem<String>> dropdownItems = [];
+          for (String value in snapshot.data) {
+            dropdownItems.add(DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            ));
+          }
+
           return DropdownButton<String>(
-            value: snapshot.data.contains(model.selectedFacility)
+            value: (snapshot.data.contains(model.selectedFacility))
                 ? model.selectedFacility
                 : null,
             icon: const Icon(Icons.arrow_downward),
@@ -49,7 +58,7 @@ class _AquariumManagerHomeScreenControllerState
                   return;
                 }
                 if (snapshot.data.contains(value)) {
-                  model.setSelectedFacility(value!);
+                  model.setSelectedFacility(value);
                 } else if (snapshot.data.isNotEmpty) {
                   model.setSelectedFacility(snapshot.data.first);
                 } else {
@@ -57,22 +66,30 @@ class _AquariumManagerHomeScreenControllerState
                 }
               });
             },
-            items: [
-              // Add dummy entry as the first item
-              const DropdownMenuItem<String>(
-                value: null,
-                child: Text('No facility selected'),
-              ),
-              ...snapshot.data.map<DropdownMenuItem<String>>((value) {
-                // we could append the data here to our data structure, item by item
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ],
+            items: dropdownItems,
           );
-        });
+        } else if (snapshot.hasError) {
+          // Handle the error state
+          return Text('Error: ${snapshot.error}');
+        } else {
+          // Handle the loading state or empty data state
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else {
+            return DropdownButton<String>(
+              value: null,
+              items: const [
+                DropdownMenuItem<String>(
+                  value: null,
+                  child: Text('No facility selected'),
+                ),
+              ],
+              onChanged: null,
+            );
+          }
+        }
+      },
+    );
   }
 
   void loadFacilitiesPage(BuildContext context, bool newFacility) {
@@ -92,7 +109,7 @@ class _AquariumManagerHomeScreenControllerState
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  MyAquariumManagerFacilitiesController()) // this will read from facility model, which has already been updated
+                  const MyAquariumManagerFacilitiesController()) // this will read from facility model, which has already been updated
           ).then((data) {
             setState(() {
               // does this work?, yes it does
@@ -113,7 +130,7 @@ class _AquariumManagerHomeScreenControllerState
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => MyAquariumManagerTankController(
+              builder: (context) => const MyAquariumManagerTankController(
                     arguments: {
                       'incomingRack_Fk': null,
                       'incomingTankPosition': null,
@@ -141,7 +158,7 @@ class _AquariumManagerHomeScreenControllerState
       int absolutePosition = int.parse(absolutePositionString);
 
       Navigator.pop(context2);
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -212,7 +229,7 @@ class _AquariumManagerHomeScreenControllerState
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    const MyAquariumManagerSearchController()) // this will read from facility model, which has already been updated
+                    MyAquariumManagerSearchController()) // this will read from facility model, which has already been updated
             );
       });
     });
@@ -228,7 +245,7 @@ class _AquariumManagerHomeScreenControllerState
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MyAquariumManagerLoginController(),
+          builder: (context) => const MyAquariumManagerLoginController(),
         ),
       );
     });
@@ -312,7 +329,7 @@ class _AquariumManagerHomeScreenControllerState
           const SizedBox(
             height: 20,
           ),
-          BuildOuterLabel_HeadlineSmall(context, "Create"),
+          buildOuterLabel_HeadlineSmall(context, "Create"),
           Row(
             children: [
               loadCommonButtonWithParameter(
@@ -322,7 +339,7 @@ class _AquariumManagerHomeScreenControllerState
           const SizedBox(
             height: 30,
           ),
-          BuildOuterLabel_HeadlineSmall(context, "Manage"),
+          buildOuterLabel_HeadlineSmall(context, "Manage"),
           Row(
             children: [
               loadCommonButtonWithParameter(
@@ -334,7 +351,7 @@ class _AquariumManagerHomeScreenControllerState
           const SizedBox(
             height: 30,
           ),
-          BuildOuterLabel_HeadlineSmall(context, "Search"),
+          buildOuterLabel_HeadlineSmall(context, "Search"),
           Row(
             children: [
               // we might want to add an indent value to align this button with the above

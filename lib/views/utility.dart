@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../model/aquarium_manager_facilities_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
-Widget BuildOuterLabel(BuildContext context, String labelText) {
+Widget buildOuterLabel(BuildContext context, String labelText) {
   return Row(
     children: [
       Padding(
@@ -18,7 +18,7 @@ Widget BuildOuterLabel(BuildContext context, String labelText) {
   );
 }
 
-Widget BuildOuterLabel_HeadlineSmall(BuildContext context, String labelText) {
+Widget buildOuterLabel_HeadlineSmall(BuildContext context, String labelText) {
   return Row(
     children: [
       Padding(
@@ -36,7 +36,7 @@ Widget BuildOuterLabel_HeadlineSmall(BuildContext context, String labelText) {
   );
 }
 
-Widget ExpandedFlex1() {
+Widget expandedFlex1() {
   return Expanded(
     flex: 1,
     child: Container(
@@ -44,33 +44,34 @@ Widget ExpandedFlex1() {
   );
 }
 
-double ReturnHeight(MyAquariumManagerFacilityModel facilityModel) {
+double returnHeight(MyAquariumManagerFacilityModel facilityModel) {
   return (kGridVSize / facilityModel.maxShelves);
 }
 
-double ReturnWidth(MyAquariumManagerFacilityModel facilityModel) {
+double returnWidth(MyAquariumManagerFacilityModel facilityModel) {
   return (kGridHSize / facilityModel.maxTanks);
 }
 
 int returnTimeNow() {
   DateTime now = DateTime.now();
-  return now.millisecondsSinceEpoch ~/ 1000;
+  //return now.millisecondsSinceEpoch ~/ 1000;
+  return now.millisecondsSinceEpoch;
 }
 
-DateTime ConvertMillisecondsToDateTime (int millisecondsSinceEpoch) {
+DateTime convertMillisecondsToDateTime (int millisecondsSinceEpoch) {
   return DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
 }
 
-String ReturnLocalDateAsString (DateTime fullTimeAndDate) {
+String returnLocalDateAsString (DateTime fullTimeAndDate) {
   return "${fullTimeAndDate.toLocal()}".split(' ')[0];
 }
 
-String buildDateOfBirth(int? retrieveValue()?) {
+String buildDateOfBirth(int? Function()? retrieveValue) {
   String dobText = "date not yet specified";
 
   int initialTimeAsInt = retrieveValue?.call() ?? returnTimeNow();
   if (initialTimeAsInt != 0) {
-    dobText = ReturnLocalDateAsString(ConvertMillisecondsToDateTime(
+    dobText = returnLocalDateAsString(convertMillisecondsToDateTime(
         retrieveValue?.call() ?? returnTimeNow()));
   }
   return dobText;

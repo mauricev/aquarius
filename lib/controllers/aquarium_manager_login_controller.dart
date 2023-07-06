@@ -7,7 +7,7 @@ import 'package:aquarium_manager/views/consts.dart';
 part 'aquarium_manager_preparelogin_controller.dart';
 
 class MyAquariumManagerLoginController extends StatefulWidget {
-  MyAquariumManagerLoginController({super.key});
+  const MyAquariumManagerLoginController({super.key});
 
   @override
   State<MyAquariumManagerLoginController> createState() =>
@@ -70,7 +70,7 @@ class _MyAquariumManagerLoginControllerState
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AquariumManagerHomeScreenController(),
+                    builder: (context) => const AquariumManagerHomeScreenController(),
                   ),
                 );
               }).catchError((error) {
@@ -126,7 +126,7 @@ class _MyAquariumManagerLoginControllerState
             ),
             controller: controllerForNewPassword2,
           ),
-          if (!doPasswordsMatch) const Text("passwords don’t match") else Text(""),
+          if (!doPasswordsMatch) const Text("passwords don’t match") else const Text(""),
           Text(registerError),
           Expanded(
             child: Row(
@@ -135,7 +135,7 @@ class _MyAquariumManagerLoginControllerState
                   onPressed: () {
                     model.setDoesUserWantToRegister(false);
                   },
-                  child: Text("Cancel"),
+                  child: const Text("Cancel"),
                 ),
                 ElevatedButton(
                   onPressed: (!doPasswordsMatchFunction())

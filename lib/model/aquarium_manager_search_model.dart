@@ -104,7 +104,18 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
       }
     }
     // sort based on birthdate
-    tankListSearched.sort((a, b) => a.birthDate.compareTo(b.birthDate));
+    tankListSearched.sort((a, b) {
+      if (a.birthDate == null && b.birthDate == null) {
+        return 0; // Both dates are null, they are equal
+      }
+      if (a.birthDate == null) {
+        return 1; // a is after b because a is null and b is not
+      }
+      if (b.birthDate == null) {
+        return -1; // a is before b because a is not null and b is
+      }
+      return a.birthDate!.compareTo(b.birthDate!); // Now we are sure that neither date is null
+    });
     notifyListeners();
   }
 
@@ -113,5 +124,4 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
     await prepareFullTankList(); // we do get the full tank list from the database and the database should always be up to date.
     prepareSearchTankList("");
   }
-
 }

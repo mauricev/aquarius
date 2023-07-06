@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -15,7 +13,6 @@ enum loginStatus {
 class ManageSession {
   Client _client = Client(); // prepared inside _create
   final _storage = const FlutterSecureStorage();
-  //late final SharedPreferences _storage;
 
   bool _doesUserWantToRegister = false;
   bool _userAccountJustCreated = false;
@@ -26,10 +23,10 @@ class ManageSession {
     print('sessionKey THREE, ManageSession._create');
     _client.setEndpoint(kIPAddress);
     _client.setProject(kProjectId);
-    _client.setSelfSigned(status: true); // For self signed certificates, only use for development
+    _client.setSelfSigned(status: true); // comment out for real-world https
   }
 
-  Future<String?> RetrieveFromSecureStorage(String keyToRetrieve) async {
+  Future<String?> retrieveFromSecureStorage(String keyToRetrieve) async {
     return await _storage.read(key: keyToRetrieve);
   }
 

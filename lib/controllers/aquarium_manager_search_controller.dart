@@ -7,19 +7,12 @@ import 'package:provider/provider.dart';
 import '../model/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/typography.dart';
 
-class MyAquariumManagerSearchController extends StatefulWidget {
-  const MyAquariumManagerSearchController({Key? key}) : super(key: key);
+class MyAquariumManagerSearchController extends StatelessWidget {
+  MyAquariumManagerSearchController({Key? key}) : super(key: key);
 
-  @override
-  State<MyAquariumManagerSearchController> createState() =>
-      _MyAquariumManagerSearchControllerState();
-}
+  final TextEditingController controllerForSearch = TextEditingController();
 
-class _MyAquariumManagerSearchControllerState
-    extends State<MyAquariumManagerSearchController> {
-  TextEditingController controllerForSearch = TextEditingController();
-
-  Widget buildCheckBox(String labelText, bool? retrieveValue()?) {
+  Widget buildCheckBox(BuildContext context, String labelText, bool? retrieveValue()?) {
     return SizedBox(
       width: 150,
       child: CheckboxListTile(
@@ -41,7 +34,6 @@ class _MyAquariumManagerSearchControllerState
     // we need more info; we need the facility, rack and document id to pass onto the other controller
     // what will display
     // 1) tankline, 2) dob 3) smalltank 4) screen positive, 5) generation, 6)
-
 
     return GestureDetector(
       onTap: () {
@@ -70,7 +62,7 @@ class _MyAquariumManagerSearchControllerState
                 children: [
                   Text(
                     tank.tankLine!,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
                   )
@@ -82,13 +74,13 @@ class _MyAquariumManagerSearchControllerState
               child: Row(
                 children: [
                   Text(
-                    "DOB: ${buildDateOfBirth(tank?.getBirthDate)}",
+                    "DOB: ${buildDateOfBirth(tank.getBirthDate)}",
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  buildCheckBox("Screen Positive", tank?.getScreenPositive),
-                  buildCheckBox("Small Tank", tank?.getSmallTank),
+                  buildCheckBox(context,"Screen Positive", tank.getScreenPositive),
+                  buildCheckBox(context,"Small Tank", tank.getSmallTank),
                   Text(
-                    "Generation: F${(tank?.generation.toString())}",
+                    "Generation: F${(tank.generation.toString())}",
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -107,37 +99,27 @@ class _MyAquariumManagerSearchControllerState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(kProgramName),
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back),
-        //   onPressed: () {
-        //     if (ModalRoute.of(context)?.settings.name == '/named_route') {
-        //       Navigator.popUntil(context, ModalRoute.withName('/home'));
-        //     } else {
-        //       Navigator.pop(context);
-        //     }
-        //   },
-        // ),
+        title: const Text(kProgramName),
       ),
       body: Column(
         children: [
-          BuildOuterLabel_HeadlineSmall(context, "Search Tanks"),
+          buildOuterLabel_HeadlineSmall(context, "Search Tanks"),
           Row(
             children: [
-              ExpandedFlex1(),
+              expandedFlex1(),
               Expanded(
                 flex: 2,
                 child: TextField(
                     keyboardType: TextInputType.text,
                     controller: controllerForSearch,
                     onChanged: (value) {
-                      searchModel.prepareSearchTankList(value);
+                      searchModel.prepareSearchTankList(value); // provider is updating this widget
                     }),
               ),
-              ExpandedFlex1(),
+              expandedFlex1(),
             ],
           ),
-          BuildOuterLabel_HeadlineSmall(context, "Results"),
+          buildOuterLabel_HeadlineSmall(context, "Results"),
           SizedBox(
             height: MediaQuery.of(context).size.height * 4 / 6,
             width: MediaQuery.of(context).size.width * 5 / 6,

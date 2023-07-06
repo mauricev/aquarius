@@ -5,6 +5,8 @@ import 'package:appwrite/models.dart' as models;
 import 'aquarium_manager_facilities_model.dart';
 import 'aquarium_manager_notes_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/views/utility.dart';
+
 
 class Tank {
   String? documentId;
@@ -12,7 +14,7 @@ class Tank {
   String rackFk;
   int absolutePosition;
   String? tankLine;
-  int birthDate; // we always start out wth value 0, so it’s never null
+  int? birthDate;
   bool? screenPositive;
   int? numberOfFish;
   bool? smallTank;
@@ -20,48 +22,25 @@ class Tank {
   final ManageSession manageSession;
   late final Notes notes;
 
-  Tank._(
-      {this.documentId,
-        required this.facilityFk,
-        required this.rackFk,
-        required this.absolutePosition,
-        this.tankLine,
-        this.birthDate = 0,
-        this.screenPositive,
-        this.numberOfFish,
-        this.smallTank,
-        this.generation,
-        required this.manageSession}) {
-    // This constructor is private and is called by the factory constructor.
-    notes = Notes(parentTank: this, manageSession: manageSession);
+  Tank({
+    this.documentId,
+    required this.facilityFk,
+    required this.rackFk,
+    required this.absolutePosition,
+    this.tankLine,
+    int? birthDate,
+    this.screenPositive,
+    this.numberOfFish,
+    this.smallTank,
+    this.generation,
+    required this.manageSession,
+  }) : birthDate = birthDate ?? returnTimeNow() {
+    notes = createNotes();
     notes.loadNotes();
   }
 
-  factory Tank({
-    String? documentId,
-    required String facilityFk,
-    required String rackFk,
-    required int absolutePosition,
-    String? tankLine,
-    int birthDate = 0,
-    bool? screenPositive,
-    int? numberOfFish,
-    bool? smallTank,
-    int? generation,
-    required ManageSession manageSession,
-  }) {
-    return Tank._(
-        documentId: documentId,
-        facilityFk: facilityFk,
-        rackFk: rackFk,
-        absolutePosition: absolutePosition,
-        tankLine: tankLine,
-        birthDate: birthDate,
-        screenPositive: screenPositive,
-        numberOfFish: numberOfFish,
-        smallTank: smallTank,
-        generation: generation,
-        manageSession: manageSession);
+  Notes createNotes() {
+    return Notes(parentTank: this, manageSession: manageSession);
   }
 
   void parkIt() {
@@ -90,6 +69,7 @@ class Tank {
   }
 
   int? getBirthDate() {
+    print("what is the birthdate, ${birthDate}");
     return birthDate;
   }
 
@@ -151,10 +131,10 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
         facilityFk: facilityFk,
         rackFk: (absolutePosition == cParkedRackAbsPosition)
             ? "0"
-            : rack_documentId!, // saved from when we switch racks; we always get it from the database
+            : rack_documentId, // saved from when we switch racks; we always get it from the database
         absolutePosition: absolutePosition,
         tankLine: "",
-        birthDate: 0, // this should translate to sometime in 1970. we may want to return a more recent, but not current date.
+        birthDate: returnTimeNow() - kStartingDOBOffset,
         screenPositive: true,
         numberOfFish: 1,
         smallTank: true,
@@ -187,7 +167,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
     tankList.removeAt(index);
   }
 
-  MyAquariumManagerTanksModel(this._manageSession) {}
+  MyAquariumManagerTanksModel(this._manageSession);
 
   Future<models.DocumentList> returnAssociatedTankList(
       String facilityId, String rackId) async {
@@ -204,17 +184,12 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   Map<String, dynamic> prepareTankMap(
       String facilityFk, int absolutePosition) {
     Tank? theTank = tankInfoWithThisAbsolutePosition(absolutePosition);
-    String? tankLine;
-    String? birthDate;
-    bool? screenPositive;
-    int? numberOfFish;
-    bool? smallTank;
-    int? generation;
+
     Map<String, dynamic> theTankMap = {
       'facility_fk': facilityFk,
       'rack_fk': (absolutePosition == cParkedRackAbsPosition)
           ? "0"
-          : rack_documentId!, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
+          : rack_documentId, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
       'absolute_position': absolutePosition,
       'tank_line': theTank?.tankLine,
       'date_of_birth': theTank?.birthDate,

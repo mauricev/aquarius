@@ -20,3 +20,16 @@ const double kHalfWidth  = 100;
 const double kNumberWidth = 50;
 
 const double kGridSize = 200;
+
+enum tankStringsEnum { tankLine, numberOfFish, generation }
+
+const int kStandardTextWidth = 75;
+
+const cParkedAbsolutePosition = -2;
+
+const kEmptyTankIndex = -1;
+
+const int kStartingYear = 2021;
+const int kStartingMonth = 1;
+const int kEndingYear = 2024;
+const int kStartingDOBOffset = 66000000000;

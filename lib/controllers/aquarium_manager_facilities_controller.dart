@@ -7,7 +7,7 @@ import '../views/utility.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
 class MyAquariumManagerFacilitiesController extends StatefulWidget {
-  MyAquariumManagerFacilitiesController({
+  const MyAquariumManagerFacilitiesController({
     Key? key,
   }) : super(key: key);
 
@@ -37,12 +37,12 @@ class _MyAquariumManagerFacilitiesController
     if (model.facilityName != null) {
       // if it is not null, we are editing an existing facility
       controllerForFacilityName.text = model.facilityName!;
-      controllerForFacilityBuilding.text = model.facilityBuilding!;
-      controllerForFacilityRoom.text = model.facilityRoom!;
-      controllerForGridWidth.text = model.gridWidth!.toString();
-      controllerForGridHeight.text = model.gridHeight!.toString();
-      controllerForMaxShelves.text = model.maxShelves!.toString();
-      controllerForMaxTanks.text = model.maxTanks!.toString();
+      controllerForFacilityBuilding.text = model.facilityBuilding;
+      controllerForFacilityRoom.text = model.facilityRoom;
+      controllerForGridWidth.text = model.gridWidth.toString();
+      controllerForGridHeight.text = model.gridHeight.toString();
+      controllerForMaxShelves.text = model.maxShelves.toString();
+      controllerForMaxTanks.text = model.maxTanks.toString();
 
       gridLocked = true; // once the facility is created, some options can't be changed.
     }
@@ -54,17 +54,17 @@ class _MyAquariumManagerFacilitiesController
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Confirmation'),
+              title: const Text('Confirmation'),
               content: Text(message),
               actions: <Widget>[
                 TextButton(
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
                 ),
                 TextButton(
-                  child: Text('OK'),
+                  child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop(true);
                   },
@@ -83,7 +83,7 @@ class _MyAquariumManagerFacilitiesController
       case facilityStringsEnum.maxTanks:
       case facilityStringsEnum.gridHeight:
       case facilityStringsEnum.gridWidth:
-        theType = TextInputType.numberWithOptions(decimal: false);
+        theType = const TextInputType.numberWithOptions(decimal: false);
         break;
       default:
         break;
@@ -186,7 +186,7 @@ class _MyAquariumManagerFacilitiesController
       ),
       body: Column(
         children: [
-          BuildOuterLabel_HeadlineSmall(context, "Facility Identity"),
+          buildOuterLabel_HeadlineSmall(context, "Facility Identity"),
           Row(
             children: [
               buildInnerLabel("Facility Name", controllerForFacilityName, model,
@@ -197,7 +197,7 @@ class _MyAquariumManagerFacilitiesController
           ),
           buildInnerLabel("Room", controllerForFacilityRoom, model,
               facilityStringsEnum.facilityRoom, kHalfWidth),
-          BuildOuterLabel_HeadlineSmall(context, "Racks"),
+          buildOuterLabel_HeadlineSmall(context, "Racks"),
           Row(
             children: [
               buildInnerLabel("Max shelves per rack", controllerForMaxShelves,
@@ -225,12 +225,16 @@ class _MyAquariumManagerFacilitiesController
                           gridLocked = confirmed;
                         });
                       },
-                child: Text("Lock in Grid"),
+                child: const Text("Lock in Grid"),
               ),
             ],
           ),
           const SizedBox(
             height: 30,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left:20.0),
+            child: buildOuterLabel(context, "Assign Racks (top view)"),
           ),
           SizedBox(
             width: kGridSize,
@@ -251,7 +255,7 @@ class _MyAquariumManagerFacilitiesController
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: Text("Cancel"),
+                    child: const Text("Cancel"),
                   ),
                 ),
               ),
@@ -273,7 +277,7 @@ class _MyAquariumManagerFacilitiesController
                           print(error.response);
                         });
                     },
-                    child: Text("Submit"),
+                    child: const Text("Submit"),
                   ),
                 ),
               ),

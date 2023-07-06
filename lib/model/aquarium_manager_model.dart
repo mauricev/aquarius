@@ -9,20 +9,21 @@ class MyAquariumManagerModel with ChangeNotifier {
   final ManageSession _manageSession;
   String? selectedFacility; // we start out with no facility selected
 
-  void AssignSavedFacility() async {
-    selectedFacility = await _manageSession.RetrieveFromSecureStorage(cFacilityNameKey);
+  void assignSavedFacility() async {
+    selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
+    // here is where we zero out the returned facility for testing with no saved facility
+    //selectedFacility = null;
     print("the saved facility is ${selectedFacility}");
   }
 
   MyAquariumManagerModel(this._manageSession ) {
-    AssignSavedFacility();
+    assignSavedFacility();
     notifyListeners();
   }
 
   void setSelectedFacility(String? facility_name) {
     selectedFacility = facility_name;
     _manageSession.SetToSecureStorage(cFacilityNameKey, selectedFacility);
-    print("saved facility to storage");
   }
 
   bool getDoesUserWantToRegister() {
@@ -91,7 +92,6 @@ class MyAquariumManagerModel with ChangeNotifier {
   // I don’t recognize this user/password combination
 
   Future<models.Session> loginUser(String username, String password) async {
-    print("model loginUser, ${username} and password, ${password}");
     return _manageSession.loginUser(username, password);
   }
 
@@ -104,7 +104,6 @@ class MyAquariumManagerModel with ChangeNotifier {
     List<String> facilityNames = documentList.documents
         .map((document) => document.data['facility_name'].toString())
         .toList();
-
     return facilityNames;
   }
 

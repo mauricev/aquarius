@@ -83,7 +83,7 @@ class Notes {
   }
 
   String? returnCurrentNoteText() {
-    if (notesList.length > 0) {
+    if (notesList.isNotEmpty) {
       return notesList[0]['note'];
     }
     return null;
@@ -95,7 +95,7 @@ class Notes {
 
   String returnIndexedNoteDate(int index) {
     DateTime date =
-        DateTime.fromMillisecondsSinceEpoch(notesList[index]['date'] * 1000);
+        DateTime.fromMillisecondsSinceEpoch(notesList[index]['date']);
     return DateFormat.yMMMMd().format(date);
   }
 
