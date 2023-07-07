@@ -11,7 +11,7 @@ import 'package:aquarium_manager/views/consts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  ManageSession manageSession = await ManageSession.create();
+  ManageSession manageSession = ManageSession();
   runApp(MyApp(manageSession: manageSession));
 }
 
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: kProgramName,
-        theme: aquarium_manager_theme,
+        theme: aquariumManagerTheme,
         home: const MyAquariumManagerLoginController(),
       ),
     );

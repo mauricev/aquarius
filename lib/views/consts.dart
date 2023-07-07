@@ -21,7 +21,7 @@ const double kNumberWidth = 50;
 
 const double kGridSize = 200;
 
-enum tankStringsEnum { tankLine, numberOfFish, generation }
+enum TankStringsEnum { tankLine, numberOfFish, generation }
 
 const int kStandardTextWidth = 75;
 

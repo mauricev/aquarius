@@ -2,8 +2,9 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/views/utility.dart';
 
-enum loginStatus {
+enum LoginStatus {
   loginNotYetAttempted,
   loginAwaiting,
   loginSuccessful,
@@ -19,8 +20,8 @@ class ManageSession {
   bool _userAccountFailedToRegister = false;
   bool _badUserPassword = false;
 
-  ManageSession._create() {
-    print('sessionKey THREE, ManageSession._create');
+  ManageSession() {
+    myPrint('sessionKey THREE, ManageSession._create');
     _client.setEndpoint(kIPAddress);
     _client.setProject(kProjectId);
     _client.setSelfSigned(status: true); // comment out for real-world https
@@ -30,19 +31,8 @@ class ManageSession {
     return await _storage.read(key: keyToRetrieve);
   }
 
-  void SetToSecureStorage(String keyToSave, String? valueToSave) async {
+  void setToSecureStorage(String keyToSave, String? valueToSave) async {
     _storage.write(key: keyToSave, value: valueToSave);
-  }
-
-  static Future<ManageSession> create() async {
-    print('sessionKey TWO, Future<ManageSession> create');
-
-    // Call the private constructor
-    ManageSession managedSession = ManageSession._create();
-
-    print('FOUR, ManageSession');
-    // Return the fully initialized object
-    return managedSession;
   }
 
   bool getDoesUserWantToRegister() {
@@ -81,7 +71,7 @@ class ManageSession {
   Future<models.User> retrieveSession() async {
     Account theAccount = Account(_client);
 
-    print("inside retrieveSession, about to account.get()");
+    myPrint("inside retrieveSession, about to account.get()");
     return theAccount.get();
   }
 
@@ -89,14 +79,14 @@ class ManageSession {
   Future<models.User> registerUser(String email, String password) async {
     Account theAccount = Account(_client);
 
-    print("about to register 2");
+    myPrint("about to register 2");
 
     models.User theUser = await theAccount.create(
       userId: ID.unique(),
       email: email,
       password: password,
     );
-    print("about to register 3, ${theUser}");
+    myPrint("about to register 3, ${theUser}");
     return theUser;
   }
 
@@ -119,7 +109,7 @@ class ManageSession {
 
     setBadUserPassword(false); // controller will reset this in the then clause
 
-    print("we are in session, loginUser");
+    myPrint("we are in session, loginUser");
     return theAccount.createEmailSession(
       email: email,
       password: password,
@@ -130,7 +120,7 @@ class ManageSession {
     Databases theDatabase = Databases(_client);
 
     String theDocumentID = ID.unique();
-    print("the document id is ${theDocumentID}");
+    myPrint("the document id is ${theDocumentID}");
     return theDatabase.createDocument(
       databaseId: kDatabaseId,
       collectionId: collectionId,

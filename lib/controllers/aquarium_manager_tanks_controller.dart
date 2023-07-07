@@ -86,11 +86,11 @@ class _MyAquariumManagerTankControllerState
     );
   }
 
-  TextInputType? returnTextInputType(tankStringsEnum tankStringsValue) {
+  TextInputType? returnTextInputType(TankStringsEnum tankStringsValue) {
     TextInputType? theType = TextInputType.text;
     switch (tankStringsValue) {
-      case tankStringsEnum.numberOfFish:
-      case tankStringsEnum.generation:
+      case TankStringsEnum.numberOfFish:
+      case TankStringsEnum.generation:
         theType = const TextInputType.numberWithOptions(decimal: false);
         break;
       default:
@@ -103,7 +103,7 @@ class _MyAquariumManagerTankControllerState
   String labelText,
       TextEditingController textController,
       MyAquariumManagerTanksModel tanksModel,
-      tankStringsEnum tanksStringsValue,[double? width]) {
+      TankStringsEnum tanksStringsValue,[double? width]) {
     // we don't yet know if this edits the original tank in the model list or not
     // but second what happens if the current tank is not a tank at all.
     // do we need a button inside the tank cell to create a tank
@@ -114,13 +114,13 @@ class _MyAquariumManagerTankControllerState
     // so we have two pressing questions will this info save into the actual tank
     Tank? currentTank = tanksModel.returnCurrentTank();
     switch (tanksStringsValue) {
-      case tankStringsEnum.tankLine:
+      case TankStringsEnum.tankLine:
         textController.text = currentTank?.tankLine ?? "";
         break;
-      case tankStringsEnum.generation:
+      case TankStringsEnum.generation:
         textController.text = currentTank?.generation.toString() ?? "";
         break;
-      case tankStringsEnum.numberOfFish:
+      case TankStringsEnum.numberOfFish:
         textController.text = currentTank?.numberOfFish.toString() ?? "";
         break;
     }
@@ -151,19 +151,19 @@ class _MyAquariumManagerTankControllerState
                           listen: false);
 
                   switch (tanksStringsValue) {
-                    case tankStringsEnum.tankLine:
+                    case TankStringsEnum.tankLine:
                       currentTank?.tankLine = textController.text;
                       break;
-                    case tankStringsEnum.numberOfFish:
+                    case TankStringsEnum.numberOfFish:
                       currentTank?.numberOfFish =
                           int.parse(textController.text);
                       break;
-                    case tankStringsEnum.generation:
+                    case TankStringsEnum.generation:
                       currentTank?.generation = int.parse(textController.text);
                       break;
                   }
 
-                  tanksModel.saveExistingTank(facilityModel.document_id,
+                  tanksModel.saveExistingTank(facilityModel.documentId,
                       (currentTank?.absolutePosition)!);
                 }),
           ),
@@ -194,7 +194,7 @@ class _MyAquariumManagerTankControllerState
             Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
 
         tankModel.saveExistingTank(
-            facilityModel.document_id, (currentTank?.absolutePosition)!);
+            facilityModel.documentId, (currentTank?.absolutePosition)!);
       });
     }
   }
@@ -240,7 +240,7 @@ class _MyAquariumManagerTankControllerState
           setState(() {
             updateValue?.call(newValue ?? false);
             tankModel.saveExistingTank(
-                facilityModel.document_id, (currentTank.absolutePosition));
+                facilityModel.documentId, (currentTank.absolutePosition));
           });
         },
         controlAffinity:
@@ -312,7 +312,7 @@ class _MyAquariumManagerTankControllerState
         Provider.of<MyAquariumManagerTanksModel>(context);
 
     Tank? currentTank = tankModel.returnCurrentTank();
-    print("is currentTank null, ${currentTank}");
+    myPrint("is currentTank null, ${currentTank}");
 
     return Scaffold(
         appBar: AppBar(
@@ -341,7 +341,7 @@ class _MyAquariumManagerTankControllerState
             Row(
               children: [
                 buildInnerLabel("Tank Line", controllerForTankLine, tankModel,
-                    tankStringsEnum.tankLine, 300),
+                    TankStringsEnum.tankLine, 300),
                 drawDateOfBirth(tankModel, currentTank, currentTank?.getBirthDate,
                     currentTank?.setBirthDate),
                 buildCheckBox(
@@ -355,11 +355,11 @@ class _MyAquariumManagerTankControllerState
             Row(
               children: [
                 buildInnerLabel("Number of Fish", controllerForNumberOfFish,
-                    tankModel, tankStringsEnum.numberOfFish),
+                    tankModel, TankStringsEnum.numberOfFish),
                 buildCheckBox(tankModel, currentTank, "Small Tank",
                     currentTank?.getSmallTank, currentTank?.setSmallTank),
                 buildInnerLabel("Generation", controllerForGeneration, tankModel,
-                    tankStringsEnum.generation),
+                    TankStringsEnum.generation),
               ],
             ),
             Row(
@@ -379,7 +379,7 @@ class _MyAquariumManagerTankControllerState
                                 Provider.of<MyAquariumManagerFacilityModel>(
                                     context,
                                     listen: false);
-                            tankModel.saveExistingTank(facilityModel.document_id,
+                            tankModel.saveExistingTank(facilityModel.documentId,
                                 cParkedRackAbsPosition);
                           });
                         },

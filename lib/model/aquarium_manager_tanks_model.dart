@@ -69,7 +69,7 @@ class Tank {
   }
 
   int? getBirthDate() {
-    print("what is the birthdate, ${birthDate}");
+    myPrint("what is the birthdate, ${birthDate}");
     return birthDate;
   }
 
@@ -92,7 +92,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
 
   int selectedRack = -2; // this is a rack cell, not a tank cell
   int selectedTankCell = -1;
-  String rack_documentId = "";
+  String rackDocumentid = "";
 
   void callNotifyListeners() {
     notifyListeners();
@@ -131,7 +131,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
         facilityFk: facilityFk,
         rackFk: (absolutePosition == cParkedRackAbsPosition)
             ? "0"
-            : rack_documentId, // saved from when we switch racks; we always get it from the database
+            : rackDocumentid, // saved from when we switch racks; we always get it from the database
         absolutePosition: absolutePosition,
         tankLine: "",
         birthDate: returnTimeNow() - kStartingDOBOffset,
@@ -189,7 +189,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
       'facility_fk': facilityFk,
       'rack_fk': (absolutePosition == cParkedRackAbsPosition)
           ? "0"
-          : rack_documentId, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
+          : rackDocumentid, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
       'absolute_position': absolutePosition,
       'tank_line': theTank?.tankLine,
       'date_of_birth': theTank?.birthDate,
@@ -248,10 +248,10 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   Future<void> loadTanksForThisRack(MyAquariumManagerFacilityModel facilityModel, String theRackId) async {
 
     models.DocumentList theTankList = await returnAssociatedTankList(
-        facilityModel.document_id, theRackId);
+        facilityModel.documentId, theRackId);
 
     // all tanks must save with a rack_fk; this is for other methods here
-    rack_documentId = theRackId;
+    rackDocumentid = theRackId;
 
     clearTanks(); // we do want the parked rack deleted because it will get re-added, but how? its rack id is “wrong’
 
@@ -259,7 +259,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
       models.Document theTank = theTankList.documents[theIndex];
       addTankFromDatabase(
           theTank.$id, // this is the document ID that uniquely indentifies this record
-          facilityModel.document_id,
+          facilityModel.documentId,
           theTank.data['rack_fk'],
           theTank.data['absolute_position'],
           theTank.data['tank_line'],
@@ -274,7 +274,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   Future<void> selectThisRackByAbsolutePosition(bool? readInTanks,
       MyAquariumManagerFacilityModel facilityModel, int selectThisRack) async {
     selectedRack = selectThisRack;
-    print("the selected rack cell is ${selectedRack} must be followed loading tanks");
+    myPrint("the selected rack cell is ${selectedRack} must be followed loading tanks");
     // the code here will query the rack via the absolute position and facility_fk from the facility mode
     // need to pass facility model and boolean for reading this stuff
     if (readInTanks!) {

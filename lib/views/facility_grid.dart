@@ -4,7 +4,7 @@ import '../model/aquarium_manager_facilities_model.dart';
 import '../model/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
-enum facilityStringsEnum {
+enum FacilityStringsEnum {
   facilityName,
   facilitySite,
   facilityBuilding,

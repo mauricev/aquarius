@@ -17,15 +17,15 @@ extension _MyAquariumManagerControllerPrepareLogin
     return FutureBuilder(
       future: model.modelRetrieveSession(), // retrieves the session
       builder: (ctx, snapshot) {
-        print("inside future builder");
+        myPrint("inside future builder");
         if (snapshot.connectionState == ConnectionState.done) {
-          print("account.get has returned with error or not");
+          myPrint("account.get has returned with error or not");
           if (snapshot.hasError) {
-            print("account.get has an ERROR, we will present the login screens");
+            myPrint("account.get has an ERROR, we will present the login screens");
             // Return the widget for login screens
             return registerLoginScreens(context, model);
           } else if (snapshot.hasData) {
-            print("account.get has returned with NO error");
+            myPrint("account.get has returned with NO error");
             // Navigate to the home screen route
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
@@ -37,7 +37,7 @@ extension _MyAquariumManagerControllerPrepareLogin
             });
           }
         }
-        print("we are in circular progress");
+        myPrint("we are in circular progress");
         return const CircularProgressIndicator(); // awaiting login status
       },
     );

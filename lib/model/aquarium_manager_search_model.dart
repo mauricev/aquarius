@@ -8,15 +8,15 @@ import 'package:aquarium_manager/views/consts.dart';
 class MyAquariumManagerSearchModel with ChangeNotifier {
   final ManageSession
       _manageSession; // we need this because manage tanks, which in turn uses Notes, which needs the sesson variable to save to disk
-  String facility_Fk = "";
+  String facilityFk = "";
 
   List<Tank> tankListFull = <Tank>[];
   List<Tank> tankListSearched = <Tank>[];
 
-  MyAquariumManagerSearchModel(this._manageSession) {}
+  MyAquariumManagerSearchModel(this._manageSession);
 
-  void setFacilityId(String facility_Fk) {
-    this.facility_Fk = facility_Fk;
+  void setFacilityId(String facilityFk) {
+    this.facilityFk = facilityFk;
   }
 
   void addTankFromDatabase(
@@ -59,7 +59,7 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
   Future<models.DocumentList> returnAllTheTanks() async {
 
     List<String>? tankQuery = [
-      Query.equal("facility_fk", facility_Fk),
+      Query.equal("facility_fk", facilityFk),
     ];
     return await _manageSession.queryDocument(cTankCollection, tankQuery);
   }
@@ -75,7 +75,7 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
       addTankFromDatabase(
           theTank
               .$id, // this is the document ID that uniquely identifies this record
-          facility_Fk,
+          facilityFk,
           theTank.data['rack_fk'],
           theTank.data['absolute_position'],
           theTank.data['tank_line'],
@@ -119,8 +119,8 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> buildInitialSearchList(String facility_Fk) async {
-    setFacilityId(facility_Fk);
+  Future<void> buildInitialSearchList(String facilityFk) async {
+    setFacilityId(facilityFk);
     await prepareFullTankList(); // we do get the full tank list from the database and the database should always be up to date.
     prepareSearchTankList("");
   }

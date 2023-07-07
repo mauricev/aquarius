@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:aquarium_manager/model/aquarium_manager_model.dart';
 import 'aquarium_manager_homescreen_controller.dart';
 import 'package:aquarium_manager/views/consts.dart';
-
+import 'package:aquarium_manager/views/utility.dart';
 part 'aquarium_manager_preparelogin_controller.dart';
 
 class MyAquariumManagerLoginController extends StatefulWidget {
@@ -63,7 +63,7 @@ class _MyAquariumManagerLoginControllerState
                   .loginUser(controllerForLoginEmail.text,
                       controllerForPassword.text)
                   .then((sessionValue) {
-                print("calling homescreen route");
+                myPrint("calling homescreen route");
                 // we are done with the login screens, remove them from the navigation stack
                 // we can get it back by navigating to it again
                 //Navigator.pushReplacementNamed(context, '/homescreen');
@@ -74,8 +74,8 @@ class _MyAquariumManagerLoginControllerState
                   ),
                 );
               }).catchError((error) {
-                print("login session failed");
-                print(error.response);
+                myPrint("login session failed");
+                myPrint(error.response);
               });
             },
             child: const Text("Login"),
@@ -153,12 +153,12 @@ class _MyAquariumManagerLoginControllerState
                               .registerUser(controllerForEmail.text,
                                   controllerForNewPassword1.text)
                               .then((registeredUserResult) {
-                                print("returning from register user, ${registeredUserResult}");
+                            myPrint("returning from register user, ${registeredUserResult}");
                             model.setDoesUserWantToRegister(false);
                           }).catchError((onError) {
                             model.setDoesUserWantToRegister(true);
                             setState(() {
-                              print("inside setstate 2");
+                              myPrint("inside setstate 2");
                               registerError = onError.toString();
                             });
                             // we can set a variable here to true to indicate there

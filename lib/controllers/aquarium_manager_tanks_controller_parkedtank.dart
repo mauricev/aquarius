@@ -67,7 +67,7 @@ class ParkedTank extends StatelessWidget {
                 : Colors
                 .transparent, // this grid cell does not have a tank, but we need a third state here
           ),
-          child: Text("${cParkedAbsolutePosition}"),
+          child: const Text("${cParkedAbsolutePosition}"),
         ),
         onTap: () {
           if (tankID != kEmptyTankIndex) {

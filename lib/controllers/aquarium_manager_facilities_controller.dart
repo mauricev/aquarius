@@ -76,13 +76,13 @@ class _MyAquariumManagerFacilitiesController
         false;
   }
 
-  TextInputType? returnTextInputType(facilityStringsEnum facilitystringValue) {
+  TextInputType? returnTextInputType(FacilityStringsEnum facilitystringValue) {
     TextInputType? theType = TextInputType.text;
     switch (facilitystringValue) {
-      case facilityStringsEnum.maxShelves:
-      case facilityStringsEnum.maxTanks:
-      case facilityStringsEnum.gridHeight:
-      case facilityStringsEnum.gridWidth:
+      case FacilityStringsEnum.maxShelves:
+      case FacilityStringsEnum.maxTanks:
+      case FacilityStringsEnum.gridHeight:
+      case FacilityStringsEnum.gridWidth:
         theType = const TextInputType.numberWithOptions(decimal: false);
         break;
       default:
@@ -91,17 +91,17 @@ class _MyAquariumManagerFacilitiesController
     return theType;
   }
 
-  bool returnGridLocked(facilityStringsEnum facilitystringValue) {
+  bool returnGridLocked(FacilityStringsEnum facilitystringValue) {
     switch (facilitystringValue) {
-      case facilityStringsEnum.facilityName:
-      case facilityStringsEnum.facilitySite:
-      case facilityStringsEnum.facilityBuilding:
-      case facilityStringsEnum.facilityRoom:
+      case FacilityStringsEnum.facilityName:
+      case FacilityStringsEnum.facilitySite:
+      case FacilityStringsEnum.facilityBuilding:
+      case FacilityStringsEnum.facilityRoom:
         return true;
-      case facilityStringsEnum.maxShelves:
-      case facilityStringsEnum.maxTanks:
-      case facilityStringsEnum.gridHeight:
-      case facilityStringsEnum.gridWidth:
+      case FacilityStringsEnum.maxShelves:
+      case FacilityStringsEnum.maxTanks:
+      case FacilityStringsEnum.gridHeight:
+      case FacilityStringsEnum.gridWidth:
         return !gridLocked;
     }
   }
@@ -110,7 +110,7 @@ class _MyAquariumManagerFacilitiesController
       String labelText,
       TextEditingController textController,
       MyAquariumManagerFacilityModel model,
-      facilityStringsEnum facilitystringValue, double width) {
+      FacilityStringsEnum facilitystringValue, double width) {
     return Padding(
       padding: const EdgeInsets.only(
         left: 40,
@@ -132,39 +132,39 @@ class _MyAquariumManagerFacilitiesController
                 enabled: returnGridLocked(facilitystringValue),
                 onChanged: (value) {
                   switch (facilitystringValue) {
-                    case facilityStringsEnum.facilityName:
+                    case FacilityStringsEnum.facilityName:
                       model.facilityName = textController.text;
                       break;
-                    case facilityStringsEnum.facilitySite:
+                    case FacilityStringsEnum.facilitySite:
                       model.facilityName = textController.text;
                       break;
-                    case facilityStringsEnum.facilityBuilding:
+                    case FacilityStringsEnum.facilityBuilding:
                       model.facilityBuilding = textController.text;
                       break;
-                    case facilityStringsEnum.facilityRoom:
+                    case FacilityStringsEnum.facilityRoom:
                       model.facilityRoom = textController.text;
                       break;
-                    case facilityStringsEnum.maxShelves:
+                    case FacilityStringsEnum.maxShelves:
                       model.maxShelves = int.parse(textController.text);
                       break;
-                    case facilityStringsEnum.maxTanks:
+                    case FacilityStringsEnum.maxTanks:
                       model.maxTanks = int.parse(textController.text);
                       break;
-                    case facilityStringsEnum.gridHeight:
+                    case FacilityStringsEnum.gridHeight:
                       if (textController.text != "") {
                         setState(() {
                           model.gridHeight = int.parse(textController.text);
                         });
-                        print("gridheight is ${model.gridHeight}");
+                        myPrint("gridheight is ${model.gridHeight}");
                       }
                       break;
-                    case facilityStringsEnum.gridWidth:
+                    case FacilityStringsEnum.gridWidth:
                       // also have to block non-numeric characters
                       if (textController.text != "") {
                         setState(() {
                           model.gridWidth = int.parse(textController.text);
                         });
-                        print("gridWidth is ${model.gridWidth}");
+                        myPrint("gridWidth is ${model.gridWidth}");
                       }
                       break;
                   }
@@ -186,24 +186,24 @@ class _MyAquariumManagerFacilitiesController
       ),
       body: Column(
         children: [
-          buildOuterLabel_HeadlineSmall(context, "Facility Identity"),
+          buildOuterLabelHeadlineSmall(context, "Facility Identity"),
           Row(
             children: [
               buildInnerLabel("Facility Name", controllerForFacilityName, model,
-                  facilityStringsEnum.facilityName,kFullWidth),
+                  FacilityStringsEnum.facilityName,kFullWidth),
               buildInnerLabel("Building", controllerForFacilityBuilding, model,
-                  facilityStringsEnum.facilityBuilding,kFullWidth),
+                  FacilityStringsEnum.facilityBuilding,kFullWidth),
             ],
           ),
           buildInnerLabel("Room", controllerForFacilityRoom, model,
-              facilityStringsEnum.facilityRoom, kHalfWidth),
-          buildOuterLabel_HeadlineSmall(context, "Racks"),
+              FacilityStringsEnum.facilityRoom, kHalfWidth),
+          buildOuterLabelHeadlineSmall(context, "Racks"),
           Row(
             children: [
               buildInnerLabel("Max shelves per rack", controllerForMaxShelves,
-                  model, facilityStringsEnum.maxShelves, kNumberWidth),
+                  model, FacilityStringsEnum.maxShelves, kNumberWidth),
               buildInnerLabel("Max tanks per shelf", controllerForMaxTanks,
-                  model, facilityStringsEnum.maxTanks, kNumberWidth),
+                  model, FacilityStringsEnum.maxTanks, kNumberWidth),
             ],
           ),
           const SizedBox(
@@ -212,9 +212,9 @@ class _MyAquariumManagerFacilitiesController
           Row(
             children: [
               buildInnerLabel("Max grid width", controllerForGridWidth, model,
-                  facilityStringsEnum.gridWidth, kNumberWidth),
+                  FacilityStringsEnum.gridWidth, kNumberWidth),
               buildInnerLabel("Max grid height", controllerForGridHeight, model,
-                  facilityStringsEnum.gridHeight, kNumberWidth),
+                  FacilityStringsEnum.gridHeight, kNumberWidth),
               ElevatedButton(
                 onPressed: gridLocked
                     ? null
@@ -267,14 +267,14 @@ class _MyAquariumManagerFacilitiesController
                   padding: const EdgeInsets.only(right: 20.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      print("inside save button");
+                      myPrint("inside save button");
                       // we may be saving for the first time or for the 50th;
                       // for subsequent saves, we have the document_id and we use that to determine how this function saves
                         model.saveFacility().then((_) {
-                          print("facility and racks were saved");
+                          myPrint("facility and racks were saved");
                           Navigator.of(context).pop();
                         }).catchError((error) {
-                          print(error.response);
+                          myPrint(error.response);
                         });
                     },
                     child: const Text("Submit"),

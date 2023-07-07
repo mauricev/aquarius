@@ -223,7 +223,7 @@ class _AquariumManagerHomeScreenControllerState
     facilitiesModel.getFacilityInfo(model.selectedFacility).then((data) {
       // are we wrong to assume this will be filled in?
       searchModel
-          .buildInitialSearchList(facilitiesModel.document_id)
+          .buildInitialSearchList(facilitiesModel.documentId)
           .then((data) {
         Navigator.push(
             context,
@@ -329,7 +329,7 @@ class _AquariumManagerHomeScreenControllerState
           const SizedBox(
             height: 20,
           ),
-          buildOuterLabel_HeadlineSmall(context, "Create"),
+          buildOuterLabelHeadlineSmall(context, "Create"),
           Row(
             children: [
               loadCommonButtonWithParameter(
@@ -339,7 +339,7 @@ class _AquariumManagerHomeScreenControllerState
           const SizedBox(
             height: 30,
           ),
-          buildOuterLabel_HeadlineSmall(context, "Manage"),
+          buildOuterLabelHeadlineSmall(context, "Manage"),
           Row(
             children: [
               loadCommonButtonWithParameter(
@@ -351,7 +351,7 @@ class _AquariumManagerHomeScreenControllerState
           const SizedBox(
             height: 30,
           ),
-          buildOuterLabel_HeadlineSmall(context, "Search"),
+          buildOuterLabelHeadlineSmall(context, "Search"),
           Row(
             children: [
               // we might want to add an indent value to align this button with the above

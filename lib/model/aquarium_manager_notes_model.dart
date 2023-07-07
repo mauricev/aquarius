@@ -28,12 +28,12 @@ class Notes {
       'date': notesList[0]['date'],
       'tank_fk': notesList[0]['tank_fk'],
     };
-    print("3 did the notes array really update: ${notesList[0]['note']}?");
+    myPrint("3 did the notes array really update: ${notesList[0]['note']}?");
     return theNoteMap;
   }
 
-  void postPrepareNoteMap(String document_Id) {
-    notesList[0]['document id'] = document_Id;
+  void postPrepareNoteMap(String documentId) {
+    notesList[0]['document id'] = documentId;
   }
 
   void saveNewNote() async {
@@ -48,7 +48,7 @@ class Notes {
   // this will be called every time during the onchanged event
   void saveExistingNote() async {
     if (isParentTankIDValid()) {
-      print("2 save existing note");
+      myPrint("2 save existing note");
       Map<String, dynamic> theNoteMap = prepareNoteMap();
       manageSession.updateDocument(theNoteMap, cNotesCollection,
           notesList[0]['document id']); // this should be the NOTE's document ID, but how did this value get put into map
@@ -59,7 +59,7 @@ class Notes {
   void addNote() {
     if (isParentTankIDValid()) {
       // notes without a valid tank_fk CANNOT be saved!
-      print("adding a note to tank ${returnParentTankID()}");
+      myPrint("adding a note to tank ${returnParentTankID()}");
       Map<String, dynamic> theNotesMap = {
         'note': "", // when a new note is initially added, it contains no text
         'date': returnTimeNow(),
@@ -68,8 +68,9 @@ class Notes {
       notesList.insert(
           0, theNotesMap); // added new items to the beginning of the list
       saveNewNote(); // save the first index; this will append the documnt id for future saving of this note
-    } else
-      print("NOT adding a note, ${returnParentTankID()}");
+    } else {
+      myPrint("NOT adding a note, ${returnParentTankID()}");
+    }
   }
 
   // only the first note can be updated
@@ -77,7 +78,7 @@ class Notes {
     Map<String, dynamic> note = notesList.elementAt(0);
     note['note'] = noteText;
     note['date'] = returnTimeNow();
-    print("1 this is incoming note text, ${note['note']}");
+    myPrint("1 this is incoming note text, ${note['note']}");
     // need to save note for the first time; will always have a valid tank_fk
     saveExistingNote();
   }
@@ -124,14 +125,14 @@ class Notes {
             'tank_fk': theParentId,
             // when we save notes, we need to save this so that each note must have its own copy
           };
-          print("loaded note, what does the note say, ${theNote.data['note']}");
+          myPrint("loaded note, what does the note say, ${theNote.data['note']}");
           // how are we sorting these? // newer items must be added first
           notesList.add(theNotesMap);
 
           notesList.sort((a, b) => b['date'].compareTo(a['date']));
         }
       } catch (e) {
-        print("I CAN’T FIND THE RIGHT TANK, ${e.toString()}");
+        myPrint("I CAN’T FIND THE RIGHT TANK, ${e.toString()}");
       }
     }
   }

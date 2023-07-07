@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../model/aquarium_manager_facilities_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
+void myPrint(String printThis) {
+  print(printThis);
+}
+
 Widget buildOuterLabel(BuildContext context, String labelText) {
   return Row(
     children: [
@@ -18,7 +22,7 @@ Widget buildOuterLabel(BuildContext context, String labelText) {
   );
 }
 
-Widget buildOuterLabel_HeadlineSmall(BuildContext context, String labelText) {
+Widget buildOuterLabelHeadlineSmall(BuildContext context, String labelText) {
   return Row(
     children: [
       Padding(

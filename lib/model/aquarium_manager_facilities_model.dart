@@ -3,11 +3,12 @@ import 'package:aquarium_manager/model/sessionKey.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/views/utility.dart';
 
 class Rack {
   int absolutePosition = 0;
   String relativePosition = "";
-  int facility_fk = 0;
+  int facilityFk = 0;
 
   Rack(this.absolutePosition, this.relativePosition);
 }
@@ -17,7 +18,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   List<Rack> rackList = <Rack>[];
 
   String? facilityName;
-  String document_id = "";
+  String documentId = "";
   String facilitySite = "";
   String facilityBuilding = "";
   String facilityRoom = "";
@@ -29,19 +30,19 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   MyAquariumManagerFacilityModel(this._manageSession);
 
   void addRack(int absolutePosition, String relativePosition) {
-    print(
+    myPrint(
         "adding the rack ${relativePosition} at position ${absolutePosition}");
     Rack aRack = Rack(absolutePosition, relativePosition);
     rackList.add(aRack);
   }
 
   void clearRacks() {
-    print("clearing racks");
+    myPrint("clearing racks");
     rackList.clear();
   }
 
   void deleteRack(int index) {
-    print("deleting rack at index ${index}");
+    myPrint("deleting rack at index ${index}");
     rackList.removeAt(index);
   }
 
@@ -64,31 +65,33 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     return -1;
   }
 
+  // this code was using the internal document id and
+  // and now I changed it to using the passed one instead
   Future<models.DocumentList> returnAssociatedRackList(
-      String document_Id) async {
+      String inDocumentId) async {
 
     List<String>? rackQuery = [
-      Query.equal("facility_fk", document_id),
+      Query.equal("facility_fk", inDocumentId), // I just changed the code to use the passed ID.
     ];
     return await _manageSession.queryDocument(cRackCollection, rackQuery);
   }
 
-  Future<int?> returnRacksAbsolutePosition(String inRack_Fk) async {
+  Future<int?> returnRacksAbsolutePosition(String inRackFk) async {
 
     List<String>? rackQuery = [
-      Query.equal("\$id", inRack_Fk),
+      Query.equal("\$id", inRackFk),
     ];
 
-    print("IN returnRacksAbsolutePosition, ${inRack_Fk}");
+    myPrint("IN returnRacksAbsolutePosition, ${inRackFk}");
     models.DocumentList theRackList = await _manageSession.queryDocument(
         cRackCollection, rackQuery);
-    print("theRackList is ${theRackList.documents[0]}");
+    myPrint("theRackList is ${theRackList.documents[0]}");
 
     models.Document theRack = theRackList.documents[0];
-    print("rack document id is ${theRack.$id}");
-    print("theRack is ${theRack.data}");
+    myPrint("rack document id is ${theRack.$id}");
+    myPrint("theRack is ${theRack.data}");
     int absolutePosition = theRack.data["absolute_position"];
-    print("rack absolutePosition is ${absolutePosition}");
+    myPrint("rack absolutePosition is ${absolutePosition}");
 
     return absolutePosition; // possible bug here, doesn't want await
   }
@@ -96,11 +99,11 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   Future<String?> returnSpecificRack(int absolutePosition) async {
 
     List<String>? rackQuery = [
-      Query.equal("facility_fk", document_id),
+      Query.equal("facility_fk", documentId),
       Query.equal("absolute_position", absolutePosition),
     ];
 
-    print("facility_fk is ${document_id} and abs pos is ${absolutePosition}");
+    myPrint("facility_fk is ${documentId} and abs pos is ${absolutePosition}");
 
     models.DocumentList theRackList = await _manageSession.queryDocument(
         cRackCollection, rackQuery);
@@ -113,7 +116,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   Future<void> getFacilityInfo(String? theFacilityName) async {
     if (theFacilityName != null) {
       // if we are null, then we are in the new facility page
-      print("we are entering an existing facility, ${theFacilityName}");
+      myPrint("we are entering an existing facility, ${theFacilityName}");
       List<String>? facilityQuery = [
         Query.equal("facility_name", theFacilityName),
       ];
@@ -122,7 +125,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
           kFacilityCollection, facilityQuery);
       models.Document theFacility = theFacilityList.documents[0];
 
-      document_id = theFacility.$id;
+      documentId = theFacility.$id;
       facilityName = theFacility.data['facility_name'];
       facilityBuilding = theFacility.data['facility_building'];
       facilityRoom = theFacility.data['facility_room'];
@@ -132,7 +135,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
       maxTanks = theFacility.data['max_tanks'];
 
       models.DocumentList theRackList =
-          await returnAssociatedRackList(document_id);
+          await returnAssociatedRackList(documentId);
 
       clearRacks(); // be sure we have no lingering racks
 
@@ -146,7 +149,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     } else {
 
       facilityName = null;
-      document_id = "";
+      documentId = "";
       facilityBuilding = "";
       facilityRoom = "";
       maxShelves = 0;
@@ -173,14 +176,14 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
 
     models.Document theFacility;
     // we assigned document_id if there is one in this istheFacilitySaved function
-    if (document_id == "") {
+    if (documentId == "") {
       // this is a new facility; give it a new id
       theFacility = await _manageSession.createDocument(  // we have to await to get the new facility id
           theFacilityMap, kFacilityCollection); // how does document_id get updated? elsewhere apparently
     } else {
       theFacility = await _manageSession.updateDocument( // since we are using facility id, we need to wait
-          theFacilityMap, kFacilityCollection, document_id);
-      print("is facility id right? facility is ${theFacility.$id} and saved value is ${document_id}");
+          theFacilityMap, kFacilityCollection, documentId);
+      myPrint("is facility id right? facility is ${theFacility.$id} and saved value is ${documentId}");
     }
 
     for (int theIndex = 0; theIndex < rackList.length; theIndex++) {
@@ -196,16 +199,16 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
         Query.equal("absolute_position", rackList[theIndex].absolutePosition),
       ];
 
-      print("the facility being saved is ${theFacility.$id}");
+      myPrint("the facility being saved is ${theFacility.$id}");
 
       models.DocumentList theRackList = await _manageSession.queryDocument(cRackCollection, rackQuery);
 
       if (theRackList.total > 0) { // racks are already existing
-        print("we found an existing rack, ${theRackList.documents[0].$id}");
+        myPrint("we found an existing rack, ${theRackList.documents[0].$id}");
         await _manageSession.updateDocument(
         theRackMap, cRackCollection, theRackList.documents[0].$id);
       } else {
-        print('we are saving a new rack, ${rackList[theIndex].relativePosition}'); // how did this rack get created? we gave it a name.
+        myPrint('we are saving a new rack, ${rackList[theIndex].relativePosition}'); // how did this rack get created? we gave it a name.
         await _manageSession.createDocument(theRackMap, cRackCollection); // if this fails, we created on an existing rack in error
       }
      }

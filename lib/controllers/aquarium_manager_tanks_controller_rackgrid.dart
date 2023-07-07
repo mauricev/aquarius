@@ -50,10 +50,6 @@ class RackGrid extends StatelessWidget {
   List<Widget> buildGridDown(MyAquariumManagerFacilityModel facilityModel,
       MyAquariumManagerTanksModel tanksModel) {
 
-    /*gridDown
-        .clear(); // we clear because this is a global variable, so we want to add starting fresh each time
-*/
-
     int offset = 0;
     for (int theIndex = 1; theIndex <= facilityModel.maxShelves; theIndex++) {
       gridDown.add(Row(

@@ -12,7 +12,7 @@ class MyAquariumManagerSearchController extends StatelessWidget {
 
   final TextEditingController controllerForSearch = TextEditingController();
 
-  Widget buildCheckBox(BuildContext context, String labelText, bool? retrieveValue()?) {
+  Widget buildCheckBox(BuildContext context, String labelText, bool? Function()? retrieveValue) {
     return SizedBox(
       width: 150,
       child: CheckboxListTile(
@@ -37,8 +37,8 @@ class MyAquariumManagerSearchController extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        print("abs position of tank I clicked on is ${tank.absolutePosition}");
-        print("abs position of rack on this tank is ${tank.rackFk}");
+        myPrint("abs position of tank I clicked on is ${tank.absolutePosition}");
+        myPrint("abs position of rack on this tank is ${tank.rackFk}");
 
         Navigator.push(
           context,
@@ -103,7 +103,7 @@ class MyAquariumManagerSearchController extends StatelessWidget {
       ),
       body: Column(
         children: [
-          buildOuterLabel_HeadlineSmall(context, "Search Tanks"),
+          buildOuterLabelHeadlineSmall(context, "Search Tanks"),
           Row(
             children: [
               expandedFlex1(),
@@ -119,7 +119,7 @@ class MyAquariumManagerSearchController extends StatelessWidget {
               expandedFlex1(),
             ],
           ),
-          buildOuterLabel_HeadlineSmall(context, "Results"),
+          buildOuterLabelHeadlineSmall(context, "Results"),
           SizedBox(
             height: MediaQuery.of(context).size.height * 4 / 6,
             width: MediaQuery.of(context).size.width * 5 / 6,

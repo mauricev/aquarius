@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/aquarium_manager_notes_model.dart';
 import '../model/aquarium_manager_tanks_model.dart';
+import 'package:aquarium_manager/views/utility.dart';
 
 class NotesDialogBody extends StatefulWidget {
   final Tank currentTank;
@@ -20,7 +21,7 @@ class _NotesDialogBodyState extends State<NotesDialogBody> {
 
     controllerForNotesItem.text = notes.returnIndexedNoteText(index);
 
-    print("i am in notes item for index, ${index}");
+    myPrint("i am in notes item for index, ${index}");
     return Column(
       children: [
         Row(
@@ -57,7 +58,7 @@ class _NotesDialogBodyState extends State<NotesDialogBody> {
         Row(
           children: [
             ElevatedButton(
-              child: Text("Add New Note"),
+              child: const Text("Add New Note"),
               onPressed: () {
                 setState(() {
                   widget.currentTank.notes
@@ -71,7 +72,7 @@ class _NotesDialogBodyState extends State<NotesDialogBody> {
           child: ListView.builder(
             itemCount: widget.currentTank.notes.notesList.length,
             itemBuilder: (BuildContext context, int index) {
-              print("notes are ${widget.currentTank.notes}");
+              myPrint("notes are ${widget.currentTank.notes}");
 
               return notesItem(context, widget.currentTank.notes, index);
             },

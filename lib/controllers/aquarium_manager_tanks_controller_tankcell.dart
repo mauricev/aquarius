@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../model/aquarium_manager_facilities_model.dart';
 import '../model/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/views/utility.dart';
 
 class TankCell extends StatefulWidget {
   final int absolutePosition; // this can’t be altered
@@ -45,7 +46,7 @@ class _TankCellState extends State<TankCell> {
     Provider.of<MyAquariumManagerTanksModel>(context, listen: false);
 
     tankModel.addNewEmptyTank(
-        facilityModel.document_id,
+        facilityModel.documentId,
         widget
             .absolutePosition); // we call setstate because this function updates the current tank with a new position
     // we need to force select this tank; otherwise, there is no current tank
@@ -55,7 +56,7 @@ class _TankCellState extends State<TankCell> {
   void assignParkedTankItsNewHome(
       Tank? parkedTank, MyAquariumManagerTanksModel tankModel) {
     parkedTank?.absolutePosition = widget.absolutePosition;
-    parkedTank?.rackFk = tankModel.rack_documentId;
+    parkedTank?.rackFk = tankModel.rackDocumentid;
   }
 
   void parkRackedTank(Tank? destinationTank) {
@@ -81,10 +82,10 @@ class _TankCellState extends State<TankCell> {
               ? null
               : () {
             // make sure we have a selected rack
-            print("we clicked a tank cell");
+            myPrint("we clicked a tank cell");
             if (tankID != kEmptyTankIndex) {
               // we only want to select actual tanks at the moment
-              print("we clicked an a real tank cell");
+              myPrint("we clicked an a real tank cell");
               tankModel.selectThisTankCell(widget.absolutePosition);
             }
           },
@@ -141,7 +142,7 @@ class _TankCellState extends State<TankCell> {
         );
       },
       onWillAccept: (data) {
-        print("shouldn't we be coming here");
+        myPrint("shouldn't we be coming here");
         return true;
       },
       onAccept: (data) {
@@ -168,7 +169,7 @@ class _TankCellState extends State<TankCell> {
             assignParkedTankItsNewHome(parkedTank, tankModel);
             // the tank has not been saved with this new info
             tankModel.saveExistingTank(
-                facilityModel.document_id, widget.absolutePosition);
+                facilityModel.documentId, widget.absolutePosition);
           } else {
             // here we are swapping tank positions
             Tank? destinationTank = tankModel
@@ -182,9 +183,9 @@ class _TankCellState extends State<TankCell> {
 
             assignParkedTankItsNewHome(parkedTank, tankModel);
             tankModel.saveExistingTank(
-                facilityModel.document_id, widget.absolutePosition);
+                facilityModel.documentId, widget.absolutePosition);
             tankModel.saveExistingTank(
-                facilityModel.document_id, cParkedAbsolutePosition);
+                facilityModel.documentId, cParkedAbsolutePosition);
           }
           tankModel.selectThisTankCell(widget.absolutePosition);
         });

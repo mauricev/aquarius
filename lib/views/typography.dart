@@ -104,7 +104,7 @@ const MaterialColor blueShades = MaterialColor(
   },
 );
 
-final aquarium_manager_theme = ThemeData(
+final aquariumManagerTheme = ThemeData(
   useMaterial3: true,
   // primaryColor: Colors.lightBlue[800],
   // primarySwatch: blueShades,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:aquarium_manager/model/sessionKey.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/views/utility.dart';
 
 class MyAquariumManagerModel with ChangeNotifier {
   final cFacilityNameKey = "faciltyNameKey";
@@ -13,7 +14,7 @@ class MyAquariumManagerModel with ChangeNotifier {
     selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
     // here is where we zero out the returned facility for testing with no saved facility
     //selectedFacility = null;
-    print("the saved facility is ${selectedFacility}");
+    myPrint("the saved facility is ${selectedFacility}");
   }
 
   MyAquariumManagerModel(this._manageSession ) {
@@ -21,9 +22,9 @@ class MyAquariumManagerModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedFacility(String? facility_name) {
-    selectedFacility = facility_name;
-    _manageSession.SetToSecureStorage(cFacilityNameKey, selectedFacility);
+  void setSelectedFacility(String? facilityName) {
+    selectedFacility = facilityName;
+    _manageSession.setToSecureStorage(cFacilityNameKey, selectedFacility);
   }
 
   bool getDoesUserWantToRegister() {
@@ -42,7 +43,7 @@ class MyAquariumManagerModel with ChangeNotifier {
   // even this class temporarily ignores the return string
   Future registerUser(String email, String password) {
     setFailedToRegister(false);
-    print("about to register 1");
+    myPrint("about to register 1");
     return _manageSession.registerUser(email, password);
   }
 
