@@ -1,6 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/model/sessionKey.dart';
+import 'package:aquarium_manager/model/session_key.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
@@ -14,7 +14,7 @@ class MyAquariumManagerModel with ChangeNotifier {
     selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
     // here is where we zero out the returned facility for testing with no saved facility
     //selectedFacility = null;
-    myPrint("the saved facility is ${selectedFacility}");
+    myPrint("the saved facility is $selectedFacility");
   }
 
   MyAquariumManagerModel(this._manageSession ) {

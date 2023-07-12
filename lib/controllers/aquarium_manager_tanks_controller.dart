@@ -9,7 +9,9 @@ import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_p
 import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_rackgrid.dart';
 import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_notes.dart';
 
-//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
+
+import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 class MyAquariumManagerTankController extends StatefulWidget {
   final Map<String, dynamic> arguments;
@@ -18,13 +20,13 @@ class MyAquariumManagerTankController extends StatefulWidget {
       : super(key: key);
 
   @override
-  _MyAquariumManagerTankControllerState createState() =>
-      _MyAquariumManagerTankControllerState();
+  MyAquariumManagerTankControllerState createState() =>
+      MyAquariumManagerTankControllerState();
 }
 
-class _MyAquariumManagerTankControllerState
+class MyAquariumManagerTankControllerState
     extends State<MyAquariumManagerTankController> {
-  String? incomingRack_Fk;
+  String? incomingRackFk;
   int? incomingTankPosition;
 
   TextEditingController controllerForTankLine = TextEditingController();
@@ -42,12 +44,12 @@ class _MyAquariumManagerTankControllerState
     MyAquariumManagerFacilityModel facilityModel =
         Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
 
-    if (incomingRack_Fk != null && incomingTankPosition != null) {
-      if (incomingRack_Fk! != "0") {
+    if (incomingRackFk != null && incomingTankPosition != null) {
+      if (incomingRackFk! != "0") {
         // parked cells don't have racks associated with them; rack is just 0 as a string.
 
         int? theRackAbsolutePosition =
-            await facilityModel.returnRacksAbsolutePosition(incomingRack_Fk!);
+            await facilityModel.returnRacksAbsolutePosition(incomingRackFk!);
 
         await tankModel.selectThisRackByAbsolutePosition(
             cFacilityClickableGrid, facilityModel, theRackAbsolutePosition!);
@@ -61,7 +63,7 @@ class _MyAquariumManagerTankControllerState
   void initState() {
     super.initState();
 
-    incomingRack_Fk = widget.arguments['incomingRack_Fk'];
+    incomingRackFk = widget.arguments['incomingRack_Fk'];
     incomingTankPosition = widget.arguments['incomingTankPosition'];
 
     // Call your methods using the BuildContext:
@@ -139,7 +141,7 @@ class _MyAquariumManagerTankControllerState
             padding: const EdgeInsets.only(
               left: 20,
             ),
-            width: (width == null) ? 75 : width,
+            width: (width == null) ? kStandardTextWidthDouble : width,
             child: TextField(
                 enabled: (currentTank != null),
                 style: Theme.of(context).textTheme.bodySmall,
@@ -208,7 +210,7 @@ class _MyAquariumManagerTankControllerState
       children: [
         const Text("Birthdate"),
         const SizedBox(
-          height: 20.0,
+          height: kIndentWidth,
         ),
         TextButton(
           onPressed: (currentTank == null) ? null : () => _selectDate(
@@ -276,7 +278,7 @@ class _MyAquariumManagerTankControllerState
     return Container();
   }
 
-  void PrintTank(Tank? currentTank) {
+  void printTank(Tank? currentTank) async {
     String tankLineString = currentTank?.tankLine ?? '';
     String screenPositiveString = (currentTank?.getScreenPositive() ?? false)
         ? "screen positive"
@@ -286,24 +288,30 @@ class _MyAquariumManagerTankControllerState
     String numberOfFishString = currentTank?.numberOfFish.toString() ?? "";
     String generationString = currentTank?.generation.toString() ?? "";
     String dateOfBirthString = buildDateOfBirth(currentTank?.getBirthDate);
-    String rackFkString = currentTank?.rackFk.toString() ?? "";
+    String rackFkString = currentTank?.rackFk ?? "";
     String absolutePositionString =
         currentTank?.absolutePosition.toString() ?? "";
+
+    MyAquariumManagerFacilityModel facilityModel =
+    Provider.of<MyAquariumManagerFacilityModel>(
+        context,
+        listen: false);
+    String rack = await facilityModel.returnRacksRelativePosition(rackFkString);
 
     // multiline string requires three quotes
     String zplCode = """
 ^XA
-^FO275,30^A0N,25^FDRack, ${tankLineString}; Tank, ${tankLineString}^FS
-^FO275,65^A0N,20^FD${tankLineString}^FS
-^FO275,100^A0N,30^FDDOB:${dateOfBirthString}^FS
-^FO275,135^A0N,30^FDCount:${numberOfFishString}^FS
-^FO275,170^A0N,30^FD${smallTankString}^FS
-^FO275,205^A0N,30^FD${screenPositiveString}^FS
-^FO275,240^A0N,30^FDGen:F${generationString}^FS
-^FO20,20^BQN,2,8^FH^FDMA:${rackFkString};${absolutePositionString}^FS 
+^FO275,30^A0N,25^FD$tankLineString^FS
+^FO275,65^A0N,30^FDDOB:$dateOfBirthString^FS
+^FO275,100^A0N,30^FDCount:$numberOfFishString^FS
+^FO275,135^A0N,30^FD$smallTankString^FS
+^FO275,170^A0N,30^FD$screenPositiveString^FS
+^FO275,205^A0N,30^FDGen:F$generationString^FS
+^FO275,240^A0N,20^FDRack, $rack; Tank, $absolutePositionString^FS
+^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
 ^XZ
 """;
-    //final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   @override
@@ -312,7 +320,7 @@ class _MyAquariumManagerTankControllerState
         Provider.of<MyAquariumManagerTanksModel>(context);
 
     Tank? currentTank = tankModel.returnCurrentTank();
-    myPrint("is currentTank null, ${currentTank}");
+    myPrint("is currentTank null, $currentTank");
 
     return Scaffold(
         appBar: AppBar(
@@ -406,10 +414,10 @@ class _MyAquariumManagerTankControllerState
                       "No current note"),
                 ),
                 ElevatedButton(
-                    onPressed: (currentTank == null)
+                    onPressed: (currentTank == null) || (defaultTargetPlatform != TargetPlatform.iOS)
                         ? null
                         : () {
-                            PrintTank(currentTank);
+                            printTank(currentTank);
                           },
                     child: const Text("Print")),
               ],

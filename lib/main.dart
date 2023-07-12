@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import "package:aquarium_manager/model/aquarium_manager_model.dart";
 import 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
-import 'package:aquarium_manager/model/sessionKey.dart';
+import 'package:aquarium_manager/model/session_key.dart';
 import 'model/aquarium_manager_facilities_model.dart';
 import 'model/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/model/sessionKey.dart';
+import 'package:aquarium_manager/model/session_key.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:aquarium_manager/views/consts.dart';
@@ -31,7 +31,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
 
   void addRack(int absolutePosition, String relativePosition) {
     myPrint(
-        "adding the rack ${relativePosition} at position ${absolutePosition}");
+        "adding the rack $relativePosition at position $absolutePosition");
     Rack aRack = Rack(absolutePosition, relativePosition);
     rackList.add(aRack);
   }
@@ -42,7 +42,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   }
 
   void deleteRack(int index) {
-    myPrint("deleting rack at index ${index}");
+    myPrint("deleting rack at index $index");
     rackList.removeAt(index);
   }
 
@@ -82,7 +82,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
       Query.equal("\$id", inRackFk),
     ];
 
-    myPrint("IN returnRacksAbsolutePosition, ${inRackFk}");
+    myPrint("IN returnRacksAbsolutePosition, $inRackFk");
     models.DocumentList theRackList = await _manageSession.queryDocument(
         cRackCollection, rackQuery);
     myPrint("theRackList is ${theRackList.documents[0]}");
@@ -91,9 +91,29 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     myPrint("rack document id is ${theRack.$id}");
     myPrint("theRack is ${theRack.data}");
     int absolutePosition = theRack.data["absolute_position"];
-    myPrint("rack absolutePosition is ${absolutePosition}");
+    myPrint("rack absolutePosition is $absolutePosition");
 
     return absolutePosition; // possible bug here, doesn't want await
+  }
+
+  Future<String> returnRacksRelativePosition(String inRackFk) async {
+
+    List<String>? rackQuery = [
+      Query.equal("\$id", inRackFk),
+    ];
+
+    myPrint("IN returnRacksRelativePosition, $inRackFk");
+    models.DocumentList theRackList = await _manageSession.queryDocument(
+        cRackCollection, rackQuery);
+    myPrint("theRackList is ${theRackList.documents[0]}");
+
+    models.Document theRack = theRackList.documents[0];
+    myPrint("rack document id is ${theRack.$id}");
+    myPrint("theRack is ${theRack.data}");
+    String relativePosition = theRack.data["relative_position"];
+    myPrint("rack position is $relativePosition");
+
+    return relativePosition; // possible bug here, doesn't want await
   }
 
   Future<String?> returnSpecificRack(int absolutePosition) async {
@@ -103,7 +123,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
       Query.equal("absolute_position", absolutePosition),
     ];
 
-    myPrint("facility_fk is ${documentId} and abs pos is ${absolutePosition}");
+    myPrint("facility_fk is $documentId and abs pos is $absolutePosition");
 
     models.DocumentList theRackList = await _manageSession.queryDocument(
         cRackCollection, rackQuery);
@@ -116,7 +136,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   Future<void> getFacilityInfo(String? theFacilityName) async {
     if (theFacilityName != null) {
       // if we are null, then we are in the new facility page
-      myPrint("we are entering an existing facility, ${theFacilityName}");
+      myPrint("we are entering an existing facility, $theFacilityName");
       List<String>? facilityQuery = [
         Query.equal("facility_name", theFacilityName),
       ];
@@ -183,7 +203,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     } else {
       theFacility = await _manageSession.updateDocument( // since we are using facility id, we need to wait
           theFacilityMap, kFacilityCollection, documentId);
-      myPrint("is facility id right? facility is ${theFacility.$id} and saved value is ${documentId}");
+      myPrint("is facility id right? facility is ${theFacility.$id} and saved value is $documentId");
     }
 
     for (int theIndex = 0; theIndex < rackList.length; theIndex++) {

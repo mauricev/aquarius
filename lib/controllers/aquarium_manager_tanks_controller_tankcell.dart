@@ -55,13 +55,15 @@ class _TankCellState extends State<TankCell> {
 
   void assignParkedTankItsNewHome(
       Tank? parkedTank, MyAquariumManagerTanksModel tankModel) {
-    parkedTank?.absolutePosition = widget.absolutePosition;
-    parkedTank?.rackFk = tankModel.rackDocumentid;
+    //parkedTank?.absolutePosition = widget.absolutePosition;
+    //parkedTank?.rackFk = tankModel.rackDocumentid;
+    parkedTank?.assignTankNewLocation(tankModel.rackDocumentid, widget.absolutePosition);
   }
 
   void parkRackedTank(Tank? destinationTank) {
-    destinationTank?.rackFk = "0";
-    destinationTank?.absolutePosition = cParkedAbsolutePosition;
+    //destinationTank?.rackFk = "0";
+    //destinationTank?.absolutePosition = cParkedAbsolutePosition;
+    destinationTank?.parkIt();
   }
 
   @override

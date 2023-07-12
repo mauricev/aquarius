@@ -208,6 +208,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_zebra_sdk:
+    dependency: "direct main"
+    description:
+      name: flutter_zebra_sdk
+      sha256: cf7c528e1f7a753934529c76e20ad621b4d97ce7d555873e9c6f094df5fcf435
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4+1"
   google_fonts:
     dependency: "direct main"
     description:
@@ -557,14 +565,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  web:
-    dependency: transitive
-    description:
-      name: web
-      sha256: dc8ccd225a2005c1be616fe02951e2e342092edf968cf0844220383757ef8f10
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.4-beta"
   web_socket_channel:
     dependency: transitive
     description:
@@ -598,5 +598,5 @@ packages:
     source: hosted
     version: "1.0.0"
 sdks:
-  dart: ">=3.1.0-185.0.dev <4.0.0"
+  dart: ">=3.0.0-0.0.dev <4.0.0"
   flutter: ">=3.3.0"

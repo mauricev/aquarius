@@ -12,7 +12,7 @@ enum LoginStatus {
 }
 
 class ManageSession {
-  Client _client = Client(); // prepared inside _create
+  final Client _client = Client();
   final _storage = const FlutterSecureStorage();
 
   bool _doesUserWantToRegister = false;
@@ -24,7 +24,10 @@ class ManageSession {
     myPrint('sessionKey THREE, ManageSession._create');
     _client.setEndpoint(kIPAddress);
     _client.setProject(kProjectId);
-    _client.setSelfSigned(status: true); // comment out for real-world https
+    // local, real-world difference
+    if(kRunningLocal) {
+      _client.setSelfSigned(status: true);
+    }
   }
 
   Future<String?> retrieveFromSecureStorage(String keyToRetrieve) async {
@@ -86,7 +89,7 @@ class ManageSession {
       email: email,
       password: password,
     );
-    myPrint("about to register 3, ${theUser}");
+    myPrint("about to register 3, $theUser");
     return theUser;
   }
 
@@ -120,7 +123,7 @@ class ManageSession {
     Databases theDatabase = Databases(_client);
 
     String theDocumentID = ID.unique();
-    myPrint("the document id is ${theDocumentID}");
+    myPrint("the document id is $theDocumentID");
     return theDatabase.createDocument(
       databaseId: kDatabaseId,
       collectionId: collectionId,

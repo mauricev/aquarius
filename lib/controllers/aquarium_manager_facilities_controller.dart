@@ -233,7 +233,7 @@ class _MyAquariumManagerFacilitiesController
             height: 30,
           ),
           Padding(
-            padding: const EdgeInsets.only(left:20.0),
+            padding: const EdgeInsets.only(left:kIndentWidth),
             child: buildOuterLabel(context, "Assign Racks (top view)"),
           ),
           SizedBox(
@@ -250,7 +250,7 @@ class _MyAquariumManagerFacilitiesController
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
+                  padding: const EdgeInsets.only(left: kIndentWidth),
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -264,7 +264,7 @@ class _MyAquariumManagerFacilitiesController
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 20.0),
+                  padding: const EdgeInsets.only(right: kIndentWidth),
                   child: ElevatedButton(
                     onPressed: () {
                       myPrint("inside save button");

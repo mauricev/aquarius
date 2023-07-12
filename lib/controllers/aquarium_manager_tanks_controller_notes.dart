@@ -12,16 +12,16 @@ class NotesDialogBody extends StatefulWidget {
       : super(key: key);
 
   @override
-  _NotesDialogBodyState createState() => _NotesDialogBodyState();
+  NotesDialogBodyState createState() => NotesDialogBodyState();
 }
 
-class _NotesDialogBodyState extends State<NotesDialogBody> {
+class NotesDialogBodyState extends State<NotesDialogBody> {
   Widget notesItem(BuildContext context, Notes notes, int index) {
     TextEditingController controllerForNotesItem = TextEditingController();
 
     controllerForNotesItem.text = notes.returnIndexedNoteText(index);
 
-    myPrint("i am in notes item for index, ${index}");
+    myPrint("i am in notes item for index, $index");
     return Column(
       children: [
         Row(

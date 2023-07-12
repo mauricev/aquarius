@@ -1,6 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/model/sessionKey.dart';
+import 'package:aquarium_manager/model/session_key.dart';
 import 'package:appwrite/models.dart' as models;
 import 'aquarium_manager_facilities_model.dart';
 import 'aquarium_manager_notes_model.dart';
@@ -48,6 +48,11 @@ class Tank {
     rackFk = cParkedRackFkAddress;
   }
 
+  void assignTankNewLocation(String rackIdentifier, int position) {
+    absolutePosition = position;
+    rackFk = rackIdentifier;
+  }
+
   void updateTankDocumentId (String tankFk) {
     documentId = tankFk;
   }
@@ -69,7 +74,7 @@ class Tank {
   }
 
   int? getBirthDate() {
-    myPrint("what is the birthdate, ${birthDate}");
+    myPrint("what is the birthdate, $birthDate");
     return birthDate;
   }
 
@@ -274,7 +279,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   Future<void> selectThisRackByAbsolutePosition(bool? readInTanks,
       MyAquariumManagerFacilityModel facilityModel, int selectThisRack) async {
     selectedRack = selectThisRack;
-    myPrint("the selected rack cell is ${selectedRack} must be followed loading tanks");
+    myPrint("the selected rack cell is $selectedRack must be followed loading tanks");
     // the code here will query the rack via the absolute position and facility_fk from the facility mode
     // need to pass facility model and boolean for reading this stuff
     if (readInTanks!) {

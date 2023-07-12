@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../model/aquarium_manager_facilities_model.dart';
 import '../model/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/views/utility.dart';
 
 enum FacilityStringsEnum {
   facilityName,
@@ -76,7 +77,7 @@ class FacilityGridCell extends StatelessWidget {
     return InkWell(
       onTap:
       (tankMode! && (index == -1)) ? null : () {
-        print("we are selecting a new rack");
+        myPrint("we are selecting a new rack");
         // POSSIBLE BUG; this is now async
         tankModel.selectThisRackByAbsolutePosition(tankMode, facilityModel,absolutePosition);
       },

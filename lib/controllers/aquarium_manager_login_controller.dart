@@ -153,7 +153,7 @@ class _MyAquariumManagerLoginControllerState
                               .registerUser(controllerForEmail.text,
                                   controllerForNewPassword1.text)
                               .then((registeredUserResult) {
-                            myPrint("returning from register user, ${registeredUserResult}");
+                            myPrint("returning from register user, $registeredUserResult");
                             model.setDoesUserWantToRegister(false);
                           }).catchError((onError) {
                             model.setDoesUserWantToRegister(true);

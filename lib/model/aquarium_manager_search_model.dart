@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/model/sessionKey.dart';
+import 'package:aquarium_manager/model/session_key.dart';
 import 'aquarium_manager_tanks_model.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:appwrite/appwrite.dart';
