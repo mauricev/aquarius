@@ -8,11 +8,18 @@ import 'model/aquarium_manager_facilities_model.dart';
 import 'model/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   ManageSession manageSession = ManageSession();
-  runApp(MyApp(manageSession: manageSession));
+
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]
+  )
+      .then((_) {
+    runApp(MyApp(manageSession: manageSession));
+  });
 }
 
 class MyApp extends StatelessWidget {

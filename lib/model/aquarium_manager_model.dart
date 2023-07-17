@@ -8,7 +8,7 @@ import 'package:aquarium_manager/views/utility.dart';
 class MyAquariumManagerModel with ChangeNotifier {
   final cFacilityNameKey = "faciltyNameKey";
   final ManageSession _manageSession;
-  String? selectedFacility; // we start out with no facility selected
+  String? selectedFacility; // we start out with no facility selected; this value is null
 
   void assignSavedFacility() async {
     selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);

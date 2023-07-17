@@ -254,23 +254,33 @@ class _AquariumManagerHomeScreenControllerState
   bool isAFacilitySelected(BuildContext context) {
     MyAquariumManagerModel model =
     Provider.of<MyAquariumManagerModel>(context, listen: false);
+    if (model.returnSelectedFacility() == null) {
+      myPrint("model.returnSelectedFacility is NULL");
+    } else {
+      myPrint("model.returnSelectedFacility is NOT NULL, ${model.returnSelectedFacility()}");
+    }
     return model.returnSelectedFacility() != null;
   }
 
   bool pretendFacilityIsAlwaysSelected(BuildContext context) {
     MyAquariumManagerModel model =
     Provider.of<MyAquariumManagerModel>(context, listen: false);
-    return model.returnSelectedFacility() == null;
+    if (model.returnSelectedFacility() == null) {
+      myPrint("model.returnSelectedFacility is NULL");
+    } else {
+      myPrint("model.returnSelectedFacility is NOT NULL, ${model.returnSelectedFacility()}");
+    }
+    return model.returnSelectedFacility() == null; // if a facility is not selected, return true
   }
 
   Widget loadCommonButton(BuildContext context,
-      void Function(BuildContext) loadController, bool Function(BuildContext) disableOnPressed, String buttonTitle) {
+      void Function(BuildContext) loadController, bool Function(BuildContext) enableOnPressed, String buttonTitle) {
     return Padding(
       padding: const EdgeInsets.only(
         left: 60,
       ),
       child: ElevatedButton(
-        onPressed: disableOnPressed(context) ? () { // if we return true, then enable the button; for new facility must return true
+        onPressed: enableOnPressed(context) ? () { // if we return true, then enable the button; for new facility must return true
           loadController(context);
         } : null,
         style: ButtonStyle(
@@ -294,6 +304,7 @@ class _AquariumManagerHomeScreenControllerState
         left: 160,
       ),
       child: ElevatedButton(
+        // if disableOnPressed is true, then
         onPressed: disableOnPressed(context) ?  () {
           loadController(context, controllerState);
         } : null,

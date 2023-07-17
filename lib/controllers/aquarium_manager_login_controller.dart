@@ -17,7 +17,7 @@ class MyAquariumManagerLoginController extends StatefulWidget {
 class _MyAquariumManagerLoginControllerState
     extends State<MyAquariumManagerLoginController> {
   bool doPasswordsMatch = true;
-  String registerError = "look here";
+  String registerError = ""; // this now defaults to an empty string
   TextEditingController controllerForEmail = TextEditingController();
   TextEditingController controllerForNewPassword1 = TextEditingController();
   TextEditingController controllerForNewPassword2 = TextEditingController();
