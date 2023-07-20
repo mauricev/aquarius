@@ -39,6 +39,8 @@ dependencies:
   flutter_zebra_sdk: ^0.0.4+1
   mobile_scanner: ^3.2.0
   flutter_launcher_icons: ^0.13.1
+  collection: ^1.17.2
+
 
 dev_dependencies:
   flutter_test:

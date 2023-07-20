@@ -38,6 +38,10 @@ class ManageSession {
     _storage.write(key: keyToSave, value: valueToSave);
   }
 
+  void deleteSecureStorage(String keyToSave) async {
+    await _storage.delete(key: keyToSave);
+  }
+
   bool getDoesUserWantToRegister() {
     return _doesUserWantToRegister;
   }
@@ -159,6 +163,16 @@ class ManageSession {
         databaseId: kDatabaseId,
         collectionId: collectionId,
         queries: queries,
+    );
+  }
+
+  Future<models.Document> getDocument(String collectionId, String documentId) {
+    Databases theDatabase = Databases(_client);
+
+    return theDatabase.getDocument(
+      databaseId: kDatabaseId,
+      collectionId: collectionId,
+      documentId: documentId,
     );
   }
 }

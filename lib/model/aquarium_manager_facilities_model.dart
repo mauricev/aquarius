@@ -133,17 +133,15 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
     return theRack.$id;
   }
 
-  Future<void> getFacilityInfo(String? theFacilityName) async {
-    if (theFacilityName != null) {
+  Future<void> getFacilityInfo(String? theFacilityFk) async {
+    if (theFacilityFk != null) {
       // if we are null, then we are in the new facility page
-      myPrint("we are entering an existing facility, $theFacilityName");
-      List<String>? facilityQuery = [
-        Query.equal("facility_name", theFacilityName),
-      ];
+      myPrint("we are entering an existing facility, $theFacilityFk");
 
-      models.DocumentList theFacilityList = await _manageSession.queryDocument(
-          kFacilityCollection, facilityQuery);
-      models.Document theFacility = theFacilityList.documents[0];
+      models.Document theFacility = await _manageSession.getDocument(
+          kFacilityCollection, theFacilityFk);
+
+      print("getfacilityinfo, ${theFacility.$id} and ${theFacility.data['facility_name']}");
 
       documentId = theFacility.$id;
       facilityName = theFacility.data['facility_name'];

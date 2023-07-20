@@ -10,6 +10,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../views/utility.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
+import 'package:collection/collection.dart';
 
 class AquariumManagerHomeScreenController extends StatefulWidget {
   const AquariumManagerHomeScreenController({Key? key}) : super(key: key);
@@ -25,25 +26,27 @@ class _AquariumManagerHomeScreenControllerState
   final cNewFacility = true;
 
   Widget facilityDropDown(BuildContext context) {
-    MyAquariumManagerModel model =
-        Provider.of<MyAquariumManagerModel>(context, listen: false);
 
-    return FutureBuilder(
-      future: model.getFacilityNames(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData && snapshot.data.isNotEmpty) {
+    MyAquariumManagerModel model =
+    Provider.of<MyAquariumManagerModel>(context, listen: false);
+
+    return FutureBuilder<List<Map<String, String>>>(
+      future: model.getFacilityNames2(),
+      builder: (BuildContext context, AsyncSnapshot<List<Map<String, String>>> snapshot) {
+        if (snapshot.hasData) {
           List<DropdownMenuItem<String>> dropdownItems = [];
-          for (String value in snapshot.data) {
+
+          for (Map<String, String> item in snapshot.data!) {
             dropdownItems.add(DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
+              value: item['facility_fk'],
+              child: Text(item['facility_name'].toString()),
             ));
           }
 
+          String? selectedValue = model.selectedFacility;
+
           return DropdownButton<String>(
-            value: (snapshot.data.contains(model.selectedFacility))
-                ? model.selectedFacility
-                : null,
+            value: selectedValue,
             icon: const Icon(Icons.arrow_downward),
             elevation: 16,
             style: const TextStyle(color: Colors.deepPurple),
@@ -53,40 +56,27 @@ class _AquariumManagerHomeScreenControllerState
             ),
             onChanged: (String? value) {
               setState(() {
-                if (value == null) {
-                  // Disable the dropdown if the dummy entry is chosen
-                  return;
-                }
-                if (snapshot.data.contains(value)) {
-                  model.setSelectedFacility(value);
-                } else if (snapshot.data.isNotEmpty) {
-                  model.setSelectedFacility(snapshot.data.first);
-                } else {
-                  model.setSelectedFacility(null);
+                if (value != null) {
+                  model.setSelectedFacility(value); // this is the document id, not the name itself
                 }
               });
             },
-            items: dropdownItems,
+            items: dropdownItems.isNotEmpty
+                ? dropdownItems
+                : [
+              DropdownMenuItem<String>(
+                value: null,
+                child: const Text('No facility selected'),
+                onTap: () {}, // Disable the "No facility selected" option
+              ),
+            ],
           );
         } else if (snapshot.hasError) {
           // Handle the error state
           return Text('Error: ${snapshot.error}');
         } else {
-          // Handle the loading state or empty data state
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else {
-            return DropdownButton<String>(
-              value: null,
-              items: const [
-                DropdownMenuItem<String>(
-                  value: null,
-                  child: Text('No facility selected'),
-                ),
-              ],
-              onChanged: null,
-            );
-          }
+          // Handle the loading state
+          return const CircularProgressIndicator();
         }
       },
     );

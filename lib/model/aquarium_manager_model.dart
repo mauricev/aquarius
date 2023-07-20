@@ -11,9 +11,12 @@ class MyAquariumManagerModel with ChangeNotifier {
   String? selectedFacility; // we start out with no facility selected; this value is null
 
   void assignSavedFacility() async {
+    // when we need to test with no saved facility
+    _manageSession.deleteSecureStorage(cFacilityNameKey);
+
     selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
-    // here is where we zero out the returned facility for testing with no saved facility
-    //selectedFacility = null;
+
+
     myPrint("the saved facility is $selectedFacility");
   }
 
@@ -96,7 +99,7 @@ class MyAquariumManagerModel with ChangeNotifier {
     return _manageSession.loginUser(username, password);
   }
 
-  Future<List<String>> getFacilityNames() async {
+  /*Future<List<String>> getFacilityNames() async {
     List<String>? query = [
       Query.notEqual("facility_name", [""]) // empty string should bring back all facilities
     ];
@@ -106,6 +109,30 @@ class MyAquariumManagerModel with ChangeNotifier {
         .map((document) => document.data['facility_name'].toString())
         .toList();
     return facilityNames;
+  }*/
+
+  Future<List<Map<String, String>>> getFacilityNames2() async {
+    List<Map<String, String>> facilitiesNameList = [];
+
+    List<String>? query = [
+      Query.notEqual("facility_name", [""]) // empty string should bring back all facilities
+    ];
+
+    models.DocumentList facilitiesDocumentList = await _manageSession.queryDocument(kFacilityCollection,query);
+
+    for (int theIndex = 0; theIndex < facilitiesDocumentList.total; theIndex++) {
+      models.Document theFacility = facilitiesDocumentList.documents[theIndex];
+
+      Map<String, String> facilityData = {
+        'facility_name': theFacility.data['facility_name'].toString(),
+        'facility_fk': theFacility.$id,
+      };
+
+      myPrint("the facility map is ${facilityData}");
+      facilitiesNameList.add(facilityData);
+    }
+
+    return facilitiesNameList;
   }
 
   String? returnSelectedFacility() {

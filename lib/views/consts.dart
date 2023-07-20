@@ -15,7 +15,7 @@ const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
 //real-world
 const String kProjectId = '648fc20504d0ed7a089d';
 
-const kRunningLocal = false;
+const kRunningLocal = true;
 
 const String kDatabaseId = '63eefc50e6d7b0cb4c4e';
 const String kFacilityCollection = "63eefc630814627ea850";
