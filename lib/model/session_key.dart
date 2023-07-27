@@ -97,17 +97,12 @@ class ManageSession {
     return theUser;
   }
 
-  bool checkSetBadUserPassword(String tempSessionValue) {
-    bool passwordInvalid = (tempSessionValue == "bad user/password");
-    setBadUserPassword (passwordInvalid);
-    return passwordInvalid;
-  }
-
   void setBadUserPassword (bool badUserPasswd) {
     _badUserPassword = badUserPasswd;
   }
 
   bool getIsUserPasswordBad() {
+    myPrint("the password is ${_badUserPassword}");
     return _badUserPassword;
   }
 

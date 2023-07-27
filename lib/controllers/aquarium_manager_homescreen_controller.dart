@@ -10,7 +10,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../views/utility.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
-import 'package:collection/collection.dart';
 
 class AquariumManagerHomeScreenController extends StatefulWidget {
   const AquariumManagerHomeScreenController({Key? key}) : super(key: key);

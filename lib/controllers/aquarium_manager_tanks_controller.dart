@@ -157,11 +157,16 @@ class MyAquariumManagerTankControllerState
                       currentTank?.tankLine = textController.text;
                       break;
                     case TankStringsEnum.numberOfFish:
-                      currentTank?.numberOfFish =
-                          int.parse(textController.text);
+                      if(textController.text != "") {
+                        currentTank?.numberOfFish =
+                            int.parse(textController.text);
+                      }
                       break;
                     case TankStringsEnum.generation:
-                      currentTank?.generation = int.parse(textController.text);
+                      if(textController.text != "") {
+                        currentTank?.generation =
+                            int.parse(textController.text);
+                      }
                       break;
                   }
 

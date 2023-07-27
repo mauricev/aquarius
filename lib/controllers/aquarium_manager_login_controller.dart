@@ -30,60 +30,81 @@ class _MyAquariumManagerLoginControllerState
     super.initState();
   }
 
+  @override
+  void dispose() {
+    // Dispose of the TextEditingController instances
+    controllerForEmail.dispose();
+    controllerForNewPassword1.dispose();
+    controllerForNewPassword2.dispose();
+    controllerForLoginEmail.dispose();
+    controllerForPassword.dispose();
+
+    super.dispose();
+  }
+
   Widget loginUserNamePassword(BuildContext context) {
-    MyAquariumManagerModel model = Provider.of<MyAquariumManagerModel>(context);
+    MyAquariumManagerModel model = Provider.of<MyAquariumManagerModel>(context, listen: true);
 
     return Expanded(
-      child: Column(
-        children: <Widget>[
-          ElevatedButton(
-            onPressed: () {
-              // this button tells the app to register a new user
-              model.setDoesUserWantToRegister(true);
-            },
-            child: const Text("Register"),
-          ),
-          if (model.getUserAccountJustCreated())
-            const Text("Your account was just created. Proceed to login."),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'email',
+      child: Padding(
+        padding: const EdgeInsets.only(left:kIndentWidth,right: kIndentWidth),
+        child: Column(
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                // this button tells the app to register a new user
+                model.setDoesUserWantToRegister(true);
+              },
+              child: const Text("Register"),
             ),
-            controller: controllerForLoginEmail,
-          ),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'password',
+            if (model.getUserAccountJustCreated())
+              const Text("Your account was just created. Proceed to login."),
+            const Text(""),
+            TextField(
+              decoration: const InputDecoration(
+                hintText: 'email',
+              ),
+              controller: controllerForLoginEmail,
             ),
-            controller: controllerForPassword,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              model
-                  .loginUser(controllerForLoginEmail.text,
-                      controllerForPassword.text)
-                  .then((sessionValue) {
-                myPrint("calling homescreen route");
-                // we are done with the login screens, remove them from the navigation stack
-                // we can get it back by navigating to it again
-                //Navigator.pushReplacementNamed(context, '/homescreen');
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AquariumManagerHomeScreenController(),
-                  ),
-                );
-              }).catchError((error) {
-                myPrint("login session failed");
-                myPrint(error.response);
-              });
-            },
-            child: const Text("Login"),
-          ),
-          model.getIsUserPasswordBad()
-              ? const Text("user/password is incorrect")
-              : Container(),
-        ],
+            TextField(
+              obscureText: true,
+              decoration: const InputDecoration(
+                hintText: 'password',
+              ),
+              controller: controllerForPassword,
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                model
+                    .loginUser(controllerForLoginEmail.text,
+                        controllerForPassword.text)
+                    .then((sessionValue) {
+                  myPrint("calling homescreen route");
+                  // we are done with the login screens, remove them from the navigation stack
+                  // we can get it back by navigating to it again
+                  //Navigator.pushReplacementNamed(context, '/homescreen');
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AquariumManagerHomeScreenController(),
+                    ),
+                  );
+                }).catchError((error) {
+                  myPrint("Login failed. Might you have entered the wrong credentials");
+                  //myPrint(error.response); <- this is a bug
+                  model.setBadUserPassword(true);
+                });
+              },
+              child: const Text("Login"),
+            ),
+            model.getIsUserPasswordBad()
+                ? const Text("Login failed. Might you have entered the wrong credentials?")
+                : Container(),
+          ],
+        ),
       ),
     );
   }
@@ -96,82 +117,91 @@ class _MyAquariumManagerLoginControllerState
     MyAquariumManagerModel model = Provider.of<MyAquariumManagerModel>(context);
 
     return Expanded(
-      child: Column(
-        children: <Widget>[
-          model.getFailedToRegister()
-              ? const Text(
-                  "User account couldn’t be created; perhaps it’s already registered")
-              : Container(),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'enter your email',
+      child: Padding(
+        padding: const EdgeInsets.only(left:kIndentWidth,right: kIndentWidth),
+        child: Column(
+          children: <Widget>[
+            model.getFailedToRegister()
+                ? const Text(
+                    "User account couldn’t be created; perhaps it’s already registered.")
+                : Container(),
+            TextField(
+              decoration: const InputDecoration(
+                hintText: 'enter your email',
+              ),
+              controller: controllerForEmail,
             ),
-            controller: controllerForEmail,
-          ),
-          TextField(
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: 'make up a password',
+            TextField(
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                hintText: 'make up a strong password',
+              ),
+              controller: controllerForNewPassword1,
             ),
-            controller: controllerForNewPassword1,
-          ),
-          TextField(
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: 'type your password again',
+            TextField(
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                hintText: 'type your password again',
+              ),
+              controller: controllerForNewPassword2,
             ),
-            controller: controllerForNewPassword2,
-          ),
-          if (!doPasswordsMatch) const Text("passwords don’t match") else const Text(""),
-          Text(registerError),
-          Expanded(
-            child: Row(
+            if (!doPasswordsMatch) const Text("passwords don’t match") else const Text(""),
+            Text(registerError),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    model.setDoesUserWantToRegister(false);
-                  },
-                  child: const Text("Cancel"),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      model.setDoesUserWantToRegister(false);
+                    },
+                    child: const Text("Cancel"),
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: (!doPasswordsMatchFunction())
-                      ? () {
-                    setState(() {
-                      doPasswordsMatch = false;
-                    });
-                  }
-                      : () {
-                          setState(() {
-                            doPasswordsMatch = true;
-                            registerError ="";
-                          });
-                          model
-                              .registerUser(controllerForEmail.text,
-                                  controllerForNewPassword1.text)
-                              .then((registeredUserResult) {
-                            myPrint("returning from register user, $registeredUserResult");
-                            model.setDoesUserWantToRegister(false);
-                          }).catchError((onError) {
-                            model.setDoesUserWantToRegister(true);
+                const SizedBox(
+                  width: 100,
+                ),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: (!doPasswordsMatchFunction())
+                        ? () {
+                      setState(() {
+                        doPasswordsMatch = false;
+                      });
+                    }
+                        : () {
                             setState(() {
-                              myPrint("inside setstate 2");
-                              registerError = onError.toString();
+                              doPasswordsMatch = true;
+                              registerError ="";
                             });
-                            // we can set a variable here to true to indicate there
-                            // was an error and call setstate on it
-                            // somewhere else we check it and display the error message here
-                          });
-                        },
-                  child: const Text("Submit"),
+                            model
+                                .registerUser(controllerForEmail.text,
+                                    controllerForNewPassword1.text)
+                                .then((registeredUserResult) {
+                              myPrint("returning from register user, $registeredUserResult");
+                              model.setDoesUserWantToRegister(false);
+                            }).catchError((onError) {
+                              model.setDoesUserWantToRegister(true);
+                              setState(() {
+                                myPrint("inside setstate 2");
+                                registerError = onError.toString();
+                              });
+                              // we can set a variable here to true to indicate there
+                              // was an error and call setstate on it
+                              // somewhere else we check it and display the error message here
+                            });
+                          },
+                    child: const Text("Submit"),
+                  ),
                 ),
               ],
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

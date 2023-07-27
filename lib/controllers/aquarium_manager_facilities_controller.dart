@@ -49,6 +49,20 @@ class _MyAquariumManagerFacilitiesController
     super.initState();
   }
 
+  @override
+  void dispose() {
+    // Dispose of the TextEditingController instances
+    controllerForFacilityName.dispose();
+    controllerForFacilityBuilding.dispose();
+    controllerForFacilityRoom.dispose();
+    controllerForMaxShelves.dispose();
+    controllerForMaxTanks.dispose();
+    controllerForGridWidth.dispose();
+    controllerForGridHeight.dispose();
+
+    super.dispose();
+  }
+
   Future<bool> confirmGridSetting(BuildContext context, String message) async {
     return await showDialog<bool>(
           context: context,

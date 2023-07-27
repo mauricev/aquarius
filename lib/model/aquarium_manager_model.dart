@@ -9,13 +9,14 @@ class MyAquariumManagerModel with ChangeNotifier {
   final cFacilityNameKey = "faciltyNameKey";
   final ManageSession _manageSession;
   String? selectedFacility; // we start out with no facility selected; this value is null
+  bool badPassword = false;
 
   void assignSavedFacility() async {
     // when we need to test with no saved facility
-    _manageSession.deleteSecureStorage(cFacilityNameKey);
+    // remove for real-world
+    //_manageSession.deleteSecureStorage(cFacilityNameKey); <- must be commented out for real-world
 
     selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
-
 
     myPrint("the saved facility is $selectedFacility");
   }
@@ -77,17 +78,16 @@ class MyAquariumManagerModel with ChangeNotifier {
     return _manageSession.logOut();
   }
 
-  bool checkSetBadUserPassword(String tempSessionValue) {
-    return _manageSession.checkSetBadUserPassword(tempSessionValue);
-  }
-
   void setBadUserPassword (bool badUserPasswd) {
     _manageSession.setBadUserPassword(badUserPasswd);
+    badPassword = badUserPasswd;
     notifyListeners();
   }
 
   bool getIsUserPasswordBad() {
-    return _manageSession.getIsUserPasswordBad();
+    myPrint("am i getting called at all?");
+    return badPassword;
+    //return _manageSession.getIsUserPasswordBad();
   }
 // errors we need to handle;
   // 1 user registering an already registered user
