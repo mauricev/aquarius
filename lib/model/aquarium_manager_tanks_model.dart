@@ -7,7 +7,6 @@ import 'aquarium_manager_notes_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
 
-
 class Tank {
   String? documentId;
   final String facilityFk;

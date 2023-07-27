@@ -7,7 +7,7 @@ import 'package:aquarium_manager/views/consts.dart';
 
 class MyAquariumManagerSearchModel with ChangeNotifier {
   final ManageSession
-      _manageSession; // we need this because manage tanks, which in turn uses Notes, which needs the sesson variable to save to disk
+      _manageSession; // we need this because manage tanks, which in turn uses Notes, which needs the session variable to save to disk
   String facilityFk = "";
 
   List<Tank> tankListFull = <Tank>[];
