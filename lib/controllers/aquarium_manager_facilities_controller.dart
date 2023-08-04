@@ -198,106 +198,123 @@ class _MyAquariumManagerFacilitiesController
       appBar: AppBar(
         title: const Text(kProgramName),
       ),
-      body: Column(
-        children: [
-          buildOuterLabelHeadlineSmall(context, "Facility Identity"),
-          Row(
-            children: [
-              buildInnerLabel("Facility Name", controllerForFacilityName, model,
-                  FacilityStringsEnum.facilityName,kFullWidth),
-              buildInnerLabel("Building", controllerForFacilityBuilding, model,
-                  FacilityStringsEnum.facilityBuilding,kFullWidth),
-            ],
-          ),
-          buildInnerLabel("Room", controllerForFacilityRoom, model,
-              FacilityStringsEnum.facilityRoom, kHalfWidth),
-          buildOuterLabelHeadlineSmall(context, "Racks"),
-          Row(
-            children: [
-              buildInnerLabel("Max shelves per rack", controllerForMaxShelves,
-                  model, FacilityStringsEnum.maxShelves, kNumberWidth),
-              buildInnerLabel("Max tanks per shelf", controllerForMaxTanks,
-                  model, FacilityStringsEnum.maxTanks, kNumberWidth),
-            ],
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Row(
-            children: [
-              buildInnerLabel("Max grid width", controllerForGridWidth, model,
-                  FacilityStringsEnum.gridWidth, kNumberWidth),
-              buildInnerLabel("Max grid height", controllerForGridHeight, model,
-                  FacilityStringsEnum.gridHeight, kNumberWidth),
-              ElevatedButton(
-                onPressed: gridLocked
-                    ? null
-                    : () async {
-                        bool confirmed = await confirmGridSetting(
-                            context, 'Lock in this grid pattern?');
-                        setState(() {
-                          gridLocked = confirmed;
-                        });
-                      },
-                child: const Text("Lock in Grid"),
+      body: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints viewportConstraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: viewportConstraints.maxHeight,
               ),
-            ],
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left:kIndentWidth),
-            child: buildOuterLabel(context, "Assign Racks (top view)"),
-          ),
-          SizedBox(
-            width: kGridSize,
-            child: (model.gridHeight == 0) || (model.gridWidth == 0)
-                ? Container()
-                : FacilityGrid(tankMode: cFacilityEditableGrid),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: kIndentWidth),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("Cancel"),
+              child: Column(
+                children: [
+                  buildOuterLabelHeadlineSmall(context, "Facility Identity"),
+                  Row(
+                    children: [
+                      buildInnerLabel(
+                          "Facility Name", controllerForFacilityName, model,
+                          FacilityStringsEnum.facilityName, kFullWidth),
+                      buildInnerLabel(
+                          "Building", controllerForFacilityBuilding, model,
+                          FacilityStringsEnum.facilityBuilding, kFullWidth),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(
-                width: 100,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: kIndentWidth),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      myPrint("inside save button");
-                      // we may be saving for the first time or for the 50th;
-                      // for subsequent saves, we have the document_id and we use that to determine how this function saves
-                        model.saveFacility().then((_) {
-                          myPrint("facility and racks were saved");
-                          Navigator.of(context).pop();
-                        }).catchError((error) {
-                          myPrint(error.response);
-                        });
-                    },
-                    child: const Text("Submit"),
+                  buildInnerLabel("Room", controllerForFacilityRoom, model,
+                      FacilityStringsEnum.facilityRoom, kHalfWidth),
+                  buildOuterLabelHeadlineSmall(context, "Racks"),
+                  Row(
+                    children: [
+                      buildInnerLabel(
+                          "Max shelves per rack", controllerForMaxShelves,
+                          model, FacilityStringsEnum.maxShelves, kNumberWidth),
+                      buildInnerLabel(
+                          "Max tanks per shelf", controllerForMaxTanks,
+                          model, FacilityStringsEnum.maxTanks, kNumberWidth),
+                    ],
                   ),
-                ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Row(
+                    children: [
+                      buildInnerLabel(
+                          "Max grid width", controllerForGridWidth, model,
+                          FacilityStringsEnum.gridWidth, kNumberWidth),
+                      buildInnerLabel(
+                          "Max grid height", controllerForGridHeight, model,
+                          FacilityStringsEnum.gridHeight, kNumberWidth),
+                      ElevatedButton(
+                        onPressed: gridLocked
+                            ? null
+                            : () async {
+                          bool confirmed = await confirmGridSetting(
+                              context, 'Lock in this grid pattern?');
+                          setState(() {
+                            gridLocked = confirmed;
+                          });
+                        },
+                        child: const Text("Lock in Grid"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: kIndentWidth),
+                    child: buildOuterLabel(context, "Assign Racks (top view)"),
+                  ),
+                  SizedBox(
+                    width: kGridSize,
+                    child: (model.gridHeight == 0) || (model.gridWidth == 0)
+                        ? Container()
+                        : FacilityGrid(tankMode: cFacilityEditableGrid),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: kIndentWidth),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Cancel"),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 100,
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: kIndentWidth),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              myPrint("inside save button");
+                              // we may be saving for the first time or for the 50th;
+                              // for subsequent saves, we have the document_id and we use that to determine how this function saves
+                              model.saveFacility().then((_) {
+                                myPrint("facility and racks were saved");
+                                Navigator.of(context).pop();
+                              }).catchError((error) {
+                                myPrint(error.response);
+                              });
+                            },
+                            child: const Text("Submit"),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
               ),
-            ],
-          )
-        ],
+            ),
+          );
+        },
       ),
     );
   }

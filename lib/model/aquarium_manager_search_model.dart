@@ -28,7 +28,7 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
       int birthDate,
       bool? screenPositive,
       int? numberOfFish,
-      bool? smallTank,
+      int? fatTankPosition,
       int? generation) {
 
     Tank aTank = Tank(
@@ -40,7 +40,7 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
         birthDate: birthDate,
         screenPositive: screenPositive,
         numberOfFish: numberOfFish,
-        smallTank: smallTank,
+        fatTankPosition: fatTankPosition,
         generation: generation,
         manageSession: _manageSession);
     tankListFull.add(aTank);
@@ -82,7 +82,7 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
           theTank.data['date_of_birth'],
           theTank.data['screen_positive'],
           theTank.data['number_of_fish'],
-          theTank.data['small_tank'],
+          theTank.data['fat_tank_position'],
           theTank.data['generation']);
     }
   }

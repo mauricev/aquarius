@@ -16,7 +16,7 @@ class Tank {
   int? birthDate;
   bool? screenPositive;
   int? numberOfFish;
-  bool? smallTank;
+  int? fatTankPosition;
   int? generation;
   final ManageSession manageSession;
   late final Notes notes;
@@ -30,7 +30,7 @@ class Tank {
     int? birthDate,
     this.screenPositive,
     this.numberOfFish,
-    this.smallTank,
+    this.fatTankPosition,
     this.generation,
     required this.manageSession,
   }) : birthDate = birthDate ?? returnTimeNow() {
@@ -60,13 +60,13 @@ class Tank {
     screenPositive = newScreenPositiveValue;
   }
 
-  void setSmallTank (bool newSmallTankValue) {
-    smallTank = newSmallTankValue;
-  }
-
-  bool? getSmallTank() {
-    return smallTank;
-  }
+  // void setSmallTank (bool newSmallTankValue) {
+  //   smallTank = newSmallTankValue;
+  // }
+  //
+  // bool? getSmallTank() {
+  //   return smallTank;
+  // }
 
   bool? getScreenPositive() {
     return screenPositive;
@@ -111,7 +111,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
       int birthDate,
       bool? screenPositive,
       int? numberOfFish,
-      bool? smallTank,
+      int? fatTankPosition,
       int? generation) {
     Tank aTank = Tank(
         documentId: documentId,
@@ -122,13 +122,17 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
         birthDate: birthDate,
         screenPositive: screenPositive,
         numberOfFish: numberOfFish,
-        smallTank: smallTank,
+        fatTankPosition: fatTankPosition,
         generation: generation,
         manageSession: _manageSession);
     tankList.add(aTank);
   }
 
-  void addNewEmptyTank(String facilityFk, int absolutePosition) async {
+  /*
+   is a tank ever created in the cParkedRackAbsPosition position? I don’t think so
+   if it is, what happens to fatTankPosition?
+   */
+  void addNewEmptyTank(String facilityFk, int absolutePosition, int? fatTankPosition) async {
     Tank aTank = Tank(
         documentId:
             null, // the tank entry is new, so it doesn’t have a document ID yet
@@ -141,22 +145,30 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
         birthDate: returnTimeNow() - kStartingDOBOffset,
         screenPositive: true,
         numberOfFish: 1,
-        smallTank: true,
+        fatTankPosition: fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
         generation: 1,
         manageSession: _manageSession);
     tankList.add(aTank);
-    // now add this to the database
-    String tankId = await saveNewTank(facilityFk,
-        absolutePosition); // problem; how does the document id in the tank get updated
 
+    // we don't add the virtual portion of a fat tank to the database
+    // we know there is a fat tank because the parent tank will have a value in fatTankPosition
+    // I am thinking that the virtual pair of a fat tank doesn't even need to know its parent
+    // this part of a fat tank simply exists in the tank list and nowhere else
+    // it just sits a placeholder to be selected
+    // I am now wondering can we even get away with not having it in the tank list at all?
+    //
 
-    Tank? theTankJustCreated =
-        tankInfoWithThisAbsolutePosition(absolutePosition);
+      // now add this to the database
+      String tankId = await saveNewTank(facilityFk,
+          absolutePosition); // problem; how does the document id in the tank get updated
 
-    theTankJustCreated?.updateTankDocumentId(tankId); // when we add an empty tank, after it’s created we get its id and immediately assign it its notes class.
-    // this means in all instances, the notes have a tank id associated with them.
-    // at this point, there are no notes, so they don’t individually need this tank_fk.
-    // when we click the Notes button and then add a note, we will use the the savenewnote command. "Old" notes don’t exist yet.
+      Tank? theTankJustCreated =
+      returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+
+      theTankJustCreated?.updateTankDocumentId(tankId); // when we add an empty tank, after it’s created we get its id and immediately assign it its notes class.
+      // this means in all instances, the notes have a tank id associated with them.
+      // at this point, there are no notes, so they don’t individually need this tank_fk.
+      // when we click the Notes button and then add a note, we will use the the savenewnote command. "Old" notes don’t exist yet.
   }
 
   // problem creating tank from the above is that it is saving the rack and we a dedicated function for this
@@ -187,7 +199,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
 
   Map<String, dynamic> prepareTankMap(
       String facilityFk, int absolutePosition) {
-    Tank? theTank = tankInfoWithThisAbsolutePosition(absolutePosition);
+    Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
 
     Map<String, dynamic> theTankMap = {
       'facility_fk': facilityFk,
@@ -199,7 +211,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
       'date_of_birth': theTank?.birthDate,
       'screen_positive': theTank?.screenPositive,
       'number_of_fish': theTank?.numberOfFish,
-      'small_tank': theTank?.smallTank,
+      'fat_tank_position': theTank?.fatTankPosition,
       'generation': theTank?.generation,
     };
     return theTankMap;
@@ -217,7 +229,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
 
   // this will be called every time during the onchanged event
   void saveExistingTank(String facilityFk, int absolutePosition) async {
-    Tank? theTank = tankInfoWithThisAbsolutePosition(absolutePosition);
+    Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
     Map<String, dynamic> theTankMap =
         prepareTankMap(facilityFk, absolutePosition);
     _manageSession.updateDocument(theTankMap, cTankCollection,
@@ -226,28 +238,11 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
 
   void euthanizeTank(int absolutePosition) async {
     //models.Document theTankDocument = await PrepareTankDocument(absolutePosition);
-    Tank? theTank = tankInfoWithThisAbsolutePosition(absolutePosition);
+    Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
     _manageSession.deleteDocument(cTankCollection, (theTank?.documentId)!);
-    int tankIndex = tankIdWithThisAbsolutePosition(absolutePosition);
+    int tankIndex = tankIdWithThisAbsolutePositionOnlyPhysical(absolutePosition);
     deleteTank(tankIndex);
   }
-
-  // void copyParkedTankToNewTankAndDeleteParkedTank(int absolutePosition) {
-  //   Tank? theParkedTank =
-  //       tankInfoWithThisAbsolutePosition(cParkedRackAbsPosition);
-  //   Tank? theDestinationTank =
-  //       tankInfoWithThisAbsolutePosition(absolutePosition);
-  //   theDestinationTank?.tankLine = theParkedTank?.tankLine;
-  //   theDestinationTank?.rackFk = (theParkedTank?.rackFk)!;
-  //   theDestinationTank?.birthDate = theParkedTank?.birthDate ?? 0; // in case parked tank is null, apparently we need to do this
-  //   theDestinationTank?.screenPositive = theParkedTank?.screenPositive;
-  //   theDestinationTank?.numberOfFish = theParkedTank?.numberOfFish;
-  //   theDestinationTank?.smallTank = theParkedTank?.smallTank;
-  //   theDestinationTank?.generation = theParkedTank?.generation;
-  //   saveExistingTank((theDestinationTank?.facilityFk)!,
-  //       (theDestinationTank?.absolutePosition)!);
-  //   euthanizeTank(cParkedRackAbsPosition);
-  // }
 
   Future<void> loadTanksForThisRack(MyAquariumManagerFacilityModel facilityModel, String theRackId) async {
 
@@ -261,6 +256,18 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
 
     for (int theIndex = 0; theIndex < theTankList.total; theIndex++) {
       models.Document theTank = theTankList.documents[theIndex];
+
+      /*
+      how about we don't save the virtual tank
+      when we read a tank we read the fat tank position and if it's non-null,
+      we add a virtual tank, right here in this loop
+      // this way when park a tank, we just remove that tank from the list and don't worry about the database
+      when we drag a tank from the parked position, we create a new virtual tank in the spot next to wherre the tank is going
+      what happens if we drag a fat tank over two small tanks, we reject this move
+      // small tank can drag over another small tank
+      a fat tank can drag over another fat tank because all we have to is alter the fat tank position of the incoming fat tank
+      and the virtual tank of the next position over; it's a straight swap; the virtual tank never “moves”
+       */
       addTankFromDatabase(
           theTank.$id, // this is the document ID that uniquely indentifies this record
           facilityModel.documentId,
@@ -270,7 +277,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
           theTank.data['date_of_birth'],
           theTank.data['screen_positive'],
           theTank.data['number_of_fish'],
-          theTank.data['small_tank'],
+          theTank.data['fat_tank_position'],
           theTank.data['generation']);
     }
   }
@@ -318,18 +325,54 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
     return -1;
   }
 
-  void selectThisTankCell(int selectThisTankCell) {
-    selectedTankCell = selectThisTankCell;
+  // one thing to be concerned about occurs when we park a fat tank
+  // what do we do with its absolutePosition because the tank is really parked
+  // we could delete the tank pair and then recreate when we drag it to its new home
+  // if we assign it the parked tank position, the method above could conceivably return
+  // the virtual part of a tank
+  // if we look at fattankposition and it has a value, it's part of fat tank pair
+  // but which part the real part of the virtual part?
+
+  // what if we don't save the virtual tank;
+  // it won't be in the list of tanks and it will the rack
+  // when we park a tank,
+
+  int convertVirtualTankPositionToPhysical(int selectThisTankCell) {
+    int tankId = tankIdWithThisAbsolutePositionIncludesVirtual(selectThisTankCell);
+    return tankList[tankId].absolutePosition;
+  }
+
+  // selectedTankCell should always contain a physical tank
+  void selectThisTankCellConvertsVirtual(int selectThisTankCell) {
+    if (selectThisTankCell != cParkedAbsolutePosition) {
+      selectedTankCell = convertVirtualTankPositionToPhysical(selectThisTankCell);
+    } else {
+      // parked always selects a physical tank
+      selectedTankCell = selectThisTankCell;
+    }
     notifyListeners();
   }
 
   // for when we are called by the search/barcode
+  // the barcode of a fat tank is its parent tank. Because of that, we don’t have to worry
+  // about selecting a virtual unselectable tank pair
   void selectThisTankCellWithoutListener(int selectThisTankCell) {
     selectedTankCell = selectThisTankCell;
   }
 
-  bool returnIsThisTankSelected(int absolutePosition) {
-    return (selectedTankCell == absolutePosition);
+  // this will need to take virtual into account
+  // first check if (selectedTankCell == absolutePosition) and if true
+  // return true
+  // otherwise, iterate through tanks and if fattankposition matches absolutePosition
+  // also return true
+  bool returnIsThisTankSelectedWithVirtual(int absolutePosition) {
+    if (absolutePosition != cParkedAbsolutePosition) {
+      absolutePosition = convertVirtualTankPositionToPhysical(absolutePosition);
+      return (selectedTankCell == absolutePosition);
+    } else {
+      // parked always selects a physical tank
+      return (selectedTankCell == absolutePosition);
+    }
   }
 
   bool isThisRackCellSelected(int whichCell) {
@@ -340,22 +383,22 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
     return selectedRack;
   }
 
-  // we use the editable version of the list here
-  // can accept -2, the parked tank position
-  Tank? tankInfoWithThisAbsolutePosition(int absolutePosition) {
+  // if slot is empty it only returns false
+  bool IsThisTankVirtual(int absolutePosition) {
     for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
-      if (tankList[theIndex].absolutePosition == absolutePosition) {
-        return tankList[theIndex];
+      if (tankList[theIndex].fatTankPosition == absolutePosition) {
+        return true;
       }
     }
-    return null;
+    return false;
   }
 
   // can accept -2, the parked tank position
   // is this giving me a reference or a copy?
   // when we tap a tank cell, we call SelectThisTankCell above and that updates the current tank cell variable
   // it calls notifylisteners which should theoretically trigger the controller to call this function which updates
-  Tank? returnCurrentTank() {
+  // selectedTankCell always contains a physical tank, so we only search physical tanks
+  Tank? returnCurrentPhysicalTank() {
     for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
       if (tankList[theIndex].absolutePosition == selectedTankCell) {
         return tankList[theIndex];
@@ -364,7 +407,8 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
     return null;
   }
 
-  Tank? returnTankWithThisAbsolutePosition(int absolutePosition) {
+  // for now, this function will ignore virtual tanks
+  Tank? returnPhysicalTankWithThisAbsolutePosition(int absolutePosition) {
     for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
       if (tankList[theIndex].absolutePosition == absolutePosition) {
         return tankList[theIndex];
@@ -374,12 +418,27 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   }
 
   // can accept -2, which is the parked tank
-  int tankIdWithThisAbsolutePosition(int absolutePosition) {
+  // when we call this, we want a physical tank in return
+  int tankIdWithThisAbsolutePositionOnlyPhysical(int absolutePosition) {
     for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
       if (tankList[theIndex].absolutePosition == absolutePosition) {
         return theIndex;
       }
     }
-    return -1; // this tell us that this tank position is empty.
+    return kEmptyTankIndex; // this tell us that this tank position is empty or virtual.
+  }
+
+  // we are called here to know whether a given tank cell contains a tank in any way shape or form
+  // but it always returns a physical tank
+  int tankIdWithThisAbsolutePositionIncludesVirtual(int absolutePosition) {
+    int tankID = tankIdWithThisAbsolutePositionOnlyPhysical(absolutePosition);
+    if (tankID == kEmptyTankIndex) {
+      for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
+        if (tankList[theIndex].fatTankPosition == absolutePosition) {
+          tankID = tankIdWithThisAbsolutePositionOnlyPhysical(tankList[theIndex].absolutePosition);
+        }
+      }
+    }
+    return tankID; // if there is no tank, we return kEmptyTankIndex
   }
 }

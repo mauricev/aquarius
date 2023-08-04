@@ -114,7 +114,7 @@ class MyAquariumManagerTankControllerState
     // will actually do something
 
     // so we have two pressing questions will this info save into the actual tank
-    Tank? currentTank = tanksModel.returnCurrentTank();
+    Tank? currentTank = tanksModel.returnCurrentPhysicalTank();
     switch (tanksStringsValue) {
       case TankStringsEnum.tankLine:
         textController.text = currentTank?.tankLine ?? "";
@@ -276,7 +276,7 @@ class MyAquariumManagerTankControllerState
         dateOfBirth: tank?.birthDate,
         screenPositive: tank?.screenPositive,
         numberOfFish: tank?.numberOfFish,
-        smallTank: tank?.smallTank,
+        fatTankPosition: tank?.fatTankPosition,
         generation: tank?.generation,
       );
     }
@@ -288,6 +288,8 @@ class MyAquariumManagerTankControllerState
     String screenPositiveString = (currentTank?.getScreenPositive() ?? false)
         ? "screen positive"
         : "screen negative";
+
+    // will need to fix; if getsmalltank != x then small tank is true
     String smallTankString =
         (currentTank?.getSmallTank() ?? false) ? "small tank" : "big tank";
     String numberOfFishString = currentTank?.numberOfFish.toString() ?? "";
@@ -324,14 +326,15 @@ class MyAquariumManagerTankControllerState
     MyAquariumManagerTanksModel tankModel =
         Provider.of<MyAquariumManagerTanksModel>(context);
 
-    Tank? currentTank = tankModel.returnCurrentTank();
+    // we want a real physical tank here
+    Tank? currentTank = tankModel.returnCurrentPhysicalTank();
     myPrint("is currentTank null, $currentTank");
 
     return Scaffold(
         appBar: AppBar(
         title: const Text(kProgramName),
         ),
-      body: Column(
+      body: ListView( // needed for scrolling the keyboard
           children: [
             buildOuterLabel(context, "Select Rack (top view)"),
             Row(
@@ -369,8 +372,7 @@ class MyAquariumManagerTankControllerState
               children: [
                 buildInnerLabel("Number of Fish", controllerForNumberOfFish,
                     tankModel, TankStringsEnum.numberOfFish),
-                buildCheckBox(tankModel, currentTank, "Small Tank",
-                    currentTank?.getSmallTank, currentTank?.setSmallTank),
+
                 buildInnerLabel("Generation", controllerForGeneration, tankModel,
                     TankStringsEnum.generation),
               ],

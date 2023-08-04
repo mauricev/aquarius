@@ -4,6 +4,7 @@ import '../model/aquarium_manager_facilities_model.dart';
 import '../model/aquarium_manager_tanks_model.dart';
 import '../views/utility.dart';
 import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_tankcell.dart';
+import '../views/consts.dart';
 
 class RackGrid extends StatelessWidget {
   RackGrid({
@@ -28,8 +29,9 @@ class RackGrid extends StatelessWidget {
       if (offset == 0) {
         offset = offset + 1;
       }
+      // virtual tanks don’t get any actual tank info; we trick it when it’s drawn or clicked on
       Tank? tank =
-      tanksModel.tankInfoWithThisAbsolutePosition(absolutePosition);
+      tanksModel.returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
 
       gridAcross.add(TankCell(
         absolutePosition: absolutePosition,
@@ -39,7 +41,7 @@ class RackGrid extends StatelessWidget {
         dateOfBirth: tank?.birthDate,
         screenPositive: tank?.screenPositive,
         numberOfFish: tank?.numberOfFish,
-        smallTank: tank?.smallTank,
+        fatTankPosition: tank?.fatTankPosition,
         generation: tank?.generation,
       ));
     }

@@ -10,7 +10,7 @@ class ParkedTank extends StatelessWidget {
   final int? dateOfBirth;
   final bool? screenPositive;
   final int? numberOfFish;
-  final bool? smallTank;
+  final int? fatTankPosition;
   final int? generation;
 
   const ParkedTank({
@@ -21,7 +21,7 @@ class ParkedTank extends StatelessWidget {
     this.dateOfBirth,
     this.screenPositive,
     this.numberOfFish,
-    this.smallTank,
+    this.fatTankPosition,
     this.generation,
   }) : super(key: key);
 
@@ -30,11 +30,15 @@ class ParkedTank extends StatelessWidget {
     MyAquariumManagerTanksModel tankModel =
     Provider.of<MyAquariumManagerTanksModel>(context);
 
+    // we want these two functions below to always return a physical tank
+    // because only a physical tank can live inside the parked tank
+    // so if we had this function search virtual tanks, we need a guard for the parked tank position
+
     int tankID =
-    tankModel.tankIdWithThisAbsolutePosition(cParkedAbsolutePosition);
+    tankModel.tankIdWithThisAbsolutePositionOnlyPhysical(cParkedAbsolutePosition);
 
     Tank? thisTank =
-    tankModel.returnTankWithThisAbsolutePosition(cParkedAbsolutePosition);
+    tankModel.returnPhysicalTankWithThisAbsolutePosition(cParkedAbsolutePosition);
     // i think we can pass the tank to the receiver
     // how do we swap tanks
     // we need a second temporary rack
@@ -61,7 +65,7 @@ class ParkedTank extends StatelessWidget {
             // we should test tankid here and if it's not in the list, then we should draw transparent; otherwise it should be gray
             color: (tankID !=
                 kEmptyTankIndex) // if we are in tankmode (not editable) and there is no text, we get grayed out
-                ? (tankModel.returnIsThisTankSelected(cParkedAbsolutePosition))
+                ? (tankModel.returnIsThisTankSelectedWithVirtual(cParkedAbsolutePosition))
                 ? Colors.lightGreen[800]
                 : Colors.grey // this grid cell has a tank
                 : Colors
@@ -72,7 +76,7 @@ class ParkedTank extends StatelessWidget {
         onTap: () {
           if (tankID != kEmptyTankIndex) {
             // we only want to select actual tanks at the moment
-            tankModel.selectThisTankCell(cParkedAbsolutePosition);
+            tankModel.selectThisTankCellConvertsVirtual(cParkedAbsolutePosition);
           }
         },
       ),

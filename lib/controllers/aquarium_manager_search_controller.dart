@@ -78,7 +78,7 @@ class MyAquariumManagerSearchController extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   buildCheckBox(context,"Screen Positive", tank.getScreenPositive),
-                  buildCheckBox(context,"Small Tank", tank.getSmallTank),
+                  // buildCheckBox(context,"Small Tank", tank.getSmallTank),
                   Text(
                     "Generation: F${(tank.generation.toString())}",
                     style: Theme.of(context).textTheme.bodySmall,

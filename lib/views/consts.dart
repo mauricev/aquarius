@@ -6,14 +6,14 @@ const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";
 
 // this will change for local, real-world output
-//const String kIPAddress = 'http://192.168.1.91/v1';
-const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
+const String kIPAddress = 'http://192.168.1.91/v1';
+//const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
 
 //local
-//const String kProjectId = '6477fda3e6695f938f0d';
+const String kProjectId = '6477fda3e6695f938f0d';
 
 //real-world
-const String kProjectId = '648fc20504d0ed7a089d';
+//const String kProjectId = '648fc20504d0ed7a089d';
 
 const kRunningLocal = true;
 
