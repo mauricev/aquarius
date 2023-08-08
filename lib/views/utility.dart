@@ -3,7 +3,7 @@ import '../model/aquarium_manager_facilities_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
 void myPrint(String printThis) {
-  //print(printThis);
+  print(printThis);
 }
 
 Widget buildOuterLabel(BuildContext context, String labelText) {

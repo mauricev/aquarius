@@ -11,7 +11,9 @@ import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_n
 
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 
-import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+
+import 'package:aquarium_manager/views/typography.dart';
 
 class MyAquariumManagerTankController extends StatefulWidget {
   final Map<String, dynamic> arguments;
@@ -269,6 +271,10 @@ class MyAquariumManagerTankControllerState
       double height = returnHeight(facilityModel);
       double width = returnWidth(facilityModel);
 
+      if (tank?.getSmallTank() == false) {
+        width = width * 2;
+      }
+
       return ParkedTank(
         height: height,
         width: width,
@@ -289,9 +295,9 @@ class MyAquariumManagerTankControllerState
         ? "screen positive"
         : "screen negative";
 
-    // will need to fix; if getsmalltank != x then small tank is true
     String smallTankString =
-        (currentTank?.getSmallTank() ?? false) ? "small tank" : "big tank";
+        (currentTank?.getSmallTank() ?? false) ? "small tank" : "fat tank";
+
     String numberOfFishString = currentTank?.numberOfFish.toString() ?? "";
     String generationString = currentTank?.generation.toString() ?? "";
     String dateOfBirthString = buildDateOfBirth(currentTank?.getBirthDate);
@@ -318,7 +324,7 @@ class MyAquariumManagerTankControllerState
 ^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
 ^XZ
 """;
-    final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    //final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   @override
@@ -329,6 +335,9 @@ class MyAquariumManagerTankControllerState
     // we want a real physical tank here
     Tank? currentTank = tankModel.returnCurrentPhysicalTank();
     myPrint("is currentTank null, $currentTank");
+
+    Color scaffoldBackgroundColor = aquariumManagerTheme.backgroundColor;
+    myPrint("the color is ${scaffoldBackgroundColor}");
 
     return Scaffold(
         appBar: AppBar(

@@ -61,46 +61,55 @@ class _TankCellState extends State<TankCell> {
     // bug fixed here
   }
 
-  Future<bool> confirmSmallTank(BuildContext context) async {
+  Future<bool?> confirmSmallTank(BuildContext context) async {
     bool isFatTank = false;
 
     return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Create Tank'),
-              actions: <Widget>[
-                CheckboxListTile(
-                  tileColor: Colors.red,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Create Tank'),
+          actions: <Widget>[
+            StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return CheckboxListTile(
+                  //tileColor: Colors.red,
                   title: const Text('Make this a fat tank?'),
-                  value: false,
+                  value: isFatTank,
                   onChanged: (bool? value) {
-                    isFatTank = value ?? false;
+                    myPrint("we are in fat checkbox, $value");
+                    setState(() {
+                      isFatTank = value ?? false;
+                    });
                   },
-                ),
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop(isFatTank);
-                  },
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
+                );
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                myPrint("we clicked cancel");
+                Navigator.of(context).pop(null); // null to cancel dialog
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(isFatTank);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  void assignParkedTankItsNewHome(
-      Tank? parkedTank, MyAquariumManagerTanksModel tankModel) {
+  // we can’t use widget.absoluteposition because that represents the cell the user clicked on
+  // and if it’s a virtual tank, we need the tank to its immediate left
+  void assignParkedTankItsNewHome(Tank? parkedTank, int newTankPosition,
+      MyAquariumManagerTanksModel tankModel) {
     parkedTank?.assignTankNewLocation(
-        tankModel.rackDocumentid, widget.absolutePosition);
+        tankModel.rackDocumentid, newTankPosition);
   }
 
   void parkRackedTank(Tank? destinationTank) {
@@ -109,11 +118,11 @@ class _TankCellState extends State<TankCell> {
 
   bool canAbsolutePositionHostAFatTank(BuildContext context, int tankPosition) {
     MyAquariumManagerFacilityModel facilityModel =
-    Provider.of<MyAquariumManagerFacilityModel>(context,
-        listen: false);
+        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
 
     // are we at the end of a row? If so, then no
-    if ((facilityModel.maxTanks % widget.absolutePosition) == 0) {
+    // BUG this was reversed
+    if ((widget.absolutePosition % facilityModel.maxTanks) == 0) {
       return false;
     }
 
@@ -149,31 +158,12 @@ class _TankCellState extends State<TankCell> {
       builder: (BuildContext context, List<dynamic> candidateData,
           List<dynamic> rejectedData) {
         return InkWell(
-          onTap: (rackID == -2)
+          onTap: (rackID == kNoRackSelected)
               ? null
               : () {
                   // make sure we have a selected rack
-                  myPrint("we clicked a tank cell");
                   if (tankID != kEmptyTankIndex) {
                     // we only want to select actual tanks at the moment
-                    myPrint("we clicked an a real tank cell");
-
-                    /*
-              tankID will return a physical tank always
-              but this selectthistankcel is selecting a virtual tank
-              we this postion minus 1 but what is telling it we are virtual?
-              we could have another intervening function here that checks
-              if this position harbors a real or physical tank
-              we can have a convert function
-              pass in widget.absolutePosition and it looks to see if it there is a physical tank
-              at this position and if there is, it returns widget.absolutePosition
-              otherwise, it checks to see if there a fattankposition at this widget.absolutePosition
-              and if there is it returns its absoluteposition
-              convertVirtualTankPositionToPhysical(widget.absolutePosition);
-              do we want to pass this function or to call it inside selectThisTankCell
-              because we don’t really want selectThisTankCell to ever select a virtual tank
-               */
-
                     tankModel.selectThisTankCellConvertsVirtual(
                         widget.absolutePosition);
                   }
@@ -182,19 +172,30 @@ class _TankCellState extends State<TankCell> {
             height: widget.height,
             width: widget.width,
             decoration: BoxDecoration(
-              border: Border.all(),
-              color: (rackID == -2) // no rack is selected
+              border: Border(
+                top: const BorderSide(width: 1.5, color: Colors.black),
+                left: tankModel.isThisTankVirtual(widget.absolutePosition)
+                    ? const BorderSide(width: 0, color: Colors.transparent)
+                    : const BorderSide(width: 1.0, color: Colors.grey),
+                right:
+                    tankModel.isThisTankPhysicalAndFat(widget.absolutePosition)
+                        ? const BorderSide(width: 0, color: Colors.transparent)
+                        : const BorderSide(width: 1.0, color: Colors.grey),
+                bottom: const BorderSide(width: 1.5, color: Colors.black),
+              ),
+              color: (rackID == kNoRackSelected) // no rack is selected
                   ? Colors.transparent
                   : (tankID !=
                           kEmptyTankIndex) // if we are in tankmode (not editable) and there is no text, we get grayed out
                       ? (tankModel.returnIsThisTankSelectedWithVirtual(
                               widget.absolutePosition))
-                          ? Colors.lightGreen[800]
-                          : Colors.grey // this grid cell has a tank
+                          ? Colors.white
+                          //: Colors.lightGreen[500] // this grid cell has a tank
+                          : Color(0xFF90CAF9)
                       : Colors
                           .transparent, // this grid cell does not have a tank, but we need a third state here
             ),
-            child: (rackID == -2) // no rack is selected
+            child: (rackID == kNoRackSelected) // no rack is selected
                 ? Text(
                     "no rack selected",
                     style: Theme.of(context).textTheme.bodySmall,
@@ -223,7 +224,8 @@ class _TankCellState extends State<TankCell> {
                               myPrint(
                                   "tank at ${widget.absolutePosition} can host a fat tank");
                               confirmSmallTank(context).then((fatTankState) {
-                                myPrint("we clicked OK to the fat tank dialog");
+                                myPrint(
+                                    "we clicked OK to the fat tank dialog, ${fatTankState}");
                                 if (fatTankState != null) {
                                   // null means the user cancelled
                                   setState(() {
@@ -248,18 +250,28 @@ class _TankCellState extends State<TankCell> {
                           ),
                         ),
                       )
-                    : Text("${widget.absolutePosition}"),
+                    // : Text("${widget.absolutePosition}"), // here is where we can have an image asset
+                    : tankModel
+                                .isThisTankVirtual(widget.absolutePosition + 1)
+                            ? Image.asset("assets/tank_fat_left.png")
+                            : tankModel
+                                    .isThisTankVirtual(widget.absolutePosition)
+                                ? Image.asset("assets/tank_fat_right.png")
+                                : Image.asset("assets/tank_thin.png"),
           ),
         );
       },
       onWillAccept: (data) {
-        myPrint("shouldn't we be coming here");
+        myPrint("on will accept");
         Tank parkedTank = data as Tank;
-
+        myPrint("on will accept");
         // if we have a fat parked tank
         if (parkedTank.fatTankPosition != null) {
+          myPrint("on will accept, parked is fat");
           if (canAbsolutePositionHostAFatTank(
-              context, widget.absolutePosition) == false) {
+                  context, widget.absolutePosition) ==
+              false) {
+            myPrint("on will accept, reject fat tank here");
             return false;
           }
         }
@@ -280,7 +292,8 @@ class _TankCellState extends State<TankCell> {
 
           // if this destination widget is a virtual tank, make the swap with the prior position numerically
           int thisPosition = widget.absolutePosition;
-          if (tankModel.IsThisTankVirtual(widget.absolutePosition)) {
+          if (tankModel.isThisTankVirtual(thisPosition)) {
+            myPrint("dragging, this tank is virtual");
             thisPosition = widget.absolutePosition - 1;
           }
 
@@ -288,39 +301,38 @@ class _TankCellState extends State<TankCell> {
           int tankID = tankModel.tankIdWithThisAbsolutePositionOnlyPhysical(
               thisPosition); // this represents the new, not parked tank
           if (tankID == kEmptyTankIndex) {
+            myPrint("we dragged to an empty tank spot");
             // there is no tank at this position
             // the user dragged over an empty tank
             // our parked tank needs two new pieces of info
             // a new abs position and the rack_fk
             // do we have a copy of the parked tank or the actual parked tank?
-            assignParkedTankItsNewHome(parkedTank, tankModel);
+            assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // the tank has not been saved with this new info
             // this will be physical
-            tankModel.saveExistingTank(
-                facilityModel.documentId, thisPosition);
+            tankModel.saveExistingTank(facilityModel.documentId, thisPosition);
           } else {
+            myPrint("we dragged to an active tank spot");
             // here we are swapping tank positions
             // this will be physical
-            Tank? destinationTank =
-                tankModel.returnPhysicalTankWithThisAbsolutePosition(
-                    thisPosition);
+            Tank? destinationTank = tankModel
+                .returnPhysicalTankWithThisAbsolutePosition(thisPosition);
 
-            // this tank is in the rack and now it's becoming a parked tank
-            // ideally this should be a function
-            //destinationTank?.rackFk = "0";
-            //destinationTank?.absolutePosition = cParkedAbsolutePosition;
+            // BUG if this tank is fat, then its fat position needs a special value, perhaps 0, so it doesn’t select anything
             parkRackedTank(destinationTank);
 
-            assignParkedTankItsNewHome(parkedTank, tankModel);
+            // BUG if this tank is fat, then its fat position needs to be updated
+            assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // this will be physical
-            tankModel.saveExistingTank(
-                facilityModel.documentId, thisPosition);
+            tankModel.saveExistingTank(facilityModel.documentId, thisPosition);
             // this will be physical
             tankModel.saveExistingTank(
                 facilityModel.documentId, cParkedAbsolutePosition);
           }
           // below we are passing a physical tank position
           // so selectThisTankCell should never come to the virtual tank code
+          myPrint(
+              "about to select a physical tank after dragging, ${thisPosition}");
           tankModel.selectThisTankCellConvertsVirtual(thisPosition);
         });
       },

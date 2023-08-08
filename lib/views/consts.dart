@@ -35,6 +35,7 @@ enum TankStringsEnum { tankLine, numberOfFish, generation }
 const int kStandardTextWidth = 75;
 const double kStandardTextWidthDouble = 75;
 
+const kNoRackSelected = -2;
 const cParkedAbsolutePosition = -2;
 
 const kEmptyTankIndex = -1;

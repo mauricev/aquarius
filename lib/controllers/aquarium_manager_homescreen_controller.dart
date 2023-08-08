@@ -243,22 +243,14 @@ class _AquariumManagerHomeScreenControllerState
   bool isAFacilitySelected(BuildContext context) {
     MyAquariumManagerModel model =
     Provider.of<MyAquariumManagerModel>(context, listen: false);
-    if (model.returnSelectedFacility() == null) {
-      myPrint("model.returnSelectedFacility is NULL");
-    } else {
-      myPrint("model.returnSelectedFacility is NOT NULL, ${model.returnSelectedFacility()}");
-    }
+
     return model.returnSelectedFacility() != null;
   }
 
   bool pretendFacilityIsAlwaysSelected(BuildContext context) {
     MyAquariumManagerModel model =
     Provider.of<MyAquariumManagerModel>(context, listen: false);
-    if (model.returnSelectedFacility() == null) {
-      myPrint("model.returnSelectedFacility is NULL");
-    } else {
-      myPrint("model.returnSelectedFacility is NOT NULL, ${model.returnSelectedFacility()}");
-    }
+
     return model.returnSelectedFacility() == null; // if a facility is not selected, return true
   }
 

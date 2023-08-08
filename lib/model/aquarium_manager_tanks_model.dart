@@ -45,11 +45,22 @@ class Tank {
   void parkIt() {
     absolutePosition = cParkedRackAbsPosition;
     rackFk = cParkedRackFkAddress;
+    // fat tanks stay fat, but have no virtual partner while they are parked
+    if (fatTankPosition != null) {
+      fatTankPosition = 0;
+    }
   }
 
   void assignTankNewLocation(String rackIdentifier, int position) {
     absolutePosition = position;
     rackFk = rackIdentifier;
+    // fat tanks get a new virtual partner
+    // we need to know if fatTankPosition has a valid value when it’s a parked tank
+    myPrint("in assignTankNewLocation");
+    if (fatTankPosition != null) {
+      myPrint("in assignTankNewLocation fatTankPosition contains a value");
+      fatTankPosition = position + 1;
+    }
   }
 
   void updateTankDocumentId (String tankFk) {
@@ -60,20 +71,15 @@ class Tank {
     screenPositive = newScreenPositiveValue;
   }
 
-  // void setSmallTank (bool newSmallTankValue) {
-  //   smallTank = newSmallTankValue;
-  // }
-  //
-  // bool? getSmallTank() {
-  //   return smallTank;
-  // }
+   bool? getSmallTank() {
+     return (fatTankPosition == null);
+   }
 
   bool? getScreenPositive() {
     return screenPositive;
   }
 
   int? getBirthDate() {
-    myPrint("what is the birthdate, $birthDate");
     return birthDate;
   }
 
@@ -87,15 +93,13 @@ class Tank {
 
 }
 
-// does it pay to make a superclass of this and the facilities model
-// no, it does not
 class MyAquariumManagerTanksModel with ChangeNotifier {
   final ManageSession _manageSession;
 
   List<Tank> tankList = <Tank>[];
 
   int selectedRack = -2; // this is a rack cell, not a tank cell
-  int selectedTankCell = -1;
+  int selectedTankCell = kEmptyTankIndex;
   String rackDocumentid = "";
 
   void callNotifyListeners() {
@@ -339,7 +343,11 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
 
   int convertVirtualTankPositionToPhysical(int selectThisTankCell) {
     int tankId = tankIdWithThisAbsolutePositionIncludesVirtual(selectThisTankCell);
-    return tankList[tankId].absolutePosition;
+    if (tankId == kEmptyTankIndex) {
+      return kEmptyTankIndex;
+    } else {
+      return tankList[tankId].absolutePosition;
+    }
   }
 
   // selectedTankCell should always contain a physical tank
@@ -375,6 +383,19 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
     }
   }
 
+  bool isThisTankParked(int absolutePosition) {
+    return(absolutePosition == cParkedAbsolutePosition);
+  }
+
+  bool isThisTankVirtual(int absolutePosition) {
+    for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
+      if (tankList[theIndex].fatTankPosition == absolutePosition) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool isThisRackCellSelected(int whichCell) {
     return (whichCell == selectedRack);
   }
@@ -383,11 +404,10 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
     return selectedRack;
   }
 
-  // if slot is empty it only returns false
-  bool IsThisTankVirtual(int absolutePosition) {
+  bool isThisTankPhysicalAndFat(int absolutePosition) {
     for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
-      if (tankList[theIndex].fatTankPosition == absolutePosition) {
-        return true;
+      if (tankList[theIndex].absolutePosition == absolutePosition) {
+        return (tankList[theIndex].fatTankPosition != null);
       }
     }
     return false;
