@@ -1,3 +1,4 @@
+import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/aquarium_manager_facilities_model.dart';
@@ -9,11 +10,17 @@ import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_p
 import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_rackgrid.dart';
 import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_notes.dart';
 
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 
 //import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 import 'package:aquarium_manager/views/typography.dart';
+
+//import 'package:easy_autocomplete/easy_autocomplete.dart';
+//import 'package:elastic_autocomplete/elastic_autocomplete.dart';
+//import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class MyAquariumManagerTankController extends StatefulWidget {
   final Map<String, dynamic> arguments;
@@ -103,18 +110,118 @@ class MyAquariumManagerTankControllerState
     return theType;
   }
 
-  Widget buildInnerLabel(
-  String labelText,
-      TextEditingController textController,
-      MyAquariumManagerTanksModel tanksModel,
-      TankStringsEnum tanksStringsValue,[double? width]) {
-    // we don't yet know if this edits the original tank in the model list or not
-    // but second what happens if the current tank is not a tank at all.
-    // do we need a button inside the tank cell to create a tank
-    // we could embed a button create tank. once created, the tank will be added
-    // to the list of tanks even though has no info and this current tank command below
-    // will actually do something
+//   Widget returnAutoCompleteForTankLine(BuildContext context, MyAquariumManagerTanksModel tanksModel, TextEditingController textController, Tank? currentTank) {
+//     myPrint("in returnAutoCompleteForTankLine");
+//     return Autocomplete<String>(
+//       //initialValue: TextEditingValue(text: initialText),
+//       optionsBuilder: (TextEditingValue textEditingValue) {
+//         myPrint("in optionsbuilder");
+//         if (textEditingValue.text == '') {
+//           myPrint("in optionsbuilder, emptyee");
+//           return const Iterable<String>.empty();
+//         }
+//         myPrint("do we have tanklines, ${tanksModel.returnListOfTankLines()}");
+//         return tanksModel.returnListOfTankLines().where((String option) {
+//           return option.contains(textEditingValue.text.toLowerCase());
+//         });
+//       },
+//         fieldViewBuilder: (BuildContext context, TextEditingController textEditingController,
+//             FocusNode focusNode,
+//             VoidCallback onFieldSubmitted) {
+//           myPrint("in fieldViewBuilder");
+//           return TextField(
+//             controller: textController,
+//             focusNode: focusNode,
+//             onChanged: (String value) {
+// myPrint("do we come here?");
+//             },
+//           );
+//         }
+//     );
+//   }
 
+  Widget returnAutoCompleteForTankLine(
+      BuildContext context,
+      MyAquariumManagerTanksModel tanksModel,
+      TextEditingController textController,
+      Tank? currentTank) {
+    return TypeAheadField<String>(
+      //getImmediateSuggestions:false,
+        hideOnEmpty: true,
+        hideOnLoading:true,
+      autoFlipDirection : true,
+
+      textFieldConfiguration: TextFieldConfiguration(
+          controller: textController,
+          // style: DefaultTextStyle.of(context)
+          //     .style
+          //     .copyWith(fontStyle: FontStyle.italic),
+          // decoration: InputDecoration(
+          //     border: OutlineInputBorder(),
+          //     ),
+          onChanged: (value) {
+            MyAquariumManagerFacilityModel facilityModel =
+                Provider.of<MyAquariumManagerFacilityModel>(context,
+                    listen: false);
+
+            currentTank?.tankLine = textController.text;
+
+            tanksModel.saveExistingTank(
+                facilityModel.returnFacilityId(), (currentTank?.absolutePosition)!);
+          }),
+      minCharsForSuggestions: 0,
+      suggestionsCallback: (String pattern) async {
+        if (pattern != "") {
+
+          MyAquariumManagerFacilityModel facilityModel =
+          Provider.of<MyAquariumManagerFacilityModel>(context,
+              listen: false);
+
+          MyAquariumManagerSearchModel searchModel =
+          Provider.of<MyAquariumManagerSearchModel>(context, listen: false);
+
+          searchModel.prepareFullTankListForFacility(facilityModel.returnFacilityId());
+
+          return searchModel
+              .returnListOfTankLines(pattern)
+              .where((item) =>
+                  item.toLowerCase().startsWith(pattern.toLowerCase()))
+              .toList();
+        } else {
+          return [];
+        }
+      },
+      itemBuilder: (context, String suggestion) {
+          return ListTile(
+            title: Text(suggestion),
+          );
+      },
+      // itemSeparatorBuilder: (context, index) {
+      //   return Divider();
+      // },
+      onSuggestionSelected: (String suggestion) {
+        setState(() {
+          MyAquariumManagerFacilityModel facilityModel =
+              Provider.of<MyAquariumManagerFacilityModel>(context,
+                  listen: false);
+
+          currentTank?.tankLine = suggestion;
+
+          tanksModel.saveExistingTank(
+              facilityModel.returnFacilityId(), (currentTank?.absolutePosition)!);
+        });
+      },
+      // suggestionsBoxDecoration: SuggestionsBoxDecoration(
+      //   borderRadius: BorderRadius.circular(10.0),
+      //   elevation: 8.0,
+      //   color: Theme.of(context).cardColor,
+      //),
+    );
+  }
+
+  Widget buildInnerLabel(String labelText, TextEditingController textController,
+      MyAquariumManagerTanksModel tanksModel, TankStringsEnum tanksStringsValue,
+      [double? width]) {
     // so we have two pressing questions will this info save into the actual tank
     Tank? currentTank = tanksModel.returnCurrentPhysicalTank();
     switch (tanksStringsValue) {
@@ -137,44 +244,49 @@ class MyAquariumManagerTankControllerState
         children: [
           Text(
             labelText,
-            style: Theme.of(context).textTheme.labelMedium,
+            style: Theme.of(context).textTheme.labelLarge,
           ),
           Container(
             padding: const EdgeInsets.only(
               left: 20,
             ),
             width: (width == null) ? kStandardTextWidthDouble : width,
-            child: TextField(
-                enabled: (currentTank != null),
-                style: Theme.of(context).textTheme.bodySmall,
-                keyboardType: returnTextInputType(tanksStringsValue),
-                controller: textController,
-                onChanged: (value) {
-                  MyAquariumManagerFacilityModel facilityModel =
-                      Provider.of<MyAquariumManagerFacilityModel>(context,
-                          listen: false);
-
-                  switch (tanksStringsValue) {
-                    case TankStringsEnum.tankLine:
-                      currentTank?.tankLine = textController.text;
-                      break;
-                    case TankStringsEnum.numberOfFish:
-                      if(textController.text != "") {
-                        currentTank?.numberOfFish =
-                            int.parse(textController.text);
+            child: (tanksStringsValue == TankStringsEnum.tankLine) &&
+                    (currentTank != null)
+                ? returnAutoCompleteForTankLine(
+                    context, tanksModel, textController, currentTank)
+                : TextField(
+                    enabled: (currentTank != null),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    keyboardType: returnTextInputType(tanksStringsValue),
+                    controller: textController,
+                    onChanged: (value) {
+                      MyAquariumManagerFacilityModel facilityModel =
+                          Provider.of<MyAquariumManagerFacilityModel>(context,
+                              listen: false);
+                      myPrint("tanksStringsValue, ${tanksStringsValue}");
+                      switch (tanksStringsValue) {
+                        case TankStringsEnum.tankLine:
+                          myPrint("we should never come here");
+                          currentTank?.tankLine = textController.text;
+                          break;
+                        case TankStringsEnum.numberOfFish:
+                          if (textController.text != "") {
+                            currentTank?.numberOfFish =
+                                int.parse(textController.text);
+                          }
+                          break;
+                        case TankStringsEnum.generation:
+                          if (textController.text != "") {
+                            currentTank?.generation =
+                                int.parse(textController.text);
+                          }
+                          break;
                       }
-                      break;
-                    case TankStringsEnum.generation:
-                      if(textController.text != "") {
-                        currentTank?.generation =
-                            int.parse(textController.text);
-                      }
-                      break;
-                  }
 
-                  tanksModel.saveExistingTank(facilityModel.documentId,
-                      (currentTank?.absolutePosition)!);
-                }),
+                      tanksModel.saveExistingTank(facilityModel.returnFacilityId(),
+                          (currentTank?.absolutePosition)!);
+                    }),
           ),
         ],
       ),
@@ -203,7 +315,7 @@ class MyAquariumManagerTankControllerState
             Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
 
         tankModel.saveExistingTank(
-            facilityModel.documentId, (currentTank?.absolutePosition)!);
+            facilityModel.returnFacilityId(), (currentTank?.absolutePosition)!);
       });
     }
   }
@@ -220,8 +332,10 @@ class MyAquariumManagerTankControllerState
           height: kIndentWidth,
         ),
         TextButton(
-          onPressed: (currentTank == null) ? null : () => _selectDate(
-              context, tankModel, currentTank, retrieveValue, updateValue),
+          onPressed: (currentTank == null)
+              ? null
+              : () => _selectDate(
+                  context, tankModel, currentTank, retrieveValue, updateValue),
           child: Text(buildDateOfBirth(retrieveValue)),
         ),
       ],
@@ -245,13 +359,15 @@ class MyAquariumManagerTankControllerState
           style: Theme.of(context).textTheme.bodySmall,
         ),
         value: retrieveValue?.call() ?? false,
-        onChanged: (currentTank == null) ? null : (newValue) {
-          setState(() {
-            updateValue?.call(newValue ?? false);
-            tankModel.saveExistingTank(
-                facilityModel.documentId, (currentTank.absolutePosition));
-          });
-        },
+        onChanged: (currentTank == null)
+            ? null
+            : (newValue) {
+                setState(() {
+                  updateValue?.call(newValue ?? false);
+                  tankModel.saveExistingTank(
+                      facilityModel.returnFacilityId(), (currentTank.absolutePosition));
+                });
+              },
         controlAffinity:
             ListTileControlAffinity.leading, //  <-- leading Checkbox
       ),
@@ -306,9 +422,7 @@ class MyAquariumManagerTankControllerState
         currentTank?.absolutePosition.toString() ?? "";
 
     MyAquariumManagerFacilityModel facilityModel =
-    Provider.of<MyAquariumManagerFacilityModel>(
-        context,
-        listen: false);
+        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
     String rack = await facilityModel.returnRacksRelativePosition(rackFkString);
 
     // multiline string requires three quotes
@@ -334,112 +448,111 @@ class MyAquariumManagerTankControllerState
 
     // we want a real physical tank here
     Tank? currentTank = tankModel.returnCurrentPhysicalTank();
-    myPrint("is currentTank null, $currentTank");
 
     Color scaffoldBackgroundColor = aquariumManagerTheme.backgroundColor;
-    myPrint("the color is ${scaffoldBackgroundColor}");
 
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: const Text(kProgramName),
-        ),
-      body: ListView( // needed for scrolling the keyboard
-          children: [
-            buildOuterLabel(context, "Select Rack (top view)"),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: FacilityGrid(tankMode: cFacilityClickableGrid),
-                ),
-              ],
-            ),
-            buildOuterLabel(context, "Select Tank (facing view)"),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                RackGrid(),
-                buildParkedTank(context),
-              ],
-            ),
-            buildOuterLabel(context, "Tank Info"),
-            Row(
-              children: [
-                buildInnerLabel("Tank Line", controllerForTankLine, tankModel,
-                    TankStringsEnum.tankLine, 300),
-                drawDateOfBirth(tankModel, currentTank, currentTank?.getBirthDate,
-                    currentTank?.setBirthDate),
-                buildCheckBox(
-                    tankModel,
-                    currentTank,
-                    "Screen Positive",
-                    currentTank?.getScreenPositive,
-                    currentTank?.setScreenPositive),
-              ],
-            ),
-            Row(
-              children: [
-                buildInnerLabel("Number of Fish", controllerForNumberOfFish,
-                    tankModel, TankStringsEnum.numberOfFish),
-
-                buildInnerLabel("Generation", controllerForGeneration, tankModel,
-                    TankStringsEnum.generation),
-              ],
-            ),
-            Row(
-              children: [
-                ((currentTank?.absolutePosition == cParkedRackAbsPosition) ||
-                        (currentTank == null) ||
-                        tankModel.isThereAParkedTank())
-                    ? Container()
-                    : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.zero, // remove any padding
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            currentTank.parkIt();
-                            MyAquariumManagerFacilityModel facilityModel =
-                                Provider.of<MyAquariumManagerFacilityModel>(
-                                    context,
-                                    listen: false);
-                            tankModel.saveExistingTank(facilityModel.documentId,
-                                cParkedRackAbsPosition);
-                          });
-                        },
-                        child: const Text("Park it"),
+      ),
+      body: ListView(
+        // needed for scrolling the keyboard
+        children: [
+          buildOuterLabel(context, "Select Rack (top view)"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: FacilityGrid(tankMode: cFacilityClickableGrid),
+              ),
+            ],
+          ),
+          buildOuterLabel(context, "Select Tank (facing view)"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              RackGrid(),
+              buildParkedTank(context),
+            ],
+          ),
+          buildOuterLabel(context, "Tank Info"),
+          Row(
+            children: [
+              buildInnerLabel("Tank Line", controllerForTankLine, tankModel,
+                  TankStringsEnum.tankLine, 300),
+              drawDateOfBirth(tankModel, currentTank, currentTank?.getBirthDate,
+                  currentTank?.setBirthDate),
+              buildCheckBox(
+                  tankModel,
+                  currentTank,
+                  "Screen Positive",
+                  currentTank?.getScreenPositive,
+                  currentTank?.setScreenPositive),
+            ],
+          ),
+          Row(
+            children: [
+              buildInnerLabel("Number of Fish", controllerForNumberOfFish,
+                  tankModel, TankStringsEnum.numberOfFish),
+              buildInnerLabel("Generation", controllerForGeneration, tankModel,
+                  TankStringsEnum.generation),
+            ],
+          ),
+          Row(
+            children: [
+              ((currentTank?.absolutePosition == cParkedRackAbsPosition) ||
+                      (currentTank == null) ||
+                      tankModel.isThereAParkedTank())
+                  ? Container()
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero, // remove any padding
                       ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 30,
-                  ),
-                  child: TextButton(
-                    onPressed: (currentTank == null)
-                        ? null
-                        : () {
-                            currentTank.notes.loadNotes().then((_) {
-                              notesDialog(context, tankModel, currentTank);
-                            }).catchError((error) {});
-                          },
-                    child: const Text("Notes…"), // this is the button text
-                  ),
+                      onPressed: () {
+                        setState(() {
+                          currentTank.parkIt();
+                          MyAquariumManagerFacilityModel facilityModel =
+                              Provider.of<MyAquariumManagerFacilityModel>(
+                                  context,
+                                  listen: false);
+                          tankModel.saveExistingTank(
+                              facilityModel.returnFacilityId(), cParkedRackAbsPosition);
+                        });
+                      },
+                      child: const Text("Park it"),
+                    ),
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 30,
                 ),
-                SizedBox(
-                  width: 550, //space for the note
-                  child: Text(currentTank?.notes.returnCurrentNoteText() ??
-                      "No current note"),
+                child: TextButton(
+                  onPressed: (currentTank == null)
+                      ? null
+                      : () {
+                          currentTank.notes.loadNotes().then((_) {
+                            notesDialog(context, tankModel, currentTank);
+                          }).catchError((error) {});
+                        },
+                  child: const Text("Notes…"), // this is the button text
                 ),
-                ElevatedButton(
-                    onPressed: (currentTank == null) || (defaultTargetPlatform != TargetPlatform.iOS)
-                        ? null
-                        : () {
-                            printTank(currentTank);
-                          },
-                    child: const Text("Print")),
-              ],
-            ),
-          ],
-        ),
+              ),
+              SizedBox(
+                width: 550, //space for the note
+                child: Text(currentTank?.notes.returnCurrentNoteText() ??
+                    "No current note"),
+              ),
+              ElevatedButton(
+                  onPressed: (currentTank == null) ||
+                          (defaultTargetPlatform != TargetPlatform.iOS)
+                      ? null
+                      : () {
+                          printTank(currentTank);
+                        },
+                  child: const Text("Print")),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

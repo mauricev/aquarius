@@ -1,3 +1,4 @@
+import 'package:aquarium_manager/views/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:aquarium_manager/model/session_key.dart';
 import 'aquarium_manager_tanks_model.dart';
@@ -30,7 +31,6 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
       int? numberOfFish,
       int? fatTankPosition,
       int? generation) {
-
     Tank aTank = Tank(
         documentId: documentId,
         facilityFk: facilityFk,
@@ -47,19 +47,18 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
   }
 
   void clearTanksFullList() {
-    tankListFull
-        .clear();
+    tankListFull.clear();
   }
 
   void clearTanksSearchedList() {
-    tankListSearched
-        .clear();
+    tankListSearched.clear();
   }
 
   Future<models.DocumentList> returnAllTheTanks() async {
-
     List<String>? tankQuery = [
       Query.equal("facility_fk", facilityFk),
+      Query.limit(
+          5000), // BUG fixed, internal default appwrite limit is 25 items returned
     ];
     return await _manageSession.queryDocument(cTankCollection, tankQuery);
   }
@@ -87,7 +86,15 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
     }
   }
 
-  void prepareSearchTankList(String tankLineTextToSearchFor) {
+  int? computeBreedingDate(int? birthDate) {
+    // we will take the birthdate and add to it 6 months
+    // if we want to change 6 months to some other value, we will probably
+    // need a new database collection of one record and a new model to manage this value
+    // along with an interface
+    return (birthDate! + kCrossBreedTime);
+  }
+
+  void prepareSearchTankList(String tankLineTextToSearchFor, bool searchType) {
     tankListSearched.clear();
     if (tankLineTextToSearchFor == "") {
       for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
@@ -96,32 +103,66 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
     } else {
       for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
         if (tankListFull[theIndex].tankLine != null) {
-          if (tankListFull[theIndex].tankLine!.toLowerCase().contains(
-              tankLineTextToSearchFor.toLowerCase())) {
+          if (tankListFull[theIndex]
+              .tankLine!
+              .toLowerCase()
+              .contains(tankLineTextToSearchFor.toLowerCase())) {
             tankListSearched.add(tankListFull[theIndex]);
           }
         }
       }
     }
-    // sort based on birthdate
-    tankListSearched.sort((a, b) {
-      if (a.birthDate == null && b.birthDate == null) {
-        return 0; // Both dates are null, they are equal
-      }
-      if (a.birthDate == null) {
-        return 1; // a is after b because a is null and b is not
-      }
-      if (b.birthDate == null) {
-        return -1; // a is before b because a is not null and b is
-      }
-      return a.birthDate!.compareTo(b.birthDate!); // Now we are sure that neither date is null
-    });
+
+    void sortByProperty<T>(
+        List<T> list, Comparable? Function(T) getProperty) {
+      list.sort((a, b) {
+        final aProp = getProperty(a);
+        final bProp = getProperty(b);
+
+        if (aProp == null && bProp == null) {
+          return 0;
+        }
+        if (aProp == null) {
+          return 1;
+        }
+        if (bProp == null) {
+          return -1;
+        }
+        return aProp.compareTo(bProp);
+      });
+    }
+
+    if (searchType == kPlainSearch) {
+      sortByProperty(tankListSearched, (tank) => tank.birthDate);
+    } else {
+      sortByProperty(tankListSearched, (tank) => tank.tankLine);
+    }
     notifyListeners();
   }
 
-  Future<void> buildInitialSearchList(String facilityFk) async {
+  // we exclude exact matches so the dropdown doesn’t automatically come down on the mere loading of the tank cell
+  // bug, we are searching only the tanks in this particular rack, not in all racks
+  Set<String> returnListOfTankLines(String excludeThisString) {
+
+    Set<String> tankLineList = Set<String>();
+
+    for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
+      String? tankLine = tankListFull[theIndex].tankLine;
+      if (tankLine != null && tankLine != excludeThisString) {
+        tankLineList.add(tankLine);
+      }
+    }
+    return tankLineList;
+  }
+
+  Future<void> prepareFullTankListForFacility(String facilityFk) async {
     setFacilityId(facilityFk);
     await prepareFullTankList(); // we do get the full tank list from the database and the database should always be up to date.
-    prepareSearchTankList("");
   }
+
+  Future<void> buildInitialSearchList(String facilityFk) async {
+    await prepareFullTankListForFacility(facilityFk); // we do get the full tank list from the database and the database should always be up to date.
+    prepareSearchTankList("",kPlainSearch);
+  }
+
 }

@@ -7,12 +7,45 @@ import 'package:provider/provider.dart';
 import '../model/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/typography.dart';
 
-class MyAquariumManagerSearchController extends StatelessWidget {
+class MyAquariumManagerSearchController extends StatefulWidget {
   MyAquariumManagerSearchController({Key? key}) : super(key: key);
 
+  @override
+  State<MyAquariumManagerSearchController> createState() =>
+      _MyAquariumManagerSearchControllerState();
+}
+
+class _MyAquariumManagerSearchControllerState
+    extends State<MyAquariumManagerSearchController> {
   final TextEditingController controllerForSearch = TextEditingController();
 
-  Widget buildCheckBox(BuildContext context, String labelText, bool? Function()? retrieveValue) {
+  bool isPlainSearch = true;
+
+  @override
+  void dispose() {
+    controllerForSearch.dispose();
+    super.dispose();
+  }
+
+  // it's not demanding i make this final
+  Widget displayCrossBreedingDate() {
+    return CheckboxListTile(
+      title: Text(
+        "Display cross-breeding times (reverse chronological order)",
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+      value: isPlainSearch,
+      onChanged: (newValue) {
+        setState(() {
+          isPlainSearch = newValue!;
+        });
+      },
+      controlAffinity: ListTileControlAffinity.leading, //  <-- leading Checkbox
+    );
+  }
+
+  Widget buildCheckBox(
+      BuildContext context, String labelText, bool? Function()? retrieveValue) {
     return SizedBox(
       width: 150,
       child: CheckboxListTile(
@@ -35,11 +68,14 @@ class MyAquariumManagerSearchController extends StatelessWidget {
     // what will display
     // 1) tankline, 2) dob 3) smalltank 4) screen positive, 5) generation, 6)
 
+    MyAquariumManagerSearchModel searchModel =
+    Provider.of<MyAquariumManagerSearchModel>(context);
+
+    int? birthDate = tank.getBirthDate();
+    int? breedingDate = searchModel.computeBreedingDate(birthDate);
+
     return GestureDetector(
       onTap: () {
-        myPrint("abs position of tank I clicked on is ${tank.absolutePosition}");
-        myPrint("abs position of rack on this tank is ${tank.rackFk}");
-
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -74,10 +110,13 @@ class MyAquariumManagerSearchController extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    "DOB: ${buildDateOfBirth(tank.getBirthDate)}",
+                    isPlainSearch
+                        ? "DOB: ${buildDateOfBirth(() => birthDate)}"
+                        : "Cross-breeding date: ${buildDateOfBirth(() => breedingDate)}",
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  buildCheckBox(context,"Screen Positive", tank.getScreenPositive),
+                  buildCheckBox(
+                      context, "Screen Positive", tank.getScreenPositive),
                   // buildCheckBox(context,"Small Tank", tank.getSmallTank),
                   Text(
                     "Generation: F${(tank.generation.toString())}",
@@ -110,11 +149,23 @@ class MyAquariumManagerSearchController extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: TextField(
+                    enabled: isPlainSearch,
                     keyboardType: TextInputType.text,
                     controller: controllerForSearch,
                     onChanged: (value) {
-                      searchModel.prepareSearchTankList(value); // provider is updating this widget
+                      searchModel.prepareSearchTankList(value,
+                          kPlainSearch);
                     }),
+              ),
+              expandedFlex1(),
+            ],
+          ),
+          Row(
+            children: [
+              expandedFlex1(),
+              Expanded(
+                flex: 2,
+                child: displayCrossBreedingDate(),
               ),
               expandedFlex1(),
             ],

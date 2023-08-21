@@ -29,6 +29,10 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
 
   MyAquariumManagerFacilityModel(this._manageSession);
 
+  String returnFacilityId() {
+    return documentId;
+  }
+
   void addRack(int absolutePosition, String relativePosition) {
     myPrint(
         "adding the rack $relativePosition at position $absolutePosition");

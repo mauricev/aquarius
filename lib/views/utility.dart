@@ -58,7 +58,6 @@ double returnWidth(MyAquariumManagerFacilityModel facilityModel) {
 
 int returnTimeNow() {
   DateTime now = DateTime.now();
-  //return now.millisecondsSinceEpoch ~/ 1000;
   return now.millisecondsSinceEpoch;
 }
 

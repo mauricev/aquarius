@@ -114,12 +114,15 @@ class MyAquariumManagerModel with ChangeNotifier {
   Future<List<Map<String, String>>> getFacilityNames2() async {
     List<Map<String, String>> facilitiesNameList = [];
 
+    myPrint("inside getFacilityNames2 1");
+
     List<String>? query = [
       Query.notEqual("facility_name", [""]) // empty string should bring back all facilities
     ];
-
+    myPrint("inside getFacilityNames2 2");
     models.DocumentList facilitiesDocumentList = await _manageSession.queryDocument(kFacilityCollection,query);
-
+    myPrint("inside getFacilityNames2 3");
+    myPrint("the facilities are ${facilitiesDocumentList}");
     for (int theIndex = 0; theIndex < facilitiesDocumentList.total; theIndex++) {
       models.Document theFacility = facilitiesDocumentList.documents[theIndex];
 

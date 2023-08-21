@@ -18,6 +18,10 @@ const String kProjectId = '6477fda3e6695f938f0d';
 const kRunningLocal = true;
 
 const String kDatabaseId = '63eefc50e6d7b0cb4c4e';
+// we don’t use this; the user selects the facility by name in the dropdown
+// we look up the id and store that
+
+// the kFacilityCollection is NOT the same as the document id of the facility document id
 const String kFacilityCollection = "63eefc630814627ea850";
 const String cRackCollection = '63f97b76c200d9237cea';
 const String cTankCollection = '6408223c577dec6908e7';
@@ -44,3 +48,7 @@ const int kStartingYear = 2021;
 const int kStartingMonth = 1;
 const int kEndingYear = 2024;
 const int kStartingDOBOffset = 66000000000;
+
+const bool kPlainSearch = true;
+const bool kCrossBreedSearch = false;
+const int kCrossBreedTime = 15774336000;

@@ -48,7 +48,7 @@ class _TankCellState extends State<TankCell> {
     // two things here, addNewEmptyTank must set its fatTankPosition value if bigtank is picked,
 
     tankModel.addNewEmptyTank(
-        facilityModel.documentId,
+        facilityModel.returnFacilityId(),
         widget.absolutePosition,
         bigTank == true
             ? (widget.absolutePosition + 1)
@@ -70,6 +70,8 @@ class _TankCellState extends State<TankCell> {
         return AlertDialog(
           title: const Text('Create Tank'),
           actions: <Widget>[
+            // for whatever reason inside the alertdialog, the outside variable isFatTank
+            // is regarded as local, so we need StatefulBuilder to attach it to outside
             StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return CheckboxListTile(
@@ -77,7 +79,6 @@ class _TankCellState extends State<TankCell> {
                   title: const Text('Make this a fat tank?'),
                   value: isFatTank,
                   onChanged: (bool? value) {
-                    myPrint("we are in fat checkbox, $value");
                     setState(() {
                       isFatTank = value ?? false;
                     });
@@ -218,19 +219,14 @@ class _TankCellState extends State<TankCell> {
                             // because fattankposition will be wrong
 
                             // new check: if there is a tank to the right of widget.absolutePosition, then this must return false
-
                             if (canAbsolutePositionHostAFatTank(
                                 context, widget.absolutePosition)) {
-                              myPrint(
-                                  "tank at ${widget.absolutePosition} can host a fat tank");
+
                               confirmSmallTank(context).then((fatTankState) {
-                                myPrint(
-                                    "we clicked OK to the fat tank dialog, ${fatTankState}");
+
                                 if (fatTankState != null) {
                                   // null means the user cancelled
                                   setState(() {
-                                    myPrint(
-                                        "we are creating a tank with state ${fatTankState}");
                                     createTank(fatTankState);
                                   });
                                 }
@@ -250,7 +246,6 @@ class _TankCellState extends State<TankCell> {
                           ),
                         ),
                       )
-                    // : Text("${widget.absolutePosition}"), // here is where we can have an image asset
                     : tankModel
                                 .isThisTankVirtual(widget.absolutePosition + 1)
                             ? Image.asset("assets/tank_fat_left.png")
@@ -310,7 +305,7 @@ class _TankCellState extends State<TankCell> {
             assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // the tank has not been saved with this new info
             // this will be physical
-            tankModel.saveExistingTank(facilityModel.documentId, thisPosition);
+            tankModel.saveExistingTank(facilityModel.returnFacilityId(), thisPosition);
           } else {
             myPrint("we dragged to an active tank spot");
             // here we are swapping tank positions
@@ -324,10 +319,10 @@ class _TankCellState extends State<TankCell> {
             // BUG if this tank is fat, then its fat position needs to be updated
             assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // this will be physical
-            tankModel.saveExistingTank(facilityModel.documentId, thisPosition);
+            tankModel.saveExistingTank(facilityModel.returnFacilityId(), thisPosition);
             // this will be physical
             tankModel.saveExistingTank(
-                facilityModel.documentId, cParkedAbsolutePosition);
+                facilityModel.returnFacilityId(), cParkedAbsolutePosition);
           }
           // below we are passing a physical tank position
           // so selectThisTankCell should never come to the virtual tank code

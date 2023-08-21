@@ -41,8 +41,8 @@ final textTheme = TextTheme(
   ),
   titleMedium: GoogleFonts.openSans(
     fontWeight: FontWeight.w600,
-    fontSize: 16,
-    height: 24 / 16,
+    fontSize: 20,
+    height: 24 / 20,
     letterSpacing: 0.1,
   ),
   titleSmall: GoogleFonts.openSans(

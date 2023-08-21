@@ -197,6 +197,8 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
         rackId,
         cParkedRackFkAddress
       ]), // potential solution make this an or search and just pass in this or 0, so get both
+      Query.limit(
+          5000), // BUG fixed, internal default appwrite limit is 25 items returned
     ];
     return await _manageSession.queryDocument(cTankCollection, tankQuery);
   }
@@ -251,7 +253,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   Future<void> loadTanksForThisRack(MyAquariumManagerFacilityModel facilityModel, String theRackId) async {
 
     models.DocumentList theTankList = await returnAssociatedTankList(
-        facilityModel.documentId, theRackId);
+        facilityModel.returnFacilityId(), theRackId);
 
     // all tanks must save with a rack_fk; this is for other methods here
     rackDocumentid = theRackId;
@@ -274,7 +276,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
        */
       addTankFromDatabase(
           theTank.$id, // this is the document ID that uniquely indentifies this record
-          facilityModel.documentId,
+          facilityModel.returnFacilityId(),
           theTank.data['rack_fk'],
           theTank.data['absolute_position'],
           theTank.data['tank_line'],

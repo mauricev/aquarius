@@ -154,6 +154,7 @@ class ManageSession {
 
   Future<models.DocumentList> queryDocument(String collectionId, List<String>? queries) {
     Databases theDatabase = Databases(_client);
+    myPrint("the database is ${theDatabase}");
     return theDatabase.listDocuments(
         databaseId: kDatabaseId,
         collectionId: collectionId,
