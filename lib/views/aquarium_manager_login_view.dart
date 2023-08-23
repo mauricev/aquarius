@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:aquarium_manager/model/aquarium_manager_model.dart';
-import 'aquarium_manager_homescreen_controller.dart';
+import 'package:aquarium_manager/models/aquarium_manager_model.dart';
+import 'aquarium_manager_homescreen_view.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
-part 'aquarium_manager_preparelogin_controller.dart';
+part 'aquarium_manager_preparelogin_view.dart';
 
-class MyAquariumManagerLoginController extends StatefulWidget {
-  const MyAquariumManagerLoginController({super.key});
+class MyAquariumManagerLoginView extends StatefulWidget {
+  const MyAquariumManagerLoginView({super.key});
 
   @override
-  State<MyAquariumManagerLoginController> createState() =>
-      _MyAquariumManagerLoginControllerState();
+  State<MyAquariumManagerLoginView> createState() =>
+      _MyAquariumManagerLoginViewState();
 }
 
-class _MyAquariumManagerLoginControllerState
-    extends State<MyAquariumManagerLoginController> {
+class _MyAquariumManagerLoginViewState
+    extends State<MyAquariumManagerLoginView> {
   bool doPasswordsMatch = true;
   String registerError = ""; // this now defaults to an empty string
   TextEditingController controllerForEmail = TextEditingController();
@@ -89,7 +89,7 @@ class _MyAquariumManagerLoginControllerState
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AquariumManagerHomeScreenController(),
+                      builder: (context) => const AquariumManagerHomeScreenView(),
                     ),
                   );
                 }).catchError((error) {

@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../model/aquarium_manager_facilities_model.dart';
-import '../views/facility_grid.dart';
-import '../views/utility.dart';
+import '../models/aquarium_manager_facilities_model.dart';
+import 'facility_grid.dart';
+import 'utility.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
-class MyAquariumManagerFacilitiesController extends StatefulWidget {
-  const MyAquariumManagerFacilitiesController({
+class MyAquariumManagerFacilitiesView extends StatefulWidget {
+  const MyAquariumManagerFacilitiesView({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<MyAquariumManagerFacilitiesController> createState() =>
+  State<MyAquariumManagerFacilitiesView> createState() =>
       _MyAquariumManagerFacilitiesController();
 }
 
 class _MyAquariumManagerFacilitiesController
-    extends State<MyAquariumManagerFacilitiesController> {
+    extends State<MyAquariumManagerFacilitiesView> {
   TextEditingController controllerForFacilityName = TextEditingController();
   TextEditingController controllerForFacilityBuilding = TextEditingController();
   TextEditingController controllerForFacilityRoom = TextEditingController();

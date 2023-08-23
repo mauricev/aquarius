@@ -1,7 +1,7 @@
-part of 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
+part of 'package:aquarium_manager/views/aquarium_manager_login_view.dart';
 
-extension _MyAquariumManagerControllerPrepareLogin
-    on _MyAquariumManagerLoginControllerState {
+extension _MyAquariumManagerViewPrepareLogin
+    on _MyAquariumManagerLoginViewState {
 
   Widget registerLoginScreens(BuildContext context,MyAquariumManagerModel model) {
     if (model.getDoesUserWantToRegister()) {
@@ -31,7 +31,7 @@ extension _MyAquariumManagerControllerPrepareLogin
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const AquariumManagerHomeScreenController(),
+                  builder: (context) => const AquariumManagerHomeScreenView(),
                 ),
               );
             });

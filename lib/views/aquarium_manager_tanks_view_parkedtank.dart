@@ -1,7 +1,7 @@
 import 'package:aquarium_manager/views/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../model/aquarium_manager_tanks_model.dart';
+import '../models/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
 class ParkedTank extends StatelessWidget {

@@ -1,22 +1,22 @@
-import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller.dart';
-import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
+import 'package:aquarium_manager/views/aquarium_manager_tanks_view.dart';
+import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:flutter/material.dart';
-import '../views/utility.dart';
+import 'utility.dart';
 import 'package:provider/provider.dart';
-import '../model/aquarium_manager_tanks_model.dart';
+import '../models/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/typography.dart';
 
-class MyAquariumManagerSearchController extends StatefulWidget {
-  MyAquariumManagerSearchController({Key? key}) : super(key: key);
+class MyAquariumManagerSearchView extends StatefulWidget {
+  MyAquariumManagerSearchView({Key? key}) : super(key: key);
 
   @override
-  State<MyAquariumManagerSearchController> createState() =>
-      _MyAquariumManagerSearchControllerState();
+  State<MyAquariumManagerSearchView> createState() =>
+      _MyAquariumManagerSearchViewState();
 }
 
-class _MyAquariumManagerSearchControllerState
-    extends State<MyAquariumManagerSearchController> {
+class _MyAquariumManagerSearchViewState
+    extends State<MyAquariumManagerSearchView> {
   final TextEditingController controllerForSearch = TextEditingController();
 
   bool isPlainSearch = true;
@@ -79,7 +79,7 @@ class _MyAquariumManagerSearchControllerState
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MyAquariumManagerTankController(
+            builder: (context) => MyAquariumManagerTankView(
               arguments: {
                 'incomingRack_Fk': tank.rackFk,
                 'incomingTankPosition': tank.absolutePosition,

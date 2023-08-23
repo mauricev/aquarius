@@ -1,14 +1,14 @@
-import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
+import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../model/aquarium_manager_facilities_model.dart';
-import '../model/aquarium_manager_tanks_model.dart';
-import '../views/utility.dart';
-import '../views/facility_grid.dart';
+import '../models/aquarium_manager_facilities_model.dart';
+import '../models/aquarium_manager_tanks_model.dart';
+import 'utility.dart';
+import 'facility_grid.dart';
 import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_parkedtank.dart';
-import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_rackgrid.dart';
-import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_notes.dart';
+import 'package:aquarium_manager/views/aquarium_manager_tanks_view_parkedtank.dart';
+import 'package:aquarium_manager/views/aquarium_manager_tanks_view_rackgrid.dart';
+import 'package:aquarium_manager/views/aquarium_manager_tanks_view_notes.dart';
 
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
@@ -22,19 +22,19 @@ import 'package:aquarium_manager/views/typography.dart';
 //import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
-class MyAquariumManagerTankController extends StatefulWidget {
+class MyAquariumManagerTankView extends StatefulWidget {
   final Map<String, dynamic> arguments;
 
-  const MyAquariumManagerTankController({Key? key, required this.arguments})
+  const MyAquariumManagerTankView({Key? key, required this.arguments})
       : super(key: key);
 
   @override
-  MyAquariumManagerTankControllerState createState() =>
-      MyAquariumManagerTankControllerState();
+  MyAquariumManagerTankViewState createState() =>
+      MyAquariumManagerTankViewState();
 }
 
-class MyAquariumManagerTankControllerState
-    extends State<MyAquariumManagerTankController> {
+class MyAquariumManagerTankViewState
+    extends State<MyAquariumManagerTankView> {
   String? incomingRackFk;
   int? incomingTankPosition;
 

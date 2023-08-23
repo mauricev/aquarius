@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../model/aquarium_manager_facilities_model.dart';
-import '../model/aquarium_manager_tanks_model.dart';
-import '../views/utility.dart';
-import 'package:aquarium_manager/controllers/aquarium_manager_tanks_controller_tankcell.dart';
-import '../views/consts.dart';
+import '../models/aquarium_manager_facilities_model.dart';
+import '../models/aquarium_manager_tanks_model.dart';
+import 'utility.dart';
+import 'package:aquarium_manager/views/aquarium_manager_tanks_view_tankcell.dart';
 
 class RackGrid extends StatelessWidget {
   RackGrid({

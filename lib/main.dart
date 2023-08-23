@@ -1,12 +1,12 @@
 import 'package:aquarium_manager/views/typography.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import "package:aquarium_manager/model/aquarium_manager_model.dart";
-import 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
-import 'package:aquarium_manager/model/session_key.dart';
-import 'model/aquarium_manager_facilities_model.dart';
-import 'model/aquarium_manager_tanks_model.dart';
-import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
+import "package:aquarium_manager/models/aquarium_manager_model.dart";
+import 'package:aquarium_manager/views/aquarium_manager_login_view.dart';
+import 'package:aquarium_manager/models/session_key.dart';
+import 'models/aquarium_manager_facilities_model.dart';
+import 'models/aquarium_manager_tanks_model.dart';
+import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:flutter/services.dart';
 
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: kProgramName,
         theme: aquariumManagerTheme,
-        home: const MyAquariumManagerLoginController(),
+        home: const MyAquariumManagerLoginView(),
       ),
     );
   }

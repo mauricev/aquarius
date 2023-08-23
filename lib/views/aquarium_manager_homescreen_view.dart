@@ -1,26 +1,26 @@
-import 'package:aquarium_manager/model/aquarium_manager_search_model.dart';
+import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../model/aquarium_manager_model.dart';
-import 'aquarium_manager_facilities_controller.dart';
-import '../model/aquarium_manager_facilities_model.dart';
-import 'aquarium_manager_search_controller.dart';
-import 'aquarium_manager_tanks_controller.dart';
+import '../models/aquarium_manager_model.dart';
+import '../views/aquarium_manager_facilities_view.dart';
+import '../models/aquarium_manager_facilities_model.dart';
+import 'aquarium_manager_search_view.dart';
+import 'aquarium_manager_tanks_view.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../views/utility.dart';
 import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/controllers/aquarium_manager_login_controller.dart';
+import 'package:aquarium_manager/views/aquarium_manager_login_view.dart';
 
-class AquariumManagerHomeScreenController extends StatefulWidget {
-  const AquariumManagerHomeScreenController({Key? key}) : super(key: key);
+class AquariumManagerHomeScreenView extends StatefulWidget {
+  const AquariumManagerHomeScreenView({Key? key}) : super(key: key);
 
   @override
-  State<AquariumManagerHomeScreenController> createState() =>
-      _AquariumManagerHomeScreenControllerState();
+  State<AquariumManagerHomeScreenView> createState() =>
+      _AquariumManagerHomeScreenViewState();
 }
 
-class _AquariumManagerHomeScreenControllerState
-    extends State<AquariumManagerHomeScreenController> {
+class _AquariumManagerHomeScreenViewState
+    extends State<AquariumManagerHomeScreenView> {
   final cNotANewFacility = false;
   final cNewFacility = true;
 
@@ -98,7 +98,7 @@ class _AquariumManagerHomeScreenControllerState
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  const MyAquariumManagerFacilitiesController()) // this will read from facility model, which has already been updated
+                  const MyAquariumManagerFacilitiesView()) // this will read from facility model, which has already been updated
           ).then((data) {
             setState(() {
               // does this work?, yes it does
@@ -119,7 +119,7 @@ class _AquariumManagerHomeScreenControllerState
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const MyAquariumManagerTankController(
+              builder: (context) => const MyAquariumManagerTankView(
                     arguments: {
                       'incomingRack_Fk': null,
                       'incomingTankPosition': null,
@@ -151,7 +151,7 @@ class _AquariumManagerHomeScreenControllerState
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MyAquariumManagerTankController(
+            builder: (context) => MyAquariumManagerTankView(
               arguments: {
                 'incomingRack_Fk': rackFk,
                 'incomingTankPosition': absolutePosition,
@@ -218,7 +218,7 @@ class _AquariumManagerHomeScreenControllerState
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    MyAquariumManagerSearchController()) // this will read from facility model, which has already been updated
+                    MyAquariumManagerSearchView()) // this will read from facility model, which has already been updated
             );
       });
     });
@@ -234,7 +234,7 @@ class _AquariumManagerHomeScreenControllerState
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const MyAquariumManagerLoginController(),
+          builder: (context) => const MyAquariumManagerLoginView(),
         ),
       );
     });

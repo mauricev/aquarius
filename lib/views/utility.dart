@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/aquarium_manager_facilities_model.dart';
+import '../models/aquarium_manager_facilities_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
 void myPrint(String printThis) {
