@@ -218,7 +218,7 @@ class _AquariumManagerHomeScreenViewState
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    MyAquariumManagerSearchView()) // this will read from facility model, which has already been updated
+                    const MyAquariumManagerSearchView()) // this will read from facility model, which has already been updated
             );
       });
     });

@@ -63,33 +63,6 @@ class _MyAquariumManagerFacilitiesController
     super.dispose();
   }
 
-  Future<bool> confirmGridSetting(BuildContext context, String message) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Confirmation'),
-              content: Text(message),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
-  }
-
   TextInputType? returnTextInputType(FacilityStringsEnum facilitystringValue) {
     TextInputType? theType = TextInputType.text;
     switch (facilitystringValue) {
@@ -246,7 +219,7 @@ class _MyAquariumManagerFacilitiesController
                         onPressed: gridLocked
                             ? null
                             : () async {
-                          bool confirmed = await confirmGridSetting(
+                          bool confirmed = await confirmActionSpecifiedInMessage(
                               context, 'Lock in this grid pattern?');
                           setState(() {
                             gridLocked = confirmed;

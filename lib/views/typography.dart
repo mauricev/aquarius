@@ -117,3 +117,22 @@ final aquariumManagerTheme = ThemeData(
   ),
   // other theme properties
 );
+
+class CustomTextStyle {
+  final TextTheme baseTextTheme;
+  final TextStyle bodySmallBold;
+
+  CustomTextStyle({
+    required this.baseTextTheme,
+    required this.bodySmallBold,
+  });
+}
+
+final customTextStyle = CustomTextStyle(
+  baseTextTheme: textTheme, // your textTheme defined previously
+  bodySmallBold: GoogleFonts.openSans(
+    fontWeight: FontWeight.w700,
+    fontSize: 9,
+    height: 12 / 9,
+  ),
+);

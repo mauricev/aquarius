@@ -1,4 +1,3 @@
-import 'package:aquarium_manager/views/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/aquarium_manager_tanks_model.dart';
@@ -37,11 +36,10 @@ class ParkedTank extends StatelessWidget {
 
     int tankID =
     tankModel.tankIdWithThisAbsolutePositionOnlyPhysical(cParkedAbsolutePosition);
-    myPrint("we are in parked territory, the tank id is ${tankID}");
 
     Tank? thisTank =
     tankModel.returnPhysicalTankWithThisAbsolutePosition(cParkedAbsolutePosition);
-    myPrint("we are in parked territory, the tank is ${thisTank}");
+
     // i think we can pass the tank to the receiver
     // how do we swap tanks
     // we need a second temporary rack

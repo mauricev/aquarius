@@ -214,9 +214,9 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
           : rackDocumentid, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
       'absolute_position': absolutePosition,
       'tank_line': theTank?.tankLine,
-      'date_of_birth': theTank?.birthDate,
-      'screen_positive': theTank?.screenPositive,
-      'number_of_fish': theTank?.numberOfFish,
+      'date_of_birth': theTank?.getBirthDate(),
+      'screen_positive': theTank?.getScreenPositive(),
+      'number_of_fish': theTank?.getNumberOfFish(),
       'fat_tank_position': theTank?.fatTankPosition,
       'generation': theTank?.generation,
     };
@@ -243,11 +243,16 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   }
 
   void euthanizeTank(int absolutePosition) async {
-    //models.Document theTankDocument = await PrepareTankDocument(absolutePosition);
     Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
-    _manageSession.deleteDocument(cTankCollection, (theTank?.documentId)!);
+
     int tankIndex = tankIdWithThisAbsolutePositionOnlyPhysical(absolutePosition);
     deleteTank(tankIndex);
+
+    await _manageSession.deleteDocument(cTankCollection, (theTank?.documentId)!); // await to ensure notifylisteners occurs after deletetank
+
+    selectThisTankCellConvertsVirtual(kEmptyTankIndex); // the currently selected tank has been deleted
+    // what happens when deleting a parked tank. there simply is no longer a parked tank??
+   // notifyListeners();  called above
   }
 
   Future<void> loadTanksForThisRack(MyAquariumManagerFacilityModel facilityModel, String theRackId) async {

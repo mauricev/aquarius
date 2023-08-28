@@ -3,7 +3,7 @@ import '../models/aquarium_manager_facilities_model.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
 void myPrint(String printThis) {
-  print(printThis);
+  //print(printThis);
 }
 
 Widget buildOuterLabel(BuildContext context, String labelText) {
@@ -78,4 +78,31 @@ String buildDateOfBirth(int? Function()? retrieveValue) {
         retrieveValue?.call() ?? returnTimeNow()));
   }
   return dobText;
+}
+
+Future<bool> confirmActionSpecifiedInMessage(BuildContext context, String message) async {
+  return await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Confirmation'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+          ),
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+          ),
+        ],
+      );
+    },
+  ) ??
+      false;
 }

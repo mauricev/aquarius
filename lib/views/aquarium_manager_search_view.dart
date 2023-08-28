@@ -8,7 +8,7 @@ import '../models/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/typography.dart';
 
 class MyAquariumManagerSearchView extends StatefulWidget {
-  MyAquariumManagerSearchView({Key? key}) : super(key: key);
+  const MyAquariumManagerSearchView({Key? key}) : super(key: key);
 
   @override
   State<MyAquariumManagerSearchView> createState() =>
@@ -17,9 +17,10 @@ class MyAquariumManagerSearchView extends StatefulWidget {
 
 class _MyAquariumManagerSearchViewState
     extends State<MyAquariumManagerSearchView> {
+
   final TextEditingController controllerForSearch = TextEditingController();
 
-  bool isPlainSearch = true;
+  bool isPlainSearch = kPlainSearch;
 
   @override
   void dispose() {
@@ -34,10 +35,16 @@ class _MyAquariumManagerSearchViewState
         "Display cross-breeding times (reverse chronological order)",
         style: Theme.of(context).textTheme.bodySmall,
       ),
-      value: isPlainSearch,
+      value: !isPlainSearch, // this checkbox is the opposite of the isPlainSearch value
       onChanged: (newValue) {
         setState(() {
-          isPlainSearch = newValue!;
+          isPlainSearch = !newValue!;
+          // we should redo the search here
+          controllerForSearch.text= "";
+          MyAquariumManagerSearchModel searchModel =
+          Provider.of<MyAquariumManagerSearchModel>(context, listen: false);
+          searchModel.prepareSearchTankList("",
+              isPlainSearch); // we pass the checkbox value to change search to sort by cross-breed date
         });
       },
       controlAffinity: ListTileControlAffinity.leading, //  <-- leading Checkbox
@@ -113,11 +120,15 @@ class _MyAquariumManagerSearchViewState
                     isPlainSearch
                         ? "DOB: ${buildDateOfBirth(() => birthDate)}"
                         : "Cross-breeding date: ${buildDateOfBirth(() => breedingDate)}",
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: isPlainSearch ? Theme.of(context).textTheme.bodySmall : customTextStyle.bodySmallBold,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Text("${tank.getNumberOfFish().toString()} fish", style: Theme.of(context).textTheme.bodySmall),
                   ),
                   buildCheckBox(
                       context, "Screen Positive", tank.getScreenPositive),
-                  // buildCheckBox(context,"Small Tank", tank.getSmallTank),
+                  buildCheckBox(context,"Thin Tank", tank.getSmallTank),
                   Text(
                     "Generation: F${(tank.generation.toString())}",
                     style: Theme.of(context).textTheme.bodySmall,

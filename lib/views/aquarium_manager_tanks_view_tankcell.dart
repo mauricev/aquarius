@@ -89,7 +89,6 @@ class _TankCellState extends State<TankCell> {
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                myPrint("we clicked cancel");
                 Navigator.of(context).pop(null); // null to cancel dialog
               },
             ),
@@ -192,7 +191,7 @@ class _TankCellState extends State<TankCell> {
                               widget.absolutePosition))
                           ? Colors.white
                           //: Colors.lightGreen[500] // this grid cell has a tank
-                          : Color(0xFF90CAF9)
+                          : const Color(0xFF90CAF9)
                       : Colors
                           .transparent, // this grid cell does not have a tank, but we need a third state here
             ),
@@ -326,8 +325,7 @@ class _TankCellState extends State<TankCell> {
           }
           // below we are passing a physical tank position
           // so selectThisTankCell should never come to the virtual tank code
-          myPrint(
-              "about to select a physical tank after dragging, ${thisPosition}");
+
           tankModel.selectThisTankCellConvertsVirtual(thisPosition);
         });
       },

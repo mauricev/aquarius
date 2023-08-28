@@ -140,12 +140,9 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   Future<void> getFacilityInfo(String? theFacilityFk) async {
     if (theFacilityFk != null) {
       // if we are null, then we are in the new facility page
-      myPrint("we are entering an existing facility, $theFacilityFk");
 
       models.Document theFacility = await _manageSession.getDocument(
           kFacilityCollection, theFacilityFk);
-
-      print("getfacilityinfo, ${theFacility.$id} and ${theFacility.data['facility_name']}");
 
       documentId = theFacility.$id;
       facilityName = theFacility.data['facility_name'];

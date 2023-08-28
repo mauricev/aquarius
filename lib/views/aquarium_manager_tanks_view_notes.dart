@@ -21,7 +21,6 @@ class NotesDialogBodyState extends State<NotesDialogBody> {
 
     controllerForNotesItem.text = notes.returnIndexedNoteText(index);
 
-    myPrint("i am in notes item for index, $index");
     return Column(
       children: [
         Row(

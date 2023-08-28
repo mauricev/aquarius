@@ -132,9 +132,9 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
     }
 
     if (searchType == kPlainSearch) {
-      sortByProperty(tankListSearched, (tank) => tank.birthDate);
-    } else {
       sortByProperty(tankListSearched, (tank) => tank.tankLine);
+    } else {
+      sortByProperty(tankListSearched, (tank) => tank.getBirthDate());
     }
     notifyListeners();
   }
@@ -143,7 +143,7 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
   // bug, we are searching only the tanks in this particular rack, not in all racks
   Set<String> returnListOfTankLines(String excludeThisString) {
 
-    Set<String> tankLineList = Set<String>();
+    Set<String> tankLineList = {};
 
     for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
       String? tankLine = tankListFull[theIndex].tankLine;

@@ -37,9 +37,9 @@ class RackGrid extends StatelessWidget {
         height: height,
         width: width,
         tankLine: tank?.tankLine,
-        dateOfBirth: tank?.birthDate,
-        screenPositive: tank?.screenPositive,
-        numberOfFish: tank?.numberOfFish,
+        dateOfBirth: tank?.getBirthDate(),
+        screenPositive: tank?.getScreenPositive(),
+        numberOfFish: tank?.getNumberOfFish(),
         fatTankPosition: tank?.fatTankPosition,
         generation: tank?.generation,
       ));
