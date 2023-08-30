@@ -1,12 +1,12 @@
 import 'package:aquarium_manager/views/typography.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import "package:aquarium_manager/models/aquarium_manager_model.dart";
-import 'package:aquarium_manager/views/aquarium_manager_login_view.dart';
-import 'package:aquarium_manager/models/session_key.dart';
-import 'models/aquarium_manager_facilities_model.dart';
-import 'models/aquarium_manager_tanks_model.dart';
-import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
+import "package:aquarium_manager/view_models/viewmodel.dart";
+import 'package:aquarium_manager/views/login_view.dart';
+import 'package:aquarium_manager/view_models/session_key.dart';
+import 'view_models/facilities_viewmodel.dart';
+import 'view_models/tanks_viewmodel.dart';
+import 'package:aquarium_manager/view_models/search_viewmodel.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:flutter/services.dart';
 
@@ -31,23 +31,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<MyAquariumManagerModel>(
-          create: (_) => MyAquariumManagerModel(manageSession),
+        ChangeNotifierProvider<AquariusViewModel>(
+          create: (_) => AquariusViewModel(manageSession),
         ),
-        ChangeNotifierProvider<MyAquariumManagerFacilityModel>(
-          create: (_) => MyAquariumManagerFacilityModel(manageSession),
+        ChangeNotifierProvider<FacilityViewModel>(
+          create: (_) => FacilityViewModel(manageSession),
         ),
-        ChangeNotifierProvider<MyAquariumManagerTanksModel>(
-          create: (_) => MyAquariumManagerTanksModel(manageSession),
+        ChangeNotifierProvider<TanksViewModel>(
+          create: (_) => TanksViewModel(manageSession),
         ),
-        ChangeNotifierProvider<MyAquariumManagerSearchModel>(
-          create: (_) => MyAquariumManagerSearchModel(manageSession),
+        ChangeNotifierProvider<SearchViewModel>(
+          create: (_) => SearchViewModel(manageSession),
         ),
       ],
       child: MaterialApp(
         title: kProgramName,
         theme: aquariumManagerTheme,
-        home: const MyAquariumManagerLoginView(),
+        home: const LoginView(),
       ),
     );
   }

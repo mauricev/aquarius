@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/models/session_key.dart';
-import 'aquarium_manager_tanks_model.dart';
+import 'package:aquarium_manager/view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:appwrite/appwrite.dart';
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
-class MyAquariumManagerSearchModel with ChangeNotifier {
+class SearchViewModel with ChangeNotifier {
   final ManageSession
       _manageSession; // we need this because manage tanks, which in turn uses Notes, which needs the session variable to save to disk
   String facilityFk = "";
@@ -13,7 +13,7 @@ class MyAquariumManagerSearchModel with ChangeNotifier {
   List<Tank> tankListFull = <Tank>[];
   List<Tank> tankListSearched = <Tank>[];
 
-  MyAquariumManagerSearchModel(this._manageSession);
+  SearchViewModel(this._manageSession);
 
   void setFacilityId(String facilityFk) {
     this.facilityFk = facilityFk;

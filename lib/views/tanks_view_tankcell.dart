@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/aquarium_manager_facilities_model.dart';
-import '../models/aquarium_manager_tanks_model.dart';
+import '../view_models/facilities_viewmodel.dart';
+import '../view_models/tanks_viewmodel.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
 class TankCell extends StatefulWidget {
   final int absolutePosition; // this can’t be altered
@@ -40,10 +41,10 @@ class _TankCellState extends State<TankCell> {
   }
 
   void createTank(bool? bigTank) {
-    MyAquariumManagerFacilityModel facilityModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
-    MyAquariumManagerTanksModel tankModel =
-        Provider.of<MyAquariumManagerTanksModel>(context, listen: false);
+    FacilityViewModel facilityModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
+    TanksViewModel tankModel =
+        Provider.of<TanksViewModel>(context, listen: false);
 
     // two things here, addNewEmptyTank must set its fatTankPosition value if bigtank is picked,
 
@@ -107,7 +108,7 @@ class _TankCellState extends State<TankCell> {
   // we can’t use widget.absoluteposition because that represents the cell the user clicked on
   // and if it’s a virtual tank, we need the tank to its immediate left
   void assignParkedTankItsNewHome(Tank? parkedTank, int newTankPosition,
-      MyAquariumManagerTanksModel tankModel) {
+      TanksViewModel tankModel) {
     parkedTank?.assignTankNewLocation(
         tankModel.rackDocumentid, newTankPosition);
   }
@@ -117,8 +118,8 @@ class _TankCellState extends State<TankCell> {
   }
 
   bool canAbsolutePositionHostAFatTank(BuildContext context, int tankPosition) {
-    MyAquariumManagerFacilityModel facilityModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilityModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
 
     // are we at the end of a row? If so, then no
     // BUG this was reversed
@@ -126,8 +127,8 @@ class _TankCellState extends State<TankCell> {
       return false;
     }
 
-    MyAquariumManagerTanksModel tankModel =
-        Provider.of<MyAquariumManagerTanksModel>(context, listen: false);
+    TanksViewModel tankModel =
+        Provider.of<TanksViewModel>(context, listen: false);
 
     // is the cell over 1 occupied physically?
     Tank? tank =
@@ -140,8 +141,8 @@ class _TankCellState extends State<TankCell> {
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerTanksModel tankModel =
-        Provider.of<MyAquariumManagerTanksModel>(context);
+    TanksViewModel tankModel =
+        Provider.of<TanksViewModel>(context);
 
     int rackID = tankModel.whichRackCellIsSelected();
 
@@ -277,12 +278,12 @@ class _TankCellState extends State<TankCell> {
         setState(() {
           Tank parkedTank = data as Tank;
 
-          MyAquariumManagerFacilityModel facilityModel =
-              Provider.of<MyAquariumManagerFacilityModel>(context,
+          FacilityViewModel facilityModel =
+              Provider.of<FacilityViewModel>(context,
                   listen: false);
 
-          MyAquariumManagerTanksModel tankModel =
-              Provider.of<MyAquariumManagerTanksModel>(context, listen: false);
+          TanksViewModel tankModel =
+              Provider.of<TanksViewModel>(context, listen: false);
 
           // if this destination widget is a virtual tank, make the swap with the prior position numerically
           int thisPosition = widget.absolutePosition;

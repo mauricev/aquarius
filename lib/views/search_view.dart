@@ -1,22 +1,22 @@
-import 'package:aquarium_manager/views/aquarium_manager_tanks_view.dart';
-import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
+import 'package:aquarium_manager/views/tanks_view.dart';
+import 'package:aquarium_manager/view_models/search_viewmodel.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:flutter/material.dart';
 import 'utility.dart';
 import 'package:provider/provider.dart';
-import '../models/aquarium_manager_tanks_model.dart';
 import 'package:aquarium_manager/views/typography.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
-class MyAquariumManagerSearchView extends StatefulWidget {
-  const MyAquariumManagerSearchView({Key? key}) : super(key: key);
+class SearchView extends StatefulWidget {
+  const SearchView({Key? key}) : super(key: key);
 
   @override
-  State<MyAquariumManagerSearchView> createState() =>
-      _MyAquariumManagerSearchViewState();
+  State<SearchView> createState() =>
+      _SearchViewState();
 }
 
-class _MyAquariumManagerSearchViewState
-    extends State<MyAquariumManagerSearchView> {
+class _SearchViewState
+    extends State<SearchView> {
 
   final TextEditingController controllerForSearch = TextEditingController();
 
@@ -41,8 +41,8 @@ class _MyAquariumManagerSearchViewState
           isPlainSearch = !newValue!;
           // we should redo the search here
           controllerForSearch.text= "";
-          MyAquariumManagerSearchModel searchModel =
-          Provider.of<MyAquariumManagerSearchModel>(context, listen: false);
+          SearchViewModel searchModel =
+          Provider.of<SearchViewModel>(context, listen: false);
           searchModel.prepareSearchTankList("",
               isPlainSearch); // we pass the checkbox value to change search to sort by cross-breed date
         });
@@ -75,8 +75,8 @@ class _MyAquariumManagerSearchViewState
     // what will display
     // 1) tankline, 2) dob 3) smalltank 4) screen positive, 5) generation, 6)
 
-    MyAquariumManagerSearchModel searchModel =
-    Provider.of<MyAquariumManagerSearchModel>(context);
+    SearchViewModel searchModel =
+    Provider.of<SearchViewModel>(context);
 
     int? birthDate = tank.getBirthDate();
     int? breedingDate = searchModel.computeBreedingDate(birthDate);
@@ -86,7 +86,7 @@ class _MyAquariumManagerSearchViewState
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MyAquariumManagerTankView(
+            builder: (context) => TankView(
               arguments: {
                 'incomingRack_Fk': tank.rackFk,
                 'incomingTankPosition': tank.absolutePosition,
@@ -144,8 +144,8 @@ class _MyAquariumManagerSearchViewState
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerSearchModel searchModel =
-        Provider.of<MyAquariumManagerSearchModel>(context);
+    SearchViewModel searchModel =
+        Provider.of<SearchViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(

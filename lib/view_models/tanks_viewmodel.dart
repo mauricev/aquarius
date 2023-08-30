@@ -1,99 +1,14 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/models/session_key.dart';
+import 'package:aquarium_manager/view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
-import 'aquarium_manager_facilities_model.dart';
-import 'aquarium_manager_notes_model.dart';
+import 'facilities_viewmodel.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
-class Tank {
-  String? documentId;
-  final String facilityFk;
-  String rackFk;
-  int absolutePosition;
-  String? tankLine;
-  int? birthDate;
-  bool? screenPositive;
-  int? numberOfFish;
-  int? fatTankPosition;
-  int? generation;
-  final ManageSession manageSession;
-  late final Notes notes;
 
-  Tank({
-    this.documentId,
-    required this.facilityFk,
-    required this.rackFk,
-    required this.absolutePosition,
-    this.tankLine,
-    int? birthDate,
-    this.screenPositive,
-    this.numberOfFish,
-    this.fatTankPosition,
-    this.generation,
-    required this.manageSession,
-  }) : birthDate = birthDate ?? returnTimeNow() {
-    notes = createNotes();
-    notes.loadNotes();
-  }
-
-  Notes createNotes() {
-    return Notes(parentTank: this, manageSession: manageSession);
-  }
-
-  void parkIt() {
-    absolutePosition = cParkedRackAbsPosition;
-    rackFk = cParkedRackFkAddress;
-    // fat tanks stay fat, but have no virtual partner while they are parked
-    if (fatTankPosition != null) {
-      fatTankPosition = 0;
-    }
-  }
-
-  void assignTankNewLocation(String rackIdentifier, int position) {
-    absolutePosition = position;
-    rackFk = rackIdentifier;
-    // fat tanks get a new virtual partner
-    // we need to know if fatTankPosition has a valid value when it’s a parked tank
-    myPrint("in assignTankNewLocation");
-    if (fatTankPosition != null) {
-      myPrint("in assignTankNewLocation fatTankPosition contains a value");
-      fatTankPosition = position + 1;
-    }
-  }
-
-  void updateTankDocumentId (String tankFk) {
-    documentId = tankFk;
-  }
-
-  void setScreenPositive (bool newScreenPositiveValue) {
-    screenPositive = newScreenPositiveValue;
-  }
-
-   bool? getSmallTank() {
-     return (fatTankPosition == null);
-   }
-
-  bool? getScreenPositive() {
-    return screenPositive;
-  }
-
-  int? getBirthDate() {
-    return birthDate;
-  }
-
-  void setBirthDate(int newBirthDateValue) {
-    birthDate = newBirthDateValue;
-  }
-
-  int? getNumberOfFish() {
-    return numberOfFish;
-  }
-
-}
-
-class MyAquariumManagerTanksModel with ChangeNotifier {
+class TanksViewModel with ChangeNotifier {
   final ManageSession _manageSession;
 
   List<Tank> tankList = <Tank>[];
@@ -187,7 +102,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
     tankList.removeAt(index);
   }
 
-  MyAquariumManagerTanksModel(this._manageSession);
+  TanksViewModel(this._manageSession);
 
   Future<models.DocumentList> returnAssociatedTankList(
       String facilityId, String rackId) async {
@@ -255,7 +170,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
    // notifyListeners();  called above
   }
 
-  Future<void> loadTanksForThisRack(MyAquariumManagerFacilityModel facilityModel, String theRackId) async {
+  Future<void> loadTanksForThisRack(FacilityViewModel facilityModel, String theRackId) async {
 
     models.DocumentList theTankList = await returnAssociatedTankList(
         facilityModel.returnFacilityId(), theRackId);
@@ -294,7 +209,7 @@ class MyAquariumManagerTanksModel with ChangeNotifier {
   }
 
   Future<void> selectThisRackByAbsolutePosition(bool? readInTanks,
-      MyAquariumManagerFacilityModel facilityModel, int selectThisRack) async {
+      FacilityViewModel facilityModel, int selectThisRack) async {
     selectedRack = selectThisRack;
     myPrint("the selected rack cell is $selectedRack must be followed loading tanks");
     // the code here will query the rack via the absolute position and facility_fk from the facility mode

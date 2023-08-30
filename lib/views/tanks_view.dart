@@ -1,14 +1,15 @@
-import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
+import 'package:aquarium_manager/view_models/search_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/aquarium_manager_facilities_model.dart';
-import '../models/aquarium_manager_tanks_model.dart';
+import '../view_models/facilities_viewmodel.dart';
+import '../view_models/tanks_viewmodel.dart';
 import 'utility.dart';
 import 'facility_grid.dart';
 import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/aquarium_manager_tanks_view_parkedtank.dart';
-import 'package:aquarium_manager/views/aquarium_manager_tanks_view_rackgrid.dart';
-import 'package:aquarium_manager/views/aquarium_manager_tanks_view_notes.dart';
+import 'package:aquarium_manager/views/tanks_view_parkedtank.dart';
+import 'package:aquarium_manager/views/tanks_view_rackgrid.dart';
+import 'package:aquarium_manager/views/tanks_view_notes.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
@@ -22,18 +23,18 @@ import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 //import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
-class MyAquariumManagerTankView extends StatefulWidget {
+class TankView extends StatefulWidget {
   final Map<String, dynamic> arguments;
 
-  const MyAquariumManagerTankView({Key? key, required this.arguments})
+  const TankView({Key? key, required this.arguments})
       : super(key: key);
 
   @override
-  MyAquariumManagerTankViewState createState() =>
-      MyAquariumManagerTankViewState();
+  TankViewState createState() =>
+      TankViewState();
 }
 
-class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
+class TankViewState extends State<TankView> {
   String? incomingRackFk;
   int? incomingTankPosition;
 
@@ -46,11 +47,11 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
   TextEditingController controllerForGeneration = TextEditingController();
 
   void _prepareRacksAndTanksForCaller() async {
-    MyAquariumManagerTanksModel tankModel =
-        Provider.of<MyAquariumManagerTanksModel>(context, listen: false);
+    TanksViewModel tankModel =
+        Provider.of<TanksViewModel>(context, listen: false);
 
-    MyAquariumManagerFacilityModel facilityModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilityModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
 
     if (incomingRackFk != null && incomingTankPosition != null) {
       if (incomingRackFk! != "0") {
@@ -85,7 +86,7 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
     setState(() {});
   }
 
-  void notesDialog(BuildContext context, MyAquariumManagerTanksModel tanksModel,
+  void notesDialog(BuildContext context, TanksViewModel tanksModel,
       Tank currentTank) {
     showModalBottomSheet(
       context: context,
@@ -141,7 +142,7 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
 
   Widget returnAutoCompleteForTankLine(
       BuildContext context,
-      MyAquariumManagerTanksModel tanksModel,
+      TanksViewModel tanksModel,
       TextEditingController textController,
       Tank? currentTank) {
     return TypeAheadField<String>(
@@ -159,8 +160,8 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
           //     border: OutlineInputBorder(),
           //     ),
           onChanged: (value) {
-            MyAquariumManagerFacilityModel facilityModel =
-                Provider.of<MyAquariumManagerFacilityModel>(context,
+            FacilityViewModel facilityModel =
+                Provider.of<FacilityViewModel>(context,
                     listen: false);
 
             currentTank?.tankLine = textController.text;
@@ -171,12 +172,12 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
       minCharsForSuggestions: 0,
       suggestionsCallback: (String pattern) async {
         if (pattern != "") {
-          MyAquariumManagerFacilityModel facilityModel =
-              Provider.of<MyAquariumManagerFacilityModel>(context,
+          FacilityViewModel facilityModel =
+              Provider.of<FacilityViewModel>(context,
                   listen: false);
 
-          MyAquariumManagerSearchModel searchModel =
-              Provider.of<MyAquariumManagerSearchModel>(context, listen: false);
+          SearchViewModel searchModel =
+              Provider.of<SearchViewModel>(context, listen: false);
 
           searchModel
               .prepareFullTankListForFacility(facilityModel.returnFacilityId());
@@ -200,8 +201,8 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
       // },
       onSuggestionSelected: (String suggestion) {
         setState(() {
-          MyAquariumManagerFacilityModel facilityModel =
-              Provider.of<MyAquariumManagerFacilityModel>(context,
+          FacilityViewModel facilityModel =
+              Provider.of<FacilityViewModel>(context,
                   listen: false);
 
           currentTank?.tankLine = suggestion;
@@ -219,7 +220,7 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
   }
 
   Widget buildInnerLabel(String labelText, TextEditingController textController,
-      MyAquariumManagerTanksModel tanksModel, TankStringsEnum tanksStringsValue,
+      TanksViewModel tanksModel, TankStringsEnum tanksStringsValue,
       [double? width]) {
     // so we have two pressing questions will this info save into the actual tank
     Tank? currentTank = tanksModel.returnCurrentPhysicalTank();
@@ -260,8 +261,8 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
                     keyboardType: returnTextInputType(tanksStringsValue),
                     controller: textController,
                     onChanged: (value) {
-                      MyAquariumManagerFacilityModel facilityModel =
-                          Provider.of<MyAquariumManagerFacilityModel>(context,
+                      FacilityViewModel facilityModel =
+                          Provider.of<FacilityViewModel>(context,
                               listen: false);
 
                       switch (tanksStringsValue) {
@@ -295,7 +296,7 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
 
   Future<void> _selectDate(
       BuildContext context,
-      MyAquariumManagerTanksModel tankModel,
+      TanksViewModel tankModel,
       Tank? currentTank,
       int? Function()? retrieveValue,
       void Function(int newValue)? updateValue) async {
@@ -311,8 +312,8 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
       setState(() {
         updateValue?.call(picked.millisecondsSinceEpoch);
 
-        MyAquariumManagerFacilityModel facilityModel =
-            Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+        FacilityViewModel facilityModel =
+            Provider.of<FacilityViewModel>(context, listen: false);
 
         tankModel.saveExistingTank(
             facilityModel.returnFacilityId(), (currentTank?.absolutePosition)!);
@@ -321,7 +322,7 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
   }
 
   Widget drawDateOfBirth(
-      MyAquariumManagerTanksModel tankModel,
+      TanksViewModel tankModel,
       Tank? currentTank,
       int? Function()? retrieveValue,
       void Function(int newValue)? updateValue) {
@@ -343,13 +344,13 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
   }
 
   Widget buildCheckBox(
-      MyAquariumManagerTanksModel tankModel,
+      TanksViewModel tankModel,
       Tank? currentTank,
       String labelText,
       bool? Function()? retrieveValue,
       void Function(bool newValue)? updateValue) {
-    MyAquariumManagerFacilityModel facilityModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilityModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
 
     return SizedBox(
       width: 150,
@@ -375,14 +376,14 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
   }
 
   Widget buildParkedTank(BuildContext context) {
-    MyAquariumManagerTanksModel tankModel =
-        Provider.of<MyAquariumManagerTanksModel>(context);
+    TanksViewModel tankModel =
+        Provider.of<TanksViewModel>(context);
 
     if (tankModel.isThereAParkedTank()) {
       Tank? tank = tankModel.returnParkedTankedInfo();
 
-      MyAquariumManagerFacilityModel facilityModel =
-          Provider.of<MyAquariumManagerFacilityModel>(context);
+      FacilityViewModel facilityModel =
+          Provider.of<FacilityViewModel>(context);
 
       double height = returnHeight(facilityModel);
       double width = returnWidth(facilityModel);
@@ -421,8 +422,8 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
     String absolutePositionString =
         currentTank?.absolutePosition.toString() ?? "";
 
-    MyAquariumManagerFacilityModel facilityModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilityModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
     String rack = await facilityModel.returnRacksRelativePosition(rackFkString);
 
     // multiline string requires three quotes
@@ -443,8 +444,8 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerTanksModel tankModel =
-        Provider.of<MyAquariumManagerTanksModel>(context);
+    TanksViewModel tankModel =
+        Provider.of<TanksViewModel>(context);
 
     // we want a real physical tank here
     Tank? currentTank = tankModel.returnCurrentPhysicalTank();
@@ -511,8 +512,8 @@ class MyAquariumManagerTankViewState extends State<MyAquariumManagerTankView> {
                         onPressed: () {
                           setState(() {
                             currentTank.parkIt();
-                            MyAquariumManagerFacilityModel facilityModel =
-                                Provider.of<MyAquariumManagerFacilityModel>(
+                            FacilityViewModel facilityModel =
+                                Provider.of<FacilityViewModel>(
                                     context,
                                     listen: false);
                             tankModel.saveExistingTank(

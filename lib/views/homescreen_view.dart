@@ -1,33 +1,33 @@
-import 'package:aquarium_manager/models/aquarium_manager_search_model.dart';
+import 'package:aquarium_manager/view_models/search_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/aquarium_manager_model.dart';
-import '../views/aquarium_manager_facilities_view.dart';
-import '../models/aquarium_manager_facilities_model.dart';
-import 'aquarium_manager_search_view.dart';
-import 'aquarium_manager_tanks_view.dart';
+import '../view_models/viewmodel.dart';
+import '../views/facilities_view.dart';
+import '../view_models/facilities_viewmodel.dart';
+import 'search_view.dart';
+import 'tanks_view.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../views/utility.dart';
 import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/aquarium_manager_login_view.dart';
+import 'package:aquarium_manager/views/login_view.dart';
 
-class AquariumManagerHomeScreenView extends StatefulWidget {
-  const AquariumManagerHomeScreenView({Key? key}) : super(key: key);
+class HomeScreenView extends StatefulWidget {
+  const HomeScreenView({Key? key}) : super(key: key);
 
   @override
-  State<AquariumManagerHomeScreenView> createState() =>
-      _AquariumManagerHomeScreenViewState();
+  State<HomeScreenView> createState() =>
+      _HomeScreenViewState();
 }
 
-class _AquariumManagerHomeScreenViewState
-    extends State<AquariumManagerHomeScreenView> {
+class _HomeScreenViewState
+    extends State<HomeScreenView> {
   final cNotANewFacility = false;
   final cNewFacility = true;
 
   Widget facilityDropDown(BuildContext context) {
 
-    MyAquariumManagerModel model =
-    Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+    Provider.of<AquariusViewModel>(context, listen: false);
 
     return FutureBuilder<List<Map<String, String>>>(
       future: model.getFacilityNames2(),
@@ -82,11 +82,11 @@ class _AquariumManagerHomeScreenViewState
   }
 
   void loadFacilitiesPage(BuildContext context, bool newFacility) {
-    MyAquariumManagerModel model =
-        Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+        Provider.of<AquariusViewModel>(context, listen: false);
 
-    MyAquariumManagerFacilityModel facilitiesModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilitiesModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
 
     String? whichFacility = model.selectedFacility;
     if (newFacility == cNewFacility) {
@@ -98,7 +98,7 @@ class _AquariumManagerHomeScreenViewState
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  const MyAquariumManagerFacilitiesView()) // this will read from facility model, which has already been updated
+                  const FacilitiesView()) // this will read from facility model, which has already been updated
           ).then((data) {
             setState(() {
               // does this work?, yes it does
@@ -108,18 +108,18 @@ class _AquariumManagerHomeScreenViewState
   }
 
   void loadTanksController(BuildContext context) {
-    MyAquariumManagerModel model =
-        Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+        Provider.of<AquariusViewModel>(context, listen: false);
 
-    MyAquariumManagerFacilityModel facilitiesModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilitiesModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
 
     facilitiesModel.getFacilityInfo(model.selectedFacility).then((data) {
       // are we wrong to assume this will be filled in?
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const MyAquariumManagerTankView(
+              builder: (context) => const TankView(
                     arguments: {
                       'incomingRack_Fk': null,
                       'incomingTankPosition': null,
@@ -151,7 +151,7 @@ class _AquariumManagerHomeScreenViewState
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MyAquariumManagerTankView(
+            builder: (context) => TankView(
               arguments: {
                 'incomingRack_Fk': rackFk,
                 'incomingTankPosition': absolutePosition,
@@ -182,11 +182,11 @@ class _AquariumManagerHomeScreenViewState
   }
 
   void loadQRCodeController(BuildContext context) {
-    MyAquariumManagerModel model =
-        Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+        Provider.of<AquariusViewModel>(context, listen: false);
 
-    MyAquariumManagerFacilityModel facilitiesModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilitiesModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
 
     facilitiesModel.getFacilityInfo(model.selectedFacility).then((data) {
       // are we wrong to assume this will be filled in?
@@ -200,14 +200,14 @@ class _AquariumManagerHomeScreenViewState
   }
 
   void loadSearchController(BuildContext context) {
-    MyAquariumManagerModel model =
-        Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+        Provider.of<AquariusViewModel>(context, listen: false);
 
-    MyAquariumManagerFacilityModel facilitiesModel =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel facilitiesModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
 
-    MyAquariumManagerSearchModel searchModel =
-        Provider.of<MyAquariumManagerSearchModel>(context, listen: false);
+    SearchViewModel searchModel =
+        Provider.of<SearchViewModel>(context, listen: false);
 
     facilitiesModel.getFacilityInfo(model.selectedFacility).then((data) {
       // are we wrong to assume this will be filled in?
@@ -218,15 +218,15 @@ class _AquariumManagerHomeScreenViewState
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    const MyAquariumManagerSearchView()) // this will read from facility model, which has already been updated
+                    const SearchView()) // this will read from facility model, which has already been updated
             );
       });
     });
   }
 
   void logoutController(BuildContext context) {
-    MyAquariumManagerModel model =
-    Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+    Provider.of<AquariusViewModel>(context, listen: false);
 
     Future<dynamic> result = model.logOut();
     result
@@ -234,22 +234,22 @@ class _AquariumManagerHomeScreenViewState
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const MyAquariumManagerLoginView(),
+          builder: (context) => const LoginView(),
         ),
       );
     });
   }
 
   bool isAFacilitySelected(BuildContext context) {
-    MyAquariumManagerModel model =
-    Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+    Provider.of<AquariusViewModel>(context, listen: false);
 
     return model.returnSelectedFacility() != null;
   }
 
   bool pretendFacilityIsAlwaysSelected(BuildContext context) {
-    MyAquariumManagerModel model =
-    Provider.of<MyAquariumManagerModel>(context, listen: false);
+    AquariusViewModel model =
+    Provider.of<AquariusViewModel>(context, listen: false);
 
     return model.returnSelectedFacility() == null; // if a facility is not selected, return true
   }

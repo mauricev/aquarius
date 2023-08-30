@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/aquarium_manager_facilities_model.dart';
+import '../view_models/facilities_viewmodel.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
 void myPrint(String printThis) {
@@ -48,11 +48,11 @@ Widget expandedFlex1() {
   );
 }
 
-double returnHeight(MyAquariumManagerFacilityModel facilityModel) {
+double returnHeight(FacilityViewModel facilityModel) {
   return (kGridVSize / facilityModel.maxShelves);
 }
 
-double returnWidth(MyAquariumManagerFacilityModel facilityModel) {
+double returnWidth(FacilityViewModel facilityModel) {
   return (kGridHSize / facilityModel.maxTanks);
 }
 

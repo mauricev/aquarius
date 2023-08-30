@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../models/aquarium_manager_notes_model.dart';
-import '../models/aquarium_manager_tanks_model.dart';
+import '../models/notes_model.dart';
+import '../view_models/tanks_viewmodel.dart';
 import 'package:aquarium_manager/views/utility.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
 class NotesDialogBody extends StatefulWidget {
   final Tank currentTank;
-  final MyAquariumManagerTanksModel tanksModel;
+  final TanksViewModel tanksModel;
 
   const NotesDialogBody(
       {Key? key, required this.tanksModel, required this.currentTank})

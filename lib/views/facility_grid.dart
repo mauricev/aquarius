@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/aquarium_manager_facilities_model.dart';
-import '../models/aquarium_manager_tanks_model.dart';
+import '../view_models/facilities_viewmodel.dart';
+import '../view_models/tanks_viewmodel.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
 
@@ -58,11 +58,11 @@ class FacilityGridCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerFacilityModel facilityModel =
-    Provider.of<MyAquariumManagerFacilityModel>(context);
+    FacilityViewModel facilityModel =
+    Provider.of<FacilityViewModel>(context);
 
-    MyAquariumManagerTanksModel tankModel =
-    Provider.of<MyAquariumManagerTanksModel>(context);
+    TanksViewModel tankModel =
+    Provider.of<TanksViewModel>(context);
 
     int index =
     facilityModel.indexOfRackWithThisAbsolutePosition(absolutePosition);
@@ -133,7 +133,7 @@ class FacilityGrid extends StatelessWidget {
   final List<Row> gridDown = <Row>[];
 
   List<Widget> buildGridAcross(int absolutePosition,
-      MyAquariumManagerFacilityModel model, bool tankMode) {
+      FacilityViewModel model, bool tankMode) {
 
     List<Widget> gridAcross = <FacilityGridCell>[];
 
@@ -164,7 +164,7 @@ class FacilityGrid extends StatelessWidget {
   }
 
   List<Widget> buildGridDown(
-      MyAquariumManagerFacilityModel model, bool readOnly) {
+      FacilityViewModel model, bool readOnly) {
     gridDown
         .clear(); // we clear because this is a global variable, so we want to add starting fresh each time
 
@@ -180,8 +180,8 @@ class FacilityGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerFacilityModel model =
-    Provider.of<MyAquariumManagerFacilityModel>(context);
+    FacilityViewModel model =
+    Provider.of<FacilityViewModel>(context);
 
     return Align(
       alignment: Alignment.center,

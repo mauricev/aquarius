@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/aquarium_manager_tanks_model.dart';
+import '../view_models/tanks_viewmodel.dart';
 import 'package:aquarium_manager/views/consts.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
 class ParkedTank extends StatelessWidget {
   final double height;
@@ -27,8 +28,8 @@ class ParkedTank extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerTanksModel tankModel =
-    Provider.of<MyAquariumManagerTanksModel>(context);
+    TanksViewModel tankModel =
+    Provider.of<TanksViewModel>(context);
 
     // we want these two functions below to always return a physical tank
     // because only a physical tank can live inside the parked tank

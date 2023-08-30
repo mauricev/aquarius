@@ -1,9 +1,9 @@
-part of 'package:aquarium_manager/views/aquarium_manager_login_view.dart';
+part of 'package:aquarium_manager/views/login_view.dart';
 
-extension _MyAquariumManagerViewPrepareLogin
-    on _MyAquariumManagerLoginViewState {
+extension _ViewPrepareLogin
+    on _LoginViewState {
 
-  Widget registerLoginScreens(BuildContext context,MyAquariumManagerModel model) {
+  Widget registerLoginScreens(BuildContext context,AquariusViewModel model) {
     if (model.getDoesUserWantToRegister()) {
       return registerUserNamePassword(context);
     } else {
@@ -12,7 +12,7 @@ extension _MyAquariumManagerViewPrepareLogin
   }
 
   Widget prepareLoginScreen(BuildContext context) {
-    MyAquariumManagerModel model = Provider.of<MyAquariumManagerModel>(context);
+    AquariusViewModel model = Provider.of<AquariusViewModel>(context);
 
     return FutureBuilder(
       future: model.modelRetrieveSession(), // retrieves the session
@@ -31,7 +31,7 @@ extension _MyAquariumManagerViewPrepareLogin
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const AquariumManagerHomeScreenView(),
+                  builder: (context) => const HomeScreenView(),
                 ),
               );
             });

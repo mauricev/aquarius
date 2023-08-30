@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/models/session_key.dart';
+import 'package:aquarium_manager/view_models/session_key.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
+import 'package:aquarium_manager/models/rack_model.dart';
 
-class Rack {
-  int absolutePosition = 0;
-  String relativePosition = "";
-  int facilityFk = 0;
-
-  Rack(this.absolutePosition, this.relativePosition);
-}
-
-class MyAquariumManagerFacilityModel with ChangeNotifier {
+class FacilityViewModel with ChangeNotifier {
   final ManageSession _manageSession;
   List<Rack> rackList = <Rack>[];
 
@@ -27,7 +20,7 @@ class MyAquariumManagerFacilityModel with ChangeNotifier {
   int gridHeight = 0;
   int gridWidth = 0;
 
-  MyAquariumManagerFacilityModel(this._manageSession);
+  FacilityViewModel(this._manageSession);
 
   String returnFacilityId() {
     return documentId;

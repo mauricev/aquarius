@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/aquarium_manager_facilities_model.dart';
+import '../view_models/facilities_viewmodel.dart';
 import 'facility_grid.dart';
 import 'utility.dart';
 import 'package:aquarium_manager/views/consts.dart';
 
-class MyAquariumManagerFacilitiesView extends StatefulWidget {
-  const MyAquariumManagerFacilitiesView({
+class FacilitiesView extends StatefulWidget {
+  const FacilitiesView({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<MyAquariumManagerFacilitiesView> createState() =>
-      _MyAquariumManagerFacilitiesController();
+  State<FacilitiesView> createState() =>
+      _FacilitiesController();
 }
 
-class _MyAquariumManagerFacilitiesController
-    extends State<MyAquariumManagerFacilitiesView> {
+class _FacilitiesController
+    extends State<FacilitiesView> {
   TextEditingController controllerForFacilityName = TextEditingController();
   TextEditingController controllerForFacilityBuilding = TextEditingController();
   TextEditingController controllerForFacilityRoom = TextEditingController();
@@ -32,8 +32,8 @@ class _MyAquariumManagerFacilitiesController
 
   @override
   initState() {
-    MyAquariumManagerFacilityModel model =
-        Provider.of<MyAquariumManagerFacilityModel>(context, listen: false);
+    FacilityViewModel model =
+        Provider.of<FacilityViewModel>(context, listen: false);
     if (model.facilityName != null) {
       // if it is not null, we are editing an existing facility
       controllerForFacilityName.text = model.facilityName!;
@@ -96,7 +96,7 @@ class _MyAquariumManagerFacilitiesController
   Widget buildInnerLabel(
       String labelText,
       TextEditingController textController,
-      MyAquariumManagerFacilityModel model,
+      FacilityViewModel model,
       FacilityStringsEnum facilitystringValue, double width) {
     return Padding(
       padding: const EdgeInsets.only(
@@ -164,8 +164,8 @@ class _MyAquariumManagerFacilitiesController
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerFacilityModel model =
-        Provider.of<MyAquariumManagerFacilityModel>(context);
+    FacilityViewModel model =
+        Provider.of<FacilityViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(

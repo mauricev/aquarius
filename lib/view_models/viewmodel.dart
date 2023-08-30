@@ -1,11 +1,11 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/models/session_key.dart';
+import 'package:aquarium_manager/view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
 
-class MyAquariumManagerModel with ChangeNotifier {
+class AquariusViewModel with ChangeNotifier {
   final cFacilityNameKey = "faciltyNameKey";
   final ManageSession _manageSession;
   String? selectedFacility; // we start out with no facility selected; this value is null
@@ -21,7 +21,7 @@ class MyAquariumManagerModel with ChangeNotifier {
     myPrint("the saved facility is $selectedFacility");
   }
 
-  MyAquariumManagerModel(this._manageSession ) {
+  AquariusViewModel(this._manageSession ) {
     assignSavedFacility();
     notifyListeners();
   }

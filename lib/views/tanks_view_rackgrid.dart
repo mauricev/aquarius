@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/aquarium_manager_facilities_model.dart';
-import '../models/aquarium_manager_tanks_model.dart';
+import '../view_models/facilities_viewmodel.dart';
+import '../view_models/tanks_viewmodel.dart';
 import 'utility.dart';
-import 'package:aquarium_manager/views/aquarium_manager_tanks_view_tankcell.dart';
+import 'package:aquarium_manager/views/tanks_view_tankcell.dart';
+import 'package:aquarium_manager/models/tank_model.dart';
 
 class RackGrid extends StatelessWidget {
   RackGrid({
@@ -14,8 +15,8 @@ class RackGrid extends StatelessWidget {
 
   List<Widget> buildGridAcross(
       int absolutePosition,
-      MyAquariumManagerFacilityModel facilityModel,
-      MyAquariumManagerTanksModel tanksModel) {
+      FacilityViewModel facilityModel,
+      TanksViewModel tanksModel) {
     List<Widget> gridAcross = <TankCell>[];
 
     double height = returnHeight(facilityModel);
@@ -48,8 +49,8 @@ class RackGrid extends StatelessWidget {
   }
 
   // we might want to build designations into the tanks A-6, B-3, etc
-  List<Widget> buildGridDown(MyAquariumManagerFacilityModel facilityModel,
-      MyAquariumManagerTanksModel tanksModel) {
+  List<Widget> buildGridDown(FacilityViewModel facilityModel,
+      TanksViewModel tanksModel) {
 
     int offset = 0;
     for (int theIndex = 1; theIndex <= facilityModel.maxShelves; theIndex++) {
@@ -65,11 +66,11 @@ class RackGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MyAquariumManagerFacilityModel facilityModel =
-    Provider.of<MyAquariumManagerFacilityModel>(context);
+    FacilityViewModel facilityModel =
+    Provider.of<FacilityViewModel>(context);
 
-    MyAquariumManagerTanksModel tankModel =
-    Provider.of<MyAquariumManagerTanksModel>(context);
+    TanksViewModel tankModel =
+    Provider.of<TanksViewModel>(context);
 
     return Center(
       child: Column(

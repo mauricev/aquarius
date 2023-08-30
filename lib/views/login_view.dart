@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:aquarium_manager/models/aquarium_manager_model.dart';
-import 'aquarium_manager_homescreen_view.dart';
+import 'package:aquarium_manager/view_models/viewmodel.dart';
+import 'homescreen_view.dart';
 import 'package:aquarium_manager/views/consts.dart';
 import 'package:aquarium_manager/views/utility.dart';
-part 'aquarium_manager_preparelogin_view.dart';
+part 'preparelogin_view.dart';
 
-class MyAquariumManagerLoginView extends StatefulWidget {
-  const MyAquariumManagerLoginView({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
   @override
-  State<MyAquariumManagerLoginView> createState() =>
-      _MyAquariumManagerLoginViewState();
+  State<LoginView> createState() =>
+      _LoginViewState();
 }
 
-class _MyAquariumManagerLoginViewState
-    extends State<MyAquariumManagerLoginView> {
+class _LoginViewState
+    extends State<LoginView> {
   bool doPasswordsMatch = true;
   String registerError = ""; // this now defaults to an empty string
   TextEditingController controllerForEmail = TextEditingController();
@@ -43,7 +43,7 @@ class _MyAquariumManagerLoginViewState
   }
 
   Widget loginUserNamePassword(BuildContext context) {
-    MyAquariumManagerModel model = Provider.of<MyAquariumManagerModel>(context, listen: true);
+    AquariusViewModel model = Provider.of<AquariusViewModel>(context, listen: true);
 
     return Expanded(
       child: Padding(
@@ -89,7 +89,7 @@ class _MyAquariumManagerLoginViewState
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AquariumManagerHomeScreenView(),
+                      builder: (context) => const HomeScreenView(),
                     ),
                   );
                 }).catchError((error) {
@@ -114,7 +114,7 @@ class _MyAquariumManagerLoginViewState
   }
 
   Widget registerUserNamePassword(BuildContext context) {
-    MyAquariumManagerModel model = Provider.of<MyAquariumManagerModel>(context);
+    AquariusViewModel model = Provider.of<AquariusViewModel>(context);
 
     return Expanded(
       child: Padding(
