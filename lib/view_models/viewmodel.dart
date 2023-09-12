@@ -87,7 +87,6 @@ class AquariusViewModel with ChangeNotifier {
   bool getIsUserPasswordBad() {
     myPrint("am i getting called at all?");
     return badPassword;
-    //return _manageSession.getIsUserPasswordBad();
   }
 // errors we need to handle;
   // 1 user registering an already registered user
@@ -99,22 +98,8 @@ class AquariusViewModel with ChangeNotifier {
     return _manageSession.loginUser(username, password);
   }
 
-  /*Future<List<String>> getFacilityNames() async {
-    List<String>? query = [
-      Query.notEqual("facility_name", [""]) // empty string should bring back all facilities
-    ];
-    models.DocumentList documentList = await _manageSession.queryDocument(kFacilityCollection,query);
-    // Extract the facility names from the list of documents
-    List<String> facilityNames = documentList.documents
-        .map((document) => document.data['facility_name'].toString())
-        .toList();
-    return facilityNames;
-  }*/
-
   Future<List<Map<String, String>>> getFacilityNames2() async {
     List<Map<String, String>> facilitiesNameList = [];
-
-
 
     List<String>? query = [
       Query.notEqual("facility_name", [""]) // empty string should bring back all facilities

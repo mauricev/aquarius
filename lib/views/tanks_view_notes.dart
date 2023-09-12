@@ -17,8 +17,16 @@ class NotesDialogBody extends StatefulWidget {
 }
 
 class NotesDialogBodyState extends State<NotesDialogBody> {
+  // i just moved this field from inside notesItem, 9/3/2023
+  final TextEditingController controllerForNotesItem = TextEditingController();
+
+  @override
+  void dispose() {
+    controllerForNotesItem.dispose();
+    super.dispose();
+  }
+
   Widget notesItem(BuildContext context, Notes notes, int index) {
-    TextEditingController controllerForNotesItem = TextEditingController();
 
     controllerForNotesItem.text = notes.returnIndexedNoteText(index);
 

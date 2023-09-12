@@ -16,8 +16,6 @@ import 'package:flutter/foundation.dart'
 
 import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
-//import 'package:aquarium_manager/views/typography.dart';
-
 //import 'package:easy_autocomplete/easy_autocomplete.dart';
 //import 'package:elastic_autocomplete/elastic_autocomplete.dart';
 //import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
