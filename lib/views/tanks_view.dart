@@ -14,6 +14,7 @@ import 'package:aquarium_manager/models/tank_model.dart';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
 
+// for local, comment out
 import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 //import 'package:easy_autocomplete/easy_autocomplete.dart';
