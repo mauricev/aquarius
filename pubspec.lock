@@ -226,10 +226,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: aeb0b80a8b3709709c9cc496cdc027c5b3216796bc0af0ce1007eaf24464fd4c
+      sha256: a25a15ebbdfc33ab1cd26c63a6ee519df92338a9c10f122adda92938253bef04
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.3"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -312,6 +312,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_zebra_sdk:
+    dependency: "direct main"
+    description:
+      name: flutter_zebra_sdk
+      sha256: cf7c528e1f7a753934529c76e20ad621b4d97ce7d555873e9c6f094df5fcf435
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4+1"
   google_fonts:
     dependency: "direct main"
     description:

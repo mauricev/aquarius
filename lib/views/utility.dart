@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../view_models/facilities_viewmodel.dart';
-import 'package:aquarium_manager/views/consts.dart';
+import '../views/consts.dart';
 
 void myPrint(String printThis) {
   //print(printThis);

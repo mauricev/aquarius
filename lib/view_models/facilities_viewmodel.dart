@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/view_models/session_key.dart';
+import '../view_models/session_key.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/utility.dart';
-import 'package:aquarium_manager/models/rack_model.dart';
+import '../views/consts.dart';
+import '../views/utility.dart';
+import '../models/rack_model.dart';
 
 class FacilityViewModel with ChangeNotifier {
   final ManageSession _manageSession;

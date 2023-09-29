@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../view_models/facilities_viewmodel.dart';
 import 'facility_grid.dart';
 import 'utility.dart';
-import 'package:aquarium_manager/views/consts.dart';
+import '../views/consts.dart';
 
 class FacilitiesView extends StatefulWidget {
   const FacilitiesView({

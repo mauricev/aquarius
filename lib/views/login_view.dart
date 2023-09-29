@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:aquarium_manager/view_models/viewmodel.dart';
+import '../view_models/viewmodel.dart';
 import 'homescreen_view.dart';
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/utility.dart';
+import '../views/consts.dart';
+import '../views/utility.dart';
 part 'preparelogin_view.dart';
 
 class LoginView extends StatefulWidget {

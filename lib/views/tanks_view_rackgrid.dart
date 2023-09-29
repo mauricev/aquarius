@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../view_models/facilities_viewmodel.dart';
 import '../view_models/tanks_viewmodel.dart';
 import 'utility.dart';
-import 'package:aquarium_manager/views/tanks_view_tankcell.dart';
-import 'package:aquarium_manager/models/tank_model.dart';
+import '../views/tanks_view_tankcell.dart';
+import '../models/tank_model.dart';
 
 class RackGrid extends StatelessWidget {
   RackGrid({

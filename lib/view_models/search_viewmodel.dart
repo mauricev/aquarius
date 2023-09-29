@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/view_models/session_key.dart';
+import '../view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:appwrite/appwrite.dart';
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/models/tank_model.dart';
+import '../views/consts.dart';
+import '../models/tank_model.dart';
 
 class SearchViewModel with ChangeNotifier {
   final ManageSession

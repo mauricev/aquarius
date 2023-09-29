@@ -1,11 +1,11 @@
-import 'package:aquarium_manager/views/tanks_view.dart';
-import 'package:aquarium_manager/view_models/search_viewmodel.dart';
-import 'package:aquarium_manager/views/consts.dart';
+import '../views/tanks_view.dart';
+import '../view_models/search_viewmodel.dart';
+import '../views/consts.dart';
 import 'package:flutter/material.dart';
 import 'utility.dart';
 import 'package:provider/provider.dart';
-import 'package:aquarium_manager/views/typography.dart';
-import 'package:aquarium_manager/models/tank_model.dart';
+import '../views/typography.dart';
+import '../models/tank_model.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({Key? key}) : super(key: key);

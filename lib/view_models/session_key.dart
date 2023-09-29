@@ -1,8 +1,8 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/utility.dart';
+import '../views/consts.dart';
+import '../views/utility.dart';
 
 enum LoginStatus {
   loginNotYetAttempted,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/tanks_viewmodel.dart';
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/models/tank_model.dart';
+import '../views/consts.dart';
+import '../models/tank_model.dart';
 
 class ParkedTank extends StatelessWidget {
   final double height;

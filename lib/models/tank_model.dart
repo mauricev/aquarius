@@ -1,7 +1,7 @@
-import 'package:aquarium_manager/view_models/session_key.dart';
-import 'package:aquarium_manager/models/notes_model.dart';
-import 'package:aquarium_manager/views/utility.dart';
-import 'package:aquarium_manager/views/consts.dart';
+import '../view_models/session_key.dart';
+import '../models/notes_model.dart';
+import '../views/utility.dart';
+import '../views/consts.dart';
 
 class Tank {
   String? documentId;

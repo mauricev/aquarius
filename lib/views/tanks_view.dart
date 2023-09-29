@@ -1,15 +1,15 @@
-import 'package:aquarium_manager/view_models/search_viewmodel.dart';
+import '../view_models/search_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/facilities_viewmodel.dart';
 import '../view_models/tanks_viewmodel.dart';
 import 'utility.dart';
 import 'facility_grid.dart';
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/tanks_view_parkedtank.dart';
-import 'package:aquarium_manager/views/tanks_view_rackgrid.dart';
-import 'package:aquarium_manager/views/tanks_view_notes.dart';
-import 'package:aquarium_manager/models/tank_model.dart';
+import '../views/consts.dart';
+import '../views/tanks_view_parkedtank.dart';
+import '../views/tanks_view_rackgrid.dart';
+import '../views/tanks_view_notes.dart';
+import '../models/tank_model.dart';
 
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;

@@ -1,4 +1,4 @@
-part of 'package:aquarium_manager/views/login_view.dart';
+part of '../views/login_view.dart';
 
 extension _ViewPrepareLogin
     on _LoginViewState {

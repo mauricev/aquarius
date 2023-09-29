@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/facilities_viewmodel.dart';
 import '../view_models/tanks_viewmodel.dart';
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/utility.dart';
+import '../views/consts.dart';
+import '../views/utility.dart';
 
 enum FacilityStringsEnum {
   facilityName,

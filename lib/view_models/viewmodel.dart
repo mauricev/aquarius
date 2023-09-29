@@ -1,9 +1,9 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:aquarium_manager/view_models/session_key.dart';
+import '../view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
-import 'package:aquarium_manager/views/consts.dart';
-import 'package:aquarium_manager/views/utility.dart';
+import '../views/consts.dart';
+import '../views/utility.dart';
 
 class AquariusViewModel with ChangeNotifier {
   final cFacilityNameKey = "faciltyNameKey";
