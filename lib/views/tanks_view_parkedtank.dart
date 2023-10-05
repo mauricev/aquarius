@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../view_models/tanks_viewmodel.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
+import '../views/utility.dart';
 
 class ParkedTank extends StatelessWidget {
   final double height;
@@ -29,7 +30,7 @@ class ParkedTank extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TanksViewModel tankModel =
-    Provider.of<TanksViewModel>(context);
+    Provider.of<TanksViewModel>(context, listen: false);
 
     // we want these two functions below to always return a physical tank
     // because only a physical tank can live inside the parked tank
@@ -73,7 +74,7 @@ class ParkedTank extends StatelessWidget {
                 : Colors
                 .transparent, // this grid cell does not have a tank, but we need a third state here
           ),
-          child: tankModel.isThisTankPhysicalAndFat(cParkedAbsolutePosition) ? Image.asset("assets/tank_fat.png") : Image.asset("assets/tank_thin.png"),
+          child: tankModel.isThisTankPhysicalAndFat(cParkedAbsolutePosition) ? returnTankWithOverlaidText(tankModel, cParkedAbsolutePosition, "assets/tank_fat.png") : returnTankWithOverlaidText(tankModel, cParkedAbsolutePosition, "assets/tank_thin.png"),
         ),
         onTap: () {
           if (tankID != kEmptyTankIndex) {

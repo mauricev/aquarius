@@ -19,6 +19,7 @@ class FacilityViewModel with ChangeNotifier {
   int maxTanks = 0;
   int gridHeight = 0;
   int gridWidth = 0;
+  bool? entranceBottom;
 
   FacilityViewModel(this._manageSession);
 
@@ -41,6 +42,15 @@ class FacilityViewModel with ChangeNotifier {
   void deleteRack(int index) {
     myPrint("deleting rack at index $index");
     rackList.removeAt(index);
+  }
+
+  bool? isEntranceAtBottom() {
+    return entranceBottom;
+  }
+
+  void setEntranceBottom(bool? isEntranceAtBottom) {
+    entranceBottom = isEntranceAtBottom;
+    notifyListeners();
   }
 
   // we use the editable version of the list here
@@ -145,6 +155,7 @@ class FacilityViewModel with ChangeNotifier {
       gridWidth = theFacility.data['grid_width'];
       maxShelves = theFacility.data['max_shelves'];
       maxTanks = theFacility.data['max_tanks'];
+      entranceBottom = theFacility.data['entrance_at_bottom'];
 
       models.DocumentList theRackList =
           await returnAssociatedRackList(documentId);
@@ -168,6 +179,7 @@ class FacilityViewModel with ChangeNotifier {
       maxTanks = 0;
       gridHeight = 0;
       gridWidth = 0;
+      entranceBottom = null;
       rackList.clear();
     }
   }
@@ -184,6 +196,7 @@ class FacilityViewModel with ChangeNotifier {
       'grid_width': gridWidth,
       'max_shelves': maxShelves,
       'max_tanks' : maxTanks,
+      'entrance_at_bottom' : entranceBottom,
     };
 
     models.Document theFacility;

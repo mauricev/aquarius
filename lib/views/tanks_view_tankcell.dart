@@ -77,7 +77,7 @@ class _TankCellState extends State<TankCell> {
               builder: (BuildContext context, StateSetter setState) {
                 return CheckboxListTile(
                   //tileColor: Colors.red,
-                  title: const Text('Make this a fat tank?'),
+                  title: const Text('Make this a 10L tank?'),
                   value: isFatTank,
                   onChanged: (bool? value) {
                     setState(() {
@@ -107,8 +107,8 @@ class _TankCellState extends State<TankCell> {
 
   // we can’t use widget.absoluteposition because that represents the cell the user clicked on
   // and if it’s a virtual tank, we need the tank to its immediate left
-  void assignParkedTankItsNewHome(Tank? parkedTank, int newTankPosition,
-      TanksViewModel tankModel) {
+  void assignParkedTankItsNewHome(
+      Tank? parkedTank, int newTankPosition, TanksViewModel tankModel) {
     parkedTank?.assignTankNewLocation(
         tankModel.rackDocumentid, newTankPosition);
   }
@@ -141,8 +141,7 @@ class _TankCellState extends State<TankCell> {
 
   @override
   Widget build(BuildContext context) {
-    TanksViewModel tankModel =
-        Provider.of<TanksViewModel>(context);
+    TanksViewModel tankModel = Provider.of<TanksViewModel>(context);
 
     int rackID = tankModel.whichRackCellIsSelected();
 
@@ -221,9 +220,7 @@ class _TankCellState extends State<TankCell> {
                             // new check: if there is a tank to the right of widget.absolutePosition, then this must return false
                             if (canAbsolutePositionHostAFatTank(
                                 context, widget.absolutePosition)) {
-
                               confirmSmallTank(context).then((fatTankState) {
-
                                 if (fatTankState != null) {
                                   // null means the user cancelled
                                   setState(() {
@@ -246,13 +243,14 @@ class _TankCellState extends State<TankCell> {
                           ),
                         ),
                       )
-                    : tankModel
-                                .isThisTankVirtual(widget.absolutePosition + 1)
-                            ? Image.asset("assets/tank_fat_left.png")
-                            : tankModel
-                                    .isThisTankVirtual(widget.absolutePosition)
-                                ? Image.asset("assets/tank_fat_right.png")
-                                : Image.asset("assets/tank_thin.png"),
+                    // this is where we draw the tank, real or virtual
+                    // we need a compound widget that draws a portion of the tank line
+                    // and the icon; i just noticed that the fat icon takes up the cell
+                    : tankModel.isThisTankVirtual(widget.absolutePosition + 1)
+                        ? returnTankWithOverlaidText(tankModel, widget.absolutePosition,"assets/tank_fat_left.png")
+                        : tankModel.isThisTankVirtual(widget.absolutePosition)
+                            ? Image.asset("assets/tank_fat_right.png")
+                            : returnTankWithOverlaidText(tankModel, widget.absolutePosition,"assets/tank_thin.png"),
           ),
         );
       },
@@ -279,8 +277,7 @@ class _TankCellState extends State<TankCell> {
           Tank parkedTank = data as Tank;
 
           FacilityViewModel facilityModel =
-              Provider.of<FacilityViewModel>(context,
-                  listen: false);
+              Provider.of<FacilityViewModel>(context, listen: false);
 
           TanksViewModel tankModel =
               Provider.of<TanksViewModel>(context, listen: false);
@@ -305,7 +302,8 @@ class _TankCellState extends State<TankCell> {
             assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // the tank has not been saved with this new info
             // this will be physical
-            tankModel.saveExistingTank(facilityModel.returnFacilityId(), thisPosition);
+            tankModel.saveExistingTank(
+                facilityModel.returnFacilityId(), thisPosition);
           } else {
             myPrint("we dragged to an active tank spot");
             // here we are swapping tank positions
@@ -319,7 +317,8 @@ class _TankCellState extends State<TankCell> {
             // BUG if this tank is fat, then its fat position needs to be updated
             assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // this will be physical
-            tankModel.saveExistingTank(facilityModel.returnFacilityId(), thisPosition);
+            tankModel.saveExistingTank(
+                facilityModel.returnFacilityId(), thisPosition);
             // this will be physical
             tankModel.saveExistingTank(
                 facilityModel.returnFacilityId(), cParkedAbsolutePosition);

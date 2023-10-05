@@ -11,6 +11,9 @@ import '../views/utility.dart';
 import '../views/consts.dart';
 import '../views/login_view.dart';
 
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
+
 class HomeScreenView extends StatefulWidget {
   const HomeScreenView({Key? key}) : super(key: key);
 
@@ -240,6 +243,13 @@ class _HomeScreenViewState
     });
   }
 
+  bool isAFacilitySelectedAndOnIos(BuildContext context) {
+    AquariusViewModel model =
+    Provider.of<AquariusViewModel>(context, listen: false);
+
+    return (model.returnSelectedFacility() != null) & (defaultTargetPlatform == TargetPlatform.iOS);
+  }
+
   bool isAFacilitySelected(BuildContext context) {
     AquariusViewModel model =
     Provider.of<AquariusViewModel>(context, listen: false);
@@ -347,8 +357,10 @@ class _HomeScreenViewState
           Row(
             children: [
               // we might want to add an indent value to align this button with the above
+              // we the button for loadQRCodeController to be enabled only if a facility is selected
+              // and we are on ios, new function isAFacilitySelectedAndOnIos
               loadCommonButton(
-                  context, loadQRCodeController, isAFacilitySelected, "Scan a Tank’s Barcode…"),
+                  context, loadQRCodeController, isAFacilitySelectedAndOnIos, "Scan a Tank’s Barcode…"),
               loadCommonButton(
                   context, loadSearchController, isAFacilitySelected, "Search For a Tank…"),
             ],

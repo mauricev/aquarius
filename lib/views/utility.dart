@@ -1,9 +1,40 @@
 import 'package:flutter/material.dart';
 import '../view_models/facilities_viewmodel.dart';
 import '../views/consts.dart';
+import '../models/tank_model.dart';
+import '../view_models/tanks_viewmodel.dart';
 
 void myPrint(String printThis) {
   //print(printThis);
+}
+
+Stack returnTankWithOverlaidText(TanksViewModel tankModel, int tankPosition, String imagePath) {
+  const cMaxAbbreviatedLength = 5;
+
+  Tank? tankItself = tankModel.returnPhysicalTankWithThisAbsolutePosition(tankPosition);
+  int length = 0;
+  String abbreviatedTankLine = "";
+  if (tankItself != null) {
+    length = (tankItself.tankLine?.length) ?? 0;
+    if (length < cMaxAbbreviatedLength) {
+      abbreviatedTankLine = (tankItself.tankLine)!.substring(0, length);
+    } else {
+      abbreviatedTankLine = (tankItself.tankLine)!.substring(0, cMaxAbbreviatedLength);
+    }
+  }
+  return Stack(alignment: Alignment.center,children: <Widget>[
+    Image.asset(imagePath),
+    Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 3.0),
+        child: Text(abbreviatedTankLine,style: const TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+        )),
+      ),
+    )
+  ]);
 }
 
 Widget buildOuterLabel(BuildContext context, String labelText) {

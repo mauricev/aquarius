@@ -70,7 +70,7 @@ class RackGrid extends StatelessWidget {
     Provider.of<FacilityViewModel>(context);
 
     TanksViewModel tankModel =
-    Provider.of<TanksViewModel>(context);
+    Provider.of<TanksViewModel>(context, listen:false);
 
     return Center(
       child: Column(

@@ -54,15 +54,15 @@ class AquariusViewModel with ChangeNotifier {
   void setDoesUserWantToRegister(bool userRegisterState) {
     _manageSession.setDoesUserWantToRegister(userRegisterState);
     notifyListeners();
-    setUserAccountJustCreated(); // calls notifyListeners a second time
+    setUserAccountJustCreated(userRegisterState); // calls notifyListeners a second time
   }
 
   bool getUserAccountJustCreated() {
     return _manageSession.getUserAccountJustCreated();
   }
 
-  void setUserAccountJustCreated() {
-    _manageSession.setUserAccountJustCreated();
+  void setUserAccountJustCreated(bool accountCreated) {
+    _manageSession.setUserAccountJustCreated(accountCreated);
     notifyListeners();
   }
 

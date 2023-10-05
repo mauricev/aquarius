@@ -16,10 +16,14 @@ enum FacilityStringsEnum {
   gridWidth
 }
 
+const cTopEntrance = 1;
+const cBottomEntrance = 2;
+
 // for facilities, the grid itself should always remain editable
 // the tank screen displays the grid, but is selectable and only for text with racks
 const cFacilityEditableGrid = false; // tankMode is false
-const cFacilityClickableGrid = true; // tankMode is true; we are on the tank page
+const cFacilityClickableGrid =
+    true; // tankMode is true; we are on the tank page
 
 class FacilityGridCell extends StatelessWidget {
   final int absolutePosition; // this can’t be altered
@@ -30,17 +34,18 @@ class FacilityGridCell extends StatelessWidget {
 
   const FacilityGridCell(
       {Key? key,
-        this.absolutePosition =
-        0, // index starts at 1, so 0 means it’s not yet assigned, which is never the case
-        this.height = 0,
-        this.width = 0,
-        this.relativePosition = "",
-        this.tankMode})
+      this.absolutePosition =
+          0, // index starts at 1, so 0 means it’s not yet assigned, which is never the case
+      this.height = 0,
+      this.width = 0,
+      this.relativePosition = "",
+      this.tankMode})
       : super(key: key);
 
-  Color returnGridCellColor (bool isInFacility, int index, bool isRackCellSelected ) {
-    Color returnColor  = Colors.transparent;
-    switch(isInFacility) {
+  Color returnGridCellColor(
+      bool isInFacility, int index, bool isRackCellSelected) {
+    Color returnColor = Colors.transparent;
+    switch (isInFacility) {
       case true:
         returnColor = Colors.transparent;
         break;
@@ -48,7 +53,8 @@ class FacilityGridCell extends StatelessWidget {
         if (isRackCellSelected) {
           returnColor = Colors.white;
         }
-        if (index == -1) { // this means there is no text in the current cell
+        if (index == -1) {
+          // this means there is no text in the current cell
           returnColor = Colors.grey;
         }
         break;
@@ -58,43 +64,43 @@ class FacilityGridCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FacilityViewModel facilityModel =
-    Provider.of<FacilityViewModel>(context);
+    FacilityViewModel facilityModel = Provider.of<FacilityViewModel>(context);
 
-    TanksViewModel tankModel =
-    Provider.of<TanksViewModel>(context);
+    TanksViewModel tankModel = Provider.of<TanksViewModel>(context);
 
     int index =
-    facilityModel.indexOfRackWithThisAbsolutePosition(absolutePosition);
+        facilityModel.indexOfRackWithThisAbsolutePosition(absolutePosition);
     String relativePositionText = "";
     if (index != -1) {
       relativePositionText = relativePosition;
     }
 
     TextEditingController controllerForRelativePosition =
-    TextEditingController(text: relativePositionText);
+        TextEditingController(text: relativePositionText);
 
     return InkWell(
-      onTap:
-      (tankMode! && (index == -1)) ? null : () {
-        myPrint("we are selecting a new rack");
-        // POSSIBLE BUG; this is now async
-        tankModel.selectThisRackByAbsolutePosition(tankMode, facilityModel,absolutePosition);
-      },
+      onTap: (tankMode! && (index == -1))
+          ? null
+          : () {
+              myPrint("we are selecting a new rack");
+              // POSSIBLE BUG; this is now async
+              tankModel.selectThisRackByAbsolutePosition(
+                  tankMode, facilityModel, absolutePosition);
+            },
       child: Container(
         height: height,
         width: width,
         decoration: BoxDecoration(
           border: Border.all(),
-            color: returnGridCellColor(!tankMode!,index, tankModel.isThisRackCellSelected( absolutePosition)),
+          color: returnGridCellColor(!tankMode!, index,
+              tankModel.isThisRackCellSelected(absolutePosition)),
         ),
         child: TextField(
           controller: controllerForRelativePosition,
           enabled: !tankMode!, // if tankMode is true, disable editing
           onChanged: (value) {
-
-            int index = facilityModel.indexOfRackWithThisAbsolutePosition(
-                absolutePosition);
+            int index = facilityModel
+                .indexOfRackWithThisAbsolutePosition(absolutePosition);
 
             if (controllerForRelativePosition.text == "") {
               if (index != -1) {
@@ -115,8 +121,8 @@ class FacilityGridCell extends StatelessWidget {
                 // 3
                 // if it’s not in the list, we add it and give its relative position
 
-                facilityModel.addRack(absolutePosition,
-                    controllerForRelativePosition.text);
+                facilityModel.addRack(
+                    absolutePosition, controllerForRelativePosition.text);
               }
             }
           },
@@ -133,24 +139,24 @@ class FacilityGrid extends StatelessWidget {
   final List<Row> gridDown = <Row>[];
 
   List<Widget> buildGridAcross(int absolutePosition,
-      FacilityViewModel model, bool tankMode) {
-
+      FacilityViewModel facilityViewModel, bool tankMode) {
     List<Widget> gridAcross = <FacilityGridCell>[];
 
-    double height = kGridSize / model.gridHeight;
-    double width = kGridSize / model.gridWidth;
+    double height = kGridSize / facilityViewModel.gridHeight;
+    double width = kGridSize / facilityViewModel.gridWidth;
 
     int offset = 0;
-    for (int theIndex = 1; theIndex <= model.gridWidth; theIndex++) {
+    for (int theIndex = 1;
+        theIndex <= facilityViewModel.gridWidth;
+        theIndex++) {
       absolutePosition =
           absolutePosition + offset; //absolutePosition is never 0;
-      if(offset == 0) {
+      if (offset == 0) {
         offset = offset + 1;
       }
 
-      String relativePosition =
-      model.relativePositionOfRackWithThisAbsolutePosition(
-          absolutePosition);
+      String relativePosition = facilityViewModel
+          .relativePositionOfRackWithThisAbsolutePosition(absolutePosition);
 
       gridAcross.add(FacilityGridCell(
           absolutePosition: absolutePosition, // this is fine
@@ -158,36 +164,105 @@ class FacilityGrid extends StatelessWidget {
           width: width,
           relativePosition: relativePosition,
           tankMode:
-          tankMode)); // this MUST pass the actual values; it can’t just reset these to nothing
+              tankMode)); // this MUST pass the actual values; it can’t just reset these to nothing
     }
     return gridAcross;
   }
 
+  Row entranceRadioButton(
+      int radioBtnValue, FacilityViewModel facilityViewModel, bool readOnly) {
+    int? entranceSelection;
+
+    if ((facilityViewModel.isEntranceAtBottom() == true) &&
+        (radioBtnValue == cBottomEntrance)) {
+      entranceSelection = cBottomEntrance;
+    }
+    if ((facilityViewModel.isEntranceAtBottom() == false) &&
+        (radioBtnValue == cTopEntrance)) {
+      entranceSelection = cTopEntrance;
+    }
+
+    // if readonly is true, we are in tankview
+    //
+
+    return Row(
+      children: [
+        Container(
+          width: kGridSize,
+          child: (!readOnly == cFacilityClickableGrid)
+              ? RadioListTile<int>(
+                  title: const Text('Pick me if this side is the entrance',
+                      style: TextStyle(
+                        fontSize: 9.0,
+                      )),
+                  value:
+                      radioBtnValue, // this tells us which of the radio buttons we are addressing
+                  // below gives the value of the radio buttons as a group
+                  groupValue: entranceSelection,
+                  onChanged: (value) {
+                    entranceSelection = value;
+                    facilityViewModel
+                        .setEntranceBottom((entranceSelection == null)
+                            ? null
+                            : (entranceSelection == cBottomEntrance)
+                                ? true
+                                : false);
+                  },
+                  contentPadding: const EdgeInsets.all(0),
+                )
+              : Center(
+                child: Text((entranceSelection == null)
+                    ? ""
+                    : ((entranceSelection == cBottomEntrance) &&
+                            (radioBtnValue == cBottomEntrance))
+                        ? "This side is the entrance"
+                        : ((entranceSelection == cTopEntrance) &&
+                (radioBtnValue == cTopEntrance))
+                ? "This side is the entrance"
+                : "should never appear"),
+              ),
+        ),
+      ],
+    );
+  }
+
   List<Widget> buildGridDown(
-      FacilityViewModel model, bool readOnly) {
+      FacilityViewModel facilityViewModel, bool readOnly) {
     gridDown
         .clear(); // we clear because this is a global variable, so we want to add starting fresh each time
 
+    gridDown
+        .add(entranceRadioButton(cTopEntrance, facilityViewModel, readOnly));
+
     int offset = 0;
-    for (int theIndex = 1; theIndex <= model.gridHeight; theIndex++) {
+    for (int theIndex = 1;
+        theIndex <= facilityViewModel.gridHeight;
+        theIndex++) {
       gridDown.add(Row(
-        children: buildGridAcross(theIndex + offset, model, readOnly),
+        children:
+            buildGridAcross(theIndex + offset, facilityViewModel, readOnly),
       ));
-      offset = offset + (model.gridWidth - 1); // we are offsetting the index for each row
+      offset = offset +
+          (facilityViewModel.gridWidth -
+              1); // we are offsetting the index for each row
     }
+
+    gridDown
+        .add(entranceRadioButton(cBottomEntrance, facilityViewModel, readOnly));
+
     return gridDown;
   }
 
   @override
   Widget build(BuildContext context) {
-    FacilityViewModel model =
-    Provider.of<FacilityViewModel>(context);
+    FacilityViewModel facilityViewModel =
+        Provider.of<FacilityViewModel>(context);
 
     return Align(
       alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: buildGridDown(model, tankMode!),
+        children: buildGridDown(facilityViewModel, tankMode!),
       ),
     );
   }

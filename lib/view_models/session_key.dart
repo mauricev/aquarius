@@ -63,8 +63,8 @@ class ManageSession {
     return _userAccountJustCreated;
   }
 
-  void setUserAccountJustCreated() {
-    _userAccountJustCreated = true;
+  void setUserAccountJustCreated(bool accountCreated) {
+    _userAccountJustCreated = accountCreated;
   }
 
   Future<dynamic> logOut() async {

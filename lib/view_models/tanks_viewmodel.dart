@@ -149,7 +149,7 @@ class TanksViewModel with ChangeNotifier {
   }
 
   // this will be called every time during the onchanged event
-  void saveExistingTank(String facilityFk, int absolutePosition) async {
+  Future<void> saveExistingTank(String facilityFk, int absolutePosition) async {
     Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
     Map<String, dynamic> theTankMap =
         prepareTankMap(facilityFk, absolutePosition);

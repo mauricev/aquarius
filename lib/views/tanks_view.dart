@@ -15,7 +15,7 @@ import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
 
 // for local, comment out
-import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 //import 'package:easy_autocomplete/easy_autocomplete.dart';
 //import 'package:elastic_autocomplete/elastic_autocomplete.dart';
@@ -45,6 +45,18 @@ class TankViewState extends State<TankView> {
 
   TextEditingController controllerForGeneration = TextEditingController();
 
+
+  void _updateTankLineController() {
+    TanksViewModel tankModel =
+    Provider.of<TanksViewModel>(context, listen: false);
+
+    Tank? currentTank = tankModel.returnCurrentPhysicalTank();
+
+    if (controllerForTankLine.text != currentTank?.tankLine) {
+      controllerForTankLine.text = currentTank?.tankLine ?? '';
+    }
+  }
+
   void _prepareRacksAndTanksForCaller() async {
     TanksViewModel tankModel =
         Provider.of<TanksViewModel>(context, listen: false);
@@ -62,9 +74,9 @@ class TankViewState extends State<TankView> {
         await tankModel.selectThisRackByAbsolutePosition(
             cFacilityClickableGrid, facilityModel, theRackAbsolutePosition!);
       }
-
       tankModel.selectThisTankCellWithoutListener(incomingTankPosition!);
     }
+    tankModel.addListener(_updateTankLineController); // Add listener
   }
 
   @override
@@ -76,6 +88,7 @@ class TankViewState extends State<TankView> {
 
     // Call your methods using the BuildContext:
     _prepareRacksAndTanksForCaller();
+
   }
 
   @override
@@ -109,36 +122,6 @@ class TankViewState extends State<TankView> {
     return theType;
   }
 
-//   Widget returnAutoCompleteForTankLine(BuildContext context, MyAquariumManagerTanksModel tanksModel, TextEditingController textController, Tank? currentTank) {
-//     myPrint("in returnAutoCompleteForTankLine");
-//     return Autocomplete<String>(
-//       //initialValue: TextEditingValue(text: initialText),
-//       optionsBuilder: (TextEditingValue textEditingValue) {
-//         myPrint("in optionsbuilder");
-//         if (textEditingValue.text == '') {
-//           myPrint("in optionsbuilder, emptyee");
-//           return const Iterable<String>.empty();
-//         }
-//         myPrint("do we have tanklines, ${tanksModel.returnListOfTankLines()}");
-//         return tanksModel.returnListOfTankLines().where((String option) {
-//           return option.contains(textEditingValue.text.toLowerCase());
-//         });
-//       },
-//         fieldViewBuilder: (BuildContext context, TextEditingController textEditingController,
-//             FocusNode focusNode,
-//             VoidCallback onFieldSubmitted) {
-//           myPrint("in fieldViewBuilder");
-//           return TextField(
-//             controller: textController,
-//             focusNode: focusNode,
-//             onChanged: (String value) {
-// myPrint("do we come here?");
-//             },
-//           );
-//         }
-//     );
-//   }
-
   Widget returnAutoCompleteForTankLine(
       BuildContext context,
       TanksViewModel tanksModel,
@@ -152,12 +135,6 @@ class TankViewState extends State<TankView> {
 
       textFieldConfiguration: TextFieldConfiguration(
           controller: textController,
-          // style: DefaultTextStyle.of(context)
-          //     .style
-          //     .copyWith(fontStyle: FontStyle.italic),
-          // decoration: InputDecoration(
-          //     border: OutlineInputBorder(),
-          //     ),
           onChanged: (value) {
             FacilityViewModel facilityModel =
                 Provider.of<FacilityViewModel>(context,
@@ -166,7 +143,9 @@ class TankViewState extends State<TankView> {
             currentTank?.tankLine = textController.text;
 
             tanksModel.saveExistingTank(facilityModel.returnFacilityId(),
-                (currentTank?.absolutePosition)!);
+                (currentTank?.absolutePosition)!).then((value) {
+              tanksModel.callNotifyListeners();
+            });
           }),
       minCharsForSuggestions: 0,
       suggestionsCallback: (String pattern) async {
@@ -195,9 +174,6 @@ class TankViewState extends State<TankView> {
           title: Text(suggestion),
         );
       },
-      // itemSeparatorBuilder: (context, index) {
-      //   return Divider();
-      // },
       onSuggestionSelected: (String suggestion) {
         setState(() {
           FacilityViewModel facilityModel =
@@ -210,22 +186,17 @@ class TankViewState extends State<TankView> {
               (currentTank?.absolutePosition)!);
         });
       },
-      // suggestionsBoxDecoration: SuggestionsBoxDecoration(
-      //   borderRadius: BorderRadius.circular(10.0),
-      //   elevation: 8.0,
-      //   color: Theme.of(context).cardColor,
-      //),
     );
   }
 
   Widget buildInnerLabel(String labelText, TextEditingController textController,
       TanksViewModel tanksModel, TankStringsEnum tanksStringsValue,
       [double? width]) {
-    // so we have two pressing questions will this info save into the actual tank
+
     Tank? currentTank = tanksModel.returnCurrentPhysicalTank();
     switch (tanksStringsValue) {
       case TankStringsEnum.tankLine:
-        textController.text = currentTank?.tankLine ?? "";
+        //textController.text = currentTank?.tankLine ?? "";
         break;
       case TankStringsEnum.generation:
         textController.text = currentTank?.generation.toString() ?? "";
@@ -266,8 +237,7 @@ class TankViewState extends State<TankView> {
 
                       switch (tanksStringsValue) {
                         case TankStringsEnum.tankLine:
-
-                          currentTank?.tankLine = textController.text;
+                          // nothing to do here because this is handled by returnAutoCompleteForTankLine above
                           break;
                         case TankStringsEnum.numberOfFish:
                           if (textController.text != "") {
@@ -282,7 +252,6 @@ class TankViewState extends State<TankView> {
                           }
                           break;
                       }
-
                       tanksModel.saveExistingTank(
                           facilityModel.returnFacilityId(),
                           (currentTank?.absolutePosition)!);
@@ -412,7 +381,7 @@ class TankViewState extends State<TankView> {
         : "screen negative";
 
     String smallTankString =
-        (currentTank?.getSmallTank() ?? false) ? "small tank" : "fat tank";
+        (currentTank?.getSmallTank() ?? false) ? "3L tank" : "10L tank";
 
     String numberOfFishString = currentTank?.getNumberOfFish().toString() ?? "";
     String generationString = currentTank?.generation.toString() ?? "";
@@ -438,7 +407,7 @@ class TankViewState extends State<TankView> {
 ^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
 ^XZ
 """;
-    final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    //final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   @override
