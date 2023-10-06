@@ -45,15 +45,33 @@ class TankViewState extends State<TankView> {
 
   TextEditingController controllerForGeneration = TextEditingController();
 
-
-  void _updateTankLineController() {
+  Tank? returnCurrentPhysicalTank() {
     TanksViewModel tankModel =
     Provider.of<TanksViewModel>(context, listen: false);
 
-    Tank? currentTank = tankModel.returnCurrentPhysicalTank();
+    return tankModel.returnCurrentPhysicalTank();
+  }
+  void _updateTankLineController() {
+    Tank? currentTank = returnCurrentPhysicalTank();
 
     if (controllerForTankLine.text != currentTank?.tankLine) {
       controllerForTankLine.text = currentTank?.tankLine ?? '';
+    }
+  }
+
+  void _updateNumberOfFishController() {
+    Tank? currentTank = returnCurrentPhysicalTank();
+
+    if (controllerForNumberOfFish.text != currentTank?.numberOfFish.toString()) {
+      controllerForNumberOfFish.text = currentTank?.numberOfFish.toString() ?? '1';
+    }
+  }
+
+  void _updateFishGenerationController() {
+    Tank? currentTank = returnCurrentPhysicalTank();
+
+    if (controllerForGeneration.text != currentTank?.generation.toString()) {
+      controllerForGeneration.text = currentTank?.generation.toString() ?? '';
     }
   }
 
@@ -76,7 +94,9 @@ class TankViewState extends State<TankView> {
       }
       tankModel.selectThisTankCellWithoutListener(incomingTankPosition!);
     }
-    tankModel.addListener(_updateTankLineController); // Add listener
+    tankModel.addListener(_updateTankLineController);
+    tankModel.addListener(_updateNumberOfFishController);
+    tankModel.addListener(_updateFishGenerationController);
   }
 
   @override
@@ -86,15 +106,12 @@ class TankViewState extends State<TankView> {
     incomingRackFk = widget.arguments['incomingRack_Fk'];
     incomingTankPosition = widget.arguments['incomingTankPosition'];
 
-    // Call your methods using the BuildContext:
     _prepareRacksAndTanksForCaller();
-
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Rebuild the widget tree
     setState(() {});
   }
 
@@ -194,17 +211,21 @@ class TankViewState extends State<TankView> {
       [double? width]) {
 
     Tank? currentTank = tanksModel.returnCurrentPhysicalTank();
-    switch (tanksStringsValue) {
-      case TankStringsEnum.tankLine:
-        //textController.text = currentTank?.tankLine ?? "";
-        break;
-      case TankStringsEnum.generation:
-        textController.text = currentTank?.generation.toString() ?? "";
-        break;
-      case TankStringsEnum.numberOfFish:
-        textController.text = currentTank?.getNumberOfFish().toString() ?? "";
-        break;
-    }
+
+    // we now use specific function listeners
+    // because we shouldn't directly set these inside the build method
+    // doing so can affect the way the text field operates leading to strange behavior
+    // switch (tanksStringsValue) {
+    //   case TankStringsEnum.tankLine:
+    //     //textController.text = currentTank?.tankLine ?? "";
+    //     break;
+    //   case TankStringsEnum.generation:
+    //     //textController.text = currentTank?.generation.toString() ?? "";
+    //     break;
+    //   case TankStringsEnum.numberOfFish:
+    //     //textController.text = currentTank?.getNumberOfFish().toString() ?? "";
+    //     break;
+    // }
 
     return Padding(
       padding: const EdgeInsets.only(
