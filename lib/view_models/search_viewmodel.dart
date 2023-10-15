@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_search_dropdown/simple_search_dropdown.dart';
 import '../view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:appwrite/appwrite.dart';
@@ -12,6 +13,9 @@ class SearchViewModel with ChangeNotifier {
 
   List<Tank> tankListFull = <Tank>[];
   List<Tank> tankListSearched = <Tank>[];
+  Map<int,int> dobNumberOfFish = <int,int>{};
+  int totalNumberOfFish = 0;
+  double averageAgeOfFish = 0;
 
   SearchViewModel(this._manageSession);
 
@@ -53,6 +57,10 @@ class SearchViewModel with ChangeNotifier {
     tankListSearched.clear();
   }
 
+  void clearDobNumberOfFishMap() {
+    dobNumberOfFish.clear();
+  }
+
   Future<models.DocumentList> returnAllTheTanks() async {
     List<String>? tankQuery = [
       Query.equal("facility_fk", facilityFk),
@@ -66,6 +74,8 @@ class SearchViewModel with ChangeNotifier {
     models.DocumentList theTankList = await returnAllTheTanks();
 
     clearTanksFullList();
+    clearTanksSearchedList();
+    clearDobNumberOfFishMap();
 
     for (int theIndex = 0; theIndex < theTankList.total; theIndex++) {
       models.Document theTank = theTankList.documents[theIndex];
@@ -85,6 +95,36 @@ class SearchViewModel with ChangeNotifier {
     }
   }
 
+  void sortByProperty<T>(List<T> list, Comparable? Function(T) getProperty) {
+    list.sort((a, b) {
+      final aProp = getProperty(a);
+      final bProp = getProperty(b);
+
+      if (aProp == null && bProp == null) {
+        return 0;
+      }
+      if (aProp == null) {
+        return 1;
+      }
+      if (bProp == null) {
+        return -1;
+      }
+      return aProp.compareTo(bProp);
+    });
+  }
+
+  // this code prepares the dropdown
+  List<ValueItem> returnTankLinesAsValueItems() {
+    List<ValueItem> selectableTankLineValueList = tankListFull
+        .where((obj) => obj.tankLine != null && obj.tankLine!.isNotEmpty)  // Filter out objects with null or empty names
+        .map((obj) => ValueItem(label: obj.tankLine!))  // Map to ValueItems
+        .toSet()  // Remove duplicates
+        .toList();  // Convert back to list
+
+    selectableTankLineValueList.sort((a, b) => a.label.compareTo(b.label)); // ValueItem contains a string label, which is the tankline
+    return selectableTankLineValueList;
+  }
+
   int? computeBreedingDate(int? birthDate) {
     // we will take the birthdate and add to it 6 months
     // if we want to change 6 months to some other value, we will probably
@@ -93,56 +133,81 @@ class SearchViewModel with ChangeNotifier {
     return (birthDate! + kCrossBreedTime);
   }
 
-  void prepareSearchTankList(String tankLineTextToSearchFor, bool searchType) {
+  int get getTotalNumberOfFish => totalNumberOfFish;
+
+  double get getAverageAgeOfFish => averageAgeOfFish;
+
+  void prepareNumberFishPerBirthDate(int? searchType) {
+    if (searchType == cTankLineSearch) {
+
+      // re-initialize variables
+      dobNumberOfFish.clear();
+      totalNumberOfFish = 0;
+      int birthDateTally = 0;
+
+      for (int theIndex = 0; theIndex < tankListSearched.length; theIndex++) {
+
+        int? birthDate = tankListSearched[theIndex].birthDate;
+
+        if(birthDate != null) {
+
+          int numberOfFishAtThisBirthDate = tankListSearched[theIndex].numberOfFish!;
+          birthDateTally += (birthDate * numberOfFishAtThisBirthDate);  // we need to tally the birthdate for *each* fish at this birthdate
+          totalNumberOfFish += numberOfFishAtThisBirthDate;
+
+          if(dobNumberOfFish.containsKey(birthDate)) {
+            // we have this dob already, add the number of fish at theIndex;
+            int numberOfFishAtStoredBirthDate = dobNumberOfFish[birthDate]!;
+            dobNumberOfFish[birthDate] = numberOfFishAtStoredBirthDate + numberOfFishAtThisBirthDate; // dobNumberOfFish[birthDate] is the number of fish for the referenced birthdate
+          } else {
+            // if dob does not exist in the map, add it with the number of fish
+            // simply referencing a new key adds it to the map
+            dobNumberOfFish[birthDate] = numberOfFishAtThisBirthDate;
+          }
+        }
+      }
+
+      averageAgeOfFish = birthDateTally / totalNumberOfFish;
+
+    }
+  }
+
+  void prepareSearchTankList(String tankLineTextToSearchFor, int? searchType, bool withNotify) {
+
     tankListSearched.clear();
-    if (tankLineTextToSearchFor == "") {
+
+    if (searchType == cCrossBreedSearch) {
+      // in cross-breed search, we search ALL tanklines
       for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
         tankListSearched.add(tankListFull[theIndex]);
       }
     } else {
-      for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
-        if (tankListFull[theIndex].tankLine != null) {
-          if (tankListFull[theIndex]
-              .tankLine!
-              .toLowerCase()
-              .contains(tankLineTextToSearchFor.toLowerCase())) {
-            tankListSearched.add(tankListFull[theIndex]);
+      if (tankLineTextToSearchFor != "") { // if tankline has yet to be assigned, we show nothing!
+        for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
+          if (tankListFull[theIndex].tankLine != null) {
+            if (tankListFull[theIndex]
+                .tankLine!
+                .toLowerCase() == (tankLineTextToSearchFor.toLowerCase())) {
+              tankListSearched.add(tankListFull[theIndex]);
+            }
           }
         }
       }
     }
 
-    void sortByProperty<T>(
-        List<T> list, Comparable? Function(T) getProperty) {
-      list.sort((a, b) {
-        final aProp = getProperty(a);
-        final bProp = getProperty(b);
+    // both are sorted according to dob, but they contain different things. cTankLineSearch contains a specific tankline; the other contains them all
+    sortByProperty(tankListSearched, (tank) => tank.getBirthDate());
 
-        if (aProp == null && bProp == null) {
-          return 0;
-        }
-        if (aProp == null) {
-          return 1;
-        }
-        if (bProp == null) {
-          return -1;
-        }
-        return aProp.compareTo(bProp);
-      });
-    }
+    prepareNumberFishPerBirthDate(searchType);
 
-    if (searchType == kPlainSearch) {
-      sortByProperty(tankListSearched, (tank) => tank.tankLine);
-    } else {
-      sortByProperty(tankListSearched, (tank) => tank.getBirthDate());
+    if (withNotify == cNotify) {
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   // we exclude exact matches so the dropdown doesn’t automatically come down on the mere loading of the tank cell
   // bug, we are searching only the tanks in this particular rack, not in all racks
   Set<String> returnListOfTankLines(String excludeThisString) {
-
     Set<String> tankLineList = {};
 
     for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
@@ -160,8 +225,8 @@ class SearchViewModel with ChangeNotifier {
   }
 
   Future<void> buildInitialSearchList(String facilityFk) async {
-    await prepareFullTankListForFacility(facilityFk); // we do get the full tank list from the database and the database should always be up to date.
-    prepareSearchTankList("",kPlainSearch);
+    await prepareFullTankListForFacility(
+        facilityFk); // we do get the full tank list from the database and the database should always be up to date.
+    prepareSearchTankList("", cTankLineSearch,cNoNotify);
   }
-
 }

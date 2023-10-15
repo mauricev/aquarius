@@ -104,7 +104,7 @@ class FacilityGridCell extends StatelessWidget {
 
             if (controllerForRelativePosition.text == "") {
               if (index != -1) {
-                facilityModel.deleteRack(index);
+                facilityModel.deleteRack(index); // i think this means if a user deletes the text of a rack, the rack goes away and this probably isn't a good idea.
               }
             } else {
               // we contain some text
@@ -181,9 +181,6 @@ class FacilityGrid extends StatelessWidget {
         (radioBtnValue == cTopEntrance)) {
       entranceSelection = cTopEntrance;
     }
-
-    // if readonly is true, we are in tankview
-    //
 
     return Row(
       children: [

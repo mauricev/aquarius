@@ -28,19 +28,15 @@ class FacilityViewModel with ChangeNotifier {
   }
 
   void addRack(int absolutePosition, String relativePosition) {
-    myPrint(
-        "adding the rack $relativePosition at position $absolutePosition");
     Rack aRack = Rack(absolutePosition, relativePosition);
     rackList.add(aRack);
   }
 
   void clearRacks() {
-    myPrint("clearing racks");
     rackList.clear();
   }
 
   void deleteRack(int index) {
-    myPrint("deleting rack at index $index");
     rackList.removeAt(index);
   }
 
@@ -184,7 +180,7 @@ class FacilityViewModel with ChangeNotifier {
     }
   }
 
-  //save facility is only for new facilities
+  //save facility is only for new facilities; this also saves the racks for this facility
   Future<void> saveFacility() async {
     // need to update any existing facility
 
@@ -211,6 +207,7 @@ class FacilityViewModel with ChangeNotifier {
       myPrint("is facility id right? facility is ${theFacility.$id} and saved value is $documentId");
     }
 
+    // save off each rack associated with this facility
     for (int theIndex = 0; theIndex < rackList.length; theIndex++) {
 
       Map<String, dynamic> theRackMap = {
@@ -220,11 +217,9 @@ class FacilityViewModel with ChangeNotifier {
       };
 
       List<String>? rackQuery = [
-        Query.equal("facility_fk", theFacility.$id), //we need the facility id; it could be a new facility with a new id
+        Query.equal("facility_fk", theFacility.$id), // we need the facility id; it could be a new facility with a new id
         Query.equal("absolute_position", rackList[theIndex].absolutePosition),
       ];
-
-      myPrint("the facility being saved is ${theFacility.$id}");
 
       models.DocumentList theRackList = await _manageSession.queryDocument(cRackCollection, rackQuery);
 

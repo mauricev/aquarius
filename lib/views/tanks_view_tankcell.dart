@@ -77,7 +77,7 @@ class _TankCellState extends State<TankCell> {
               builder: (BuildContext context, StateSetter setState) {
                 return CheckboxListTile(
                   //tileColor: Colors.red,
-                  title: const Text('Make this a 10L tank?'),
+                  title: const Text('Make this a ${cFatTank} tank?'),
                   value: isFatTank,
                   onChanged: (bool? value) {
                     setState(() {

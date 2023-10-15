@@ -82,6 +82,10 @@ class TankViewState extends State<TankView> {
     FacilityViewModel facilityModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
+    tankModel.addListener(_updateTankLineController);
+    tankModel.addListener(_updateNumberOfFishController);
+    tankModel.addListener(_updateFishGenerationController);
+
     if (incomingRackFk != null && incomingTankPosition != null) {
       if (incomingRackFk! != "0") {
         // parked cells don't have racks associated with them; rack is just 0 as a string.
@@ -92,11 +96,9 @@ class TankViewState extends State<TankView> {
         await tankModel.selectThisRackByAbsolutePosition(
             cFacilityClickableGrid, facilityModel, theRackAbsolutePosition!);
       }
-      tankModel.selectThisTankCellWithoutListener(incomingTankPosition!);
+      // fixed bug, we do have to notifylisteners after all
+      tankModel.selectThisTankCellConvertsVirtual(incomingTankPosition!);
     }
-    tankModel.addListener(_updateTankLineController);
-    tankModel.addListener(_updateNumberOfFishController);
-    tankModel.addListener(_updateFishGenerationController);
   }
 
   @override
@@ -402,7 +404,7 @@ class TankViewState extends State<TankView> {
         : "screen negative";
 
     String smallTankString =
-        (currentTank?.getSmallTank() ?? false) ? "3L tank" : "10L tank";
+        (currentTank?.getSmallTank() ?? false) ? "${cThinTank} tank" : "${cFatTank} tank";
 
     String numberOfFishString = currentTank?.getNumberOfFish().toString() ?? "";
     String generationString = currentTank?.generation.toString() ?? "";

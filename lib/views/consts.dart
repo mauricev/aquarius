@@ -43,16 +43,23 @@ enum TankStringsEnum { tankLine, numberOfFish, generation }
 const int kStandardTextWidth = 75;
 const double kStandardTextWidthDouble = 75;
 
-const kNoRackSelected = -2;
-const cParkedAbsolutePosition = -2;
+const int kNoRackSelected = -2;
+const int cParkedAbsolutePosition = -2;
 
-const kEmptyTankIndex = -1;
+const int kEmptyTankIndex = -1;
 
 const int kStartingYear = 2021;
 const int kStartingMonth = 1;
 const int kEndingYear = 2024;
-const int kStartingDOBOffset = 66000000000;
+const int kStartingDOBOffset = 66000000000; // 764.44 days since 1/1/70 midnight, not sure how I calculated this. it's the default dob for new tanks
 
-const bool kPlainSearch = true;
-const bool kCrossBreedSearch = false;
-const int kCrossBreedTime = 15774336000;
+const int cTankLineSearch = 1;
+const int cCrossBreedSearch = 2;
+const int kCrossBreedTime = 15552000000; // new value at 180 days; 15774336000 was the old value
+const int kDayInMilliseconds = 86400000;
+
+const bool cNotify = true;
+const bool cNoNotify = false;
+
+const String cThinTank = "3L";
+const String cFatTank = "10L";
