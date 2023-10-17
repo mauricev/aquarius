@@ -67,7 +67,7 @@ class Tank {
     screenPositive = newScreenPositiveValue;
   }
 
-  bool? getSmallTank() {
+  bool getSmallTank() {
     return (fatTankPosition == null);
   }
 

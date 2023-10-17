@@ -57,7 +57,7 @@ class _TankCellState extends State<TankCell> {
 
     // we need to force select this tank; otherwise, there is no current tank
     tankModel.selectThisTankCellConvertsVirtual(widget
-        .absolutePosition); // we are selecting the parent tank of a fat tank cell pair
+        .absolutePosition,cNotify); // we are selecting the parent tank of a fat tank cell pair
     // position will have absoluteposition as a value and will act as if it is also selected
     // bug fixed here
   }
@@ -76,8 +76,7 @@ class _TankCellState extends State<TankCell> {
             StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return CheckboxListTile(
-                  //tileColor: Colors.red,
-                  title: const Text('Make this a ${cFatTank} tank?'),
+                  title: const Text('Make this a $cFatTank tank?'),
                   value: isFatTank,
                   onChanged: (bool? value) {
                     setState(() {
@@ -165,7 +164,7 @@ class _TankCellState extends State<TankCell> {
                   if (tankID != kEmptyTankIndex) {
                     // we only want to select actual tanks at the moment
                     tankModel.selectThisTankCellConvertsVirtual(
-                        widget.absolutePosition);
+                        widget.absolutePosition,cNotify);
                   }
                 },
           child: Container(
@@ -276,16 +275,12 @@ class _TankCellState extends State<TankCell> {
         setState(() {
           Tank parkedTank = data as Tank;
 
-          FacilityViewModel facilityModel =
-              Provider.of<FacilityViewModel>(context, listen: false);
-
           TanksViewModel tankModel =
               Provider.of<TanksViewModel>(context, listen: false);
 
           // if this destination widget is a virtual tank, make the swap with the prior position numerically
           int thisPosition = widget.absolutePosition;
           if (tankModel.isThisTankVirtual(thisPosition)) {
-            myPrint("dragging, this tank is virtual");
             thisPosition = widget.absolutePosition - 1;
           }
 
@@ -299,15 +294,19 @@ class _TankCellState extends State<TankCell> {
             // our parked tank needs two new pieces of info
             // a new abs position and the rack_fk
             // do we have a copy of the parked tank or the actual parked tank?
+
+            // business logic 10
+
             assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // the tank has not been saved with this new info
             // this will be physical
-            tankModel.saveExistingTank(
-                facilityModel.returnFacilityId(), thisPosition);
+            tankModel.saveExistingTank(thisPosition);
           } else {
-            myPrint("we dragged to an active tank spot");
             // here we are swapping tank positions
             // this will be physical
+
+            // business logic 11, everything below should be distilled down to one method in tankModel
+
             Tank? destinationTank = tankModel
                 .returnPhysicalTankWithThisAbsolutePosition(thisPosition);
 
@@ -317,16 +316,14 @@ class _TankCellState extends State<TankCell> {
             // BUG if this tank is fat, then its fat position needs to be updated
             assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
             // this will be physical
-            tankModel.saveExistingTank(
-                facilityModel.returnFacilityId(), thisPosition);
+            tankModel.saveExistingTank(thisPosition);
             // this will be physical
-            tankModel.saveExistingTank(
-                facilityModel.returnFacilityId(), cParkedAbsolutePosition);
+            tankModel.saveExistingTank(cParkedAbsolutePosition);
           }
           // below we are passing a physical tank position
           // so selectThisTankCell should never come to the virtual tank code
 
-          tankModel.selectThisTankCellConvertsVirtual(thisPosition);
+          tankModel.selectThisTankCellConvertsVirtual(thisPosition,cNotify);
         });
       },
     );

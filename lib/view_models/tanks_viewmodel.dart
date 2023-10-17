@@ -16,6 +16,12 @@ class TanksViewModel with ChangeNotifier {
   int selectedRack = -2; // this is a rack cell, not a tank cell
   int selectedTankCell = kEmptyTankIndex;
   String rackDocumentid = "";
+  String facilityId = "";
+
+  void setFacilityId(String incomingFacilityId) {
+    facilityId = incomingFacilityId;
+    print("setFacilityId, ${facilityId}");
+  }
 
   void callNotifyListeners() {
     notifyListeners();
@@ -149,10 +155,10 @@ class TanksViewModel with ChangeNotifier {
   }
 
   // this will be called every time during the onchanged event
-  Future<void> saveExistingTank(String facilityFk, int absolutePosition) async {
+  Future<void> saveExistingTank(int absolutePosition) async {
     Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
     Map<String, dynamic> theTankMap =
-        prepareTankMap(facilityFk, absolutePosition);
+        prepareTankMap(facilityId, absolutePosition);
     _manageSession.updateDocument(theTankMap, cTankCollection,
         (theTank?.documentId)!); // tank’s document ID must be correct!
   }
@@ -165,7 +171,7 @@ class TanksViewModel with ChangeNotifier {
 
     await _manageSession.deleteDocument(cTankCollection, (theTank?.documentId)!); // await to ensure notifylisteners occurs after deletetank
 
-    selectThisTankCellConvertsVirtual(kEmptyTankIndex); // the currently selected tank has been deleted
+    selectThisTankCellConvertsVirtual(kEmptyTankIndex,cNotify); // the currently selected tank has been deleted
     // what happens when deleting a parked tank. there simply is no longer a parked tank??
    // notifyListeners();  called above
   }
@@ -209,7 +215,7 @@ class TanksViewModel with ChangeNotifier {
   }
 
   Future<void> selectThisRackByAbsolutePosition(bool? readInTanks,
-      FacilityViewModel facilityModel, int selectThisRack) async {
+      FacilityViewModel facilityModel, int selectThisRack, bool withNotifyListeners) async {
     selectedRack = selectThisRack;
     myPrint("the selected rack cell is $selectedRack must be followed loading tanks");
     // the code here will query the rack via the absolute position and facility_fk from the facility mode
@@ -221,7 +227,9 @@ class TanksViewModel with ChangeNotifier {
         await loadTanksForThisRack(facilityModel,theRackId);  // BUG there is no await here, so notifylisteners may execute before this returns
       }
     }
-    notifyListeners();
+    if (withNotifyListeners) {
+      notifyListeners();
+    }
   }
 
   bool isThereAParkedTank() {
@@ -273,14 +281,16 @@ class TanksViewModel with ChangeNotifier {
   }
 
   // selectedTankCell should always contain a physical tank
-  void selectThisTankCellConvertsVirtual(int selectThisTankCell) {
+  void selectThisTankCellConvertsVirtual(int selectThisTankCell, bool withNotify) {
     if (selectThisTankCell != cParkedAbsolutePosition) {
       selectedTankCell = convertVirtualTankPositionToPhysical(selectThisTankCell);
     } else {
       // parked always selects a physical tank
       selectedTankCell = selectThisTankCell;
     }
-    notifyListeners();
+    if (withNotify == cNotify) {
+      notifyListeners();
+    }
   }
 
   // for when we are called by the search/barcode

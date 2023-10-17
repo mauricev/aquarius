@@ -238,7 +238,7 @@ class _SearchViewState extends State<SearchView> {
               child: Row(
                 children: [
                   Expanded(
-                    flex: 3,
+                    flex: (searchSelection == cCrossBreedSearch) ? 4:3,
                     child: Text(
                       (searchSelection == cCrossBreedSearch)
                           ? "Cross-breeding date: ${buildDateOfBirth(() => breedingDate)}"
@@ -260,8 +260,8 @@ class _SearchViewState extends State<SearchView> {
                     child: buildCheckBox(context, "Screen Positive", tank.getScreenPositive),
                   ),
                   Expanded(
-                    flex:3,
-                    child: buildCheckBox(context, "${cThinTank} Tank", tank.getSmallTank),
+                    flex:2,
+                    child: (tank.getSmallTank() == true) ? Text("3L tank",style: Theme.of(context).textTheme.bodySmall) : Text("10L tank",style: Theme.of(context).textTheme.bodySmall),
                   ),
                   Expanded(
                     flex: 2,
@@ -270,12 +270,10 @@ class _SearchViewState extends State<SearchView> {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
-                  Spacer(flex: 1),
+                  const Spacer(flex: 1),
                 ],
               )
-
             ),
-
           ],
         ),
       ),
@@ -546,10 +544,7 @@ class _SearchViewState extends State<SearchView> {
     // const cCrossBreedSearch = 2;
     return Expanded(
       child: RadioListTile<int>(
-        title: Text(searchLabel,
-            style: const TextStyle(
-              fontSize: 9.0,
-            )),
+        title: Text(searchLabel,),
         value:
             radioBtnValue, // this tells us which of the radio buttons we are addressing
         // below gives the value of the radio buttons as a group
@@ -568,18 +563,23 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 
+  List<ValueItem> returnEmptyTankLineValueList() {
+    print("returnEmptyTankLineValueList");
+    return <ValueItem>[];
+  }
+
   Widget simple_search_dropdown(SearchViewModel searchModel) {
     return SearchDropDown(
       key: singleSearchKey,
-      listItems: searchModel.returnTankLinesAsValueItems(),
-      //confirmDelete: true,
-      //onDeleteItem: removeItem,
+      listItems: (searchSelection == cTankLineSearch) ? searchModel.returnTankLinesAsValueItems():returnEmptyTankLineValueList(),
       onAddItem: addItem,
       addMode: false,
       deleteMode: false,
       updateSelectedItem: updateSelectedItem,
+      //verifyInputItem: searchModel.rejectBogusTankLineValueItems,
       selectedItem: null,
       hint: "Select a tank line",
+      //newValueItem: (input) => ValueItem(label: input, value: input),
     );
   }
 
@@ -596,6 +596,8 @@ class _SearchViewState extends State<SearchView> {
   List<BarChartGroupData> getBarGroups(SearchViewModel searchModel) {
     List<BarChartGroupData> barGroups = [];
 
+    Color barColor = Color.fromARGB(255, 165, 254, 206);
+
     searchModel.dobNumberOfFish.forEach((xValue, yValue) {
       barGroups.add(
         BarChartGroupData(
@@ -603,7 +605,7 @@ class _SearchViewState extends State<SearchView> {
           barRods: [
             BarChartRodData(
               toY: yValue.toDouble(),
-              color: Colors.blue,
+              color: barColor,
             ),
           ],
         ),
@@ -625,8 +627,8 @@ class _SearchViewState extends State<SearchView> {
           buildOuterLabelHeadlineSmall(context, "Search Tanks"),
           Row(
             children: [
-              searchRadioButton('tanklines', cTankLineSearch),
-              searchRadioButton('cross-breed', cCrossBreedSearch),
+              searchRadioButton('Tanklines', cTankLineSearch),
+              searchRadioButton('Cross-breed', cCrossBreedSearch),
             ],
           ),
           Row(
@@ -659,6 +661,7 @@ class _SearchViewState extends State<SearchView> {
             ),
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ((searchSelection == cTankLineSearch) &&
                       (selectedSingleItem != null))
@@ -667,18 +670,19 @@ class _SearchViewState extends State<SearchView> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   children: <TextSpan>[
                     const TextSpan(text: 'The average age of the', style: TextStyle(fontWeight: FontWeight.normal)),
-                    TextSpan(text: ' ${searchModel.getTotalNumberOfFish} fish ', style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: 'in tankline ${selectedSingleItem?.label ?? ""} is', style: TextStyle(fontWeight: FontWeight.normal)),
-                    TextSpan(text: ' ${(returnTimeNow() - searchModel.getAverageAgeOfFish.toInt()) / kDayInMilliseconds} days', style: TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(text: ' ${searchModel.getTotalNumberOfFish} fish ', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    TextSpan(text: 'in tankline ${selectedSingleItem?.label ?? ""} is', style: const TextStyle(fontWeight: FontWeight.normal)),
+                    TextSpan(text: ' ${(returnTimeNow() - searchModel.getAverageAgeOfFish.toInt()) ~/ kDayInMilliseconds} days', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
               ): Container(),
             ],
           ),
+        SizedBox(height:30),
           ((searchSelection == cTankLineSearch) && (selectedSingleItem != null))
               ? Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(40.0),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 5 / 6,
                     child: BarChart(
                       BarChartData(
                         barGroups: getBarGroups(searchModel),

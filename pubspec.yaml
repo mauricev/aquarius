@@ -47,7 +47,7 @@ dependencies:
   flutter_dropdown_plus: ^1.2.0
   drop_down_search_field: ^1.0.0
   custom_searchable_dropdown: ^2.1.1
-  simple_search_dropdown: ^2.2.0
+  simple_search_dropdown: ^3.0.0
   fl_chart: ^0.64.0
 
 dev_dependencies:

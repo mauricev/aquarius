@@ -85,16 +85,12 @@ class FacilityViewModel with ChangeNotifier {
       Query.equal("\$id", inRackFk),
     ];
 
-    myPrint("IN returnRacksAbsolutePosition, $inRackFk");
     models.DocumentList theRackList = await _manageSession.queryDocument(
         cRackCollection, rackQuery);
-    myPrint("theRackList is ${theRackList.documents[0]}");
 
     models.Document theRack = theRackList.documents[0];
-    myPrint("rack document id is ${theRack.$id}");
-    myPrint("theRack is ${theRack.data}");
+
     int absolutePosition = theRack.data["absolute_position"];
-    myPrint("rack absolutePosition is $absolutePosition");
 
     return absolutePosition; // possible bug here, doesn't want await
   }
@@ -105,16 +101,12 @@ class FacilityViewModel with ChangeNotifier {
       Query.equal("\$id", inRackFk),
     ];
 
-    myPrint("IN returnRacksRelativePosition, $inRackFk");
     models.DocumentList theRackList = await _manageSession.queryDocument(
         cRackCollection, rackQuery);
-    myPrint("theRackList is ${theRackList.documents[0]}");
 
     models.Document theRack = theRackList.documents[0];
-    myPrint("rack document id is ${theRack.$id}");
-    myPrint("theRack is ${theRack.data}");
+
     String relativePosition = theRack.data["relative_position"];
-    myPrint("rack position is $relativePosition");
 
     return relativePosition; // possible bug here, doesn't want await
   }
@@ -143,7 +135,7 @@ class FacilityViewModel with ChangeNotifier {
       models.Document theFacility = await _manageSession.getDocument(
           kFacilityCollection, theFacilityFk);
 
-      documentId = theFacility.$id;
+      documentId = theFacility.$id; // this is the same as the theFacilityFk
       facilityName = theFacility.data['facility_name'];
       facilityBuilding = theFacility.data['facility_building'];
       facilityRoom = theFacility.data['facility_room'];

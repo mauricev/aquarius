@@ -79,7 +79,7 @@ class ParkedTank extends StatelessWidget {
         onTap: () {
           if (tankID != kEmptyTankIndex) {
             // we only want to select actual tanks at the moment
-            tankModel.selectThisTankCellConvertsVirtual(cParkedAbsolutePosition);
+            tankModel.selectThisTankCellConvertsVirtual(cParkedAbsolutePosition,cNotify);
           }
         },
       ),
