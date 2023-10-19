@@ -125,7 +125,7 @@ class Notes {
             'tank_fk': theParentId,
             // when we save notes, we need to save this so that each note must have its own copy
           };
-          myPrint("loaded note, what does the note say, ${theNote.data['note']}");
+
           // how are we sorting these? // newer items must be added first
           notesList.add(theNotesMap);
 

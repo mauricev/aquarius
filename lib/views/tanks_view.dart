@@ -15,18 +15,21 @@ import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
 
 // for local, comment out
-//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
-//import 'package:easy_autocomplete/easy_autocomplete.dart';
-//import 'package:elastic_autocomplete/elastic_autocomplete.dart';
-//import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class TankView extends StatefulWidget {
-  final Map<String, dynamic> arguments;
+  final String? incomingRackFk;
+  final int? incomingTankPosition;
+  final TanksViewModel tankViewModelNoContext;
 
-  const TankView({Key? key, required this.arguments})
-      : super(key: key);
+  const TankView({
+    Key? key,
+    this.incomingRackFk,
+    this.incomingTankPosition,
+    required this.tankViewModelNoContext,
+  }) : super(key: key);
 
   @override
   TankViewState createState() =>
@@ -34,8 +37,6 @@ class TankView extends StatefulWidget {
 }
 
 class TankViewState extends State<TankView> {
-  String? incomingRackFk;
-  int? incomingTankPosition;
 
   TextEditingController controllerForTankLine = TextEditingController();
   TextEditingController controllerForBirthDate = TextEditingController();
@@ -46,10 +47,10 @@ class TankViewState extends State<TankView> {
   TextEditingController controllerForGeneration = TextEditingController();
 
   Tank? returnCurrentPhysicalTank() {
-    TanksViewModel tankModel =
-    Provider.of<TanksViewModel>(context, listen: false);
+    /*TanksViewModel tankModel =
+    Provider.of<TanksViewModel>(context, listen: false);*/
 
-    return tankModel.returnCurrentPhysicalTank();
+    return widget.tankViewModelNoContext.returnCurrentPhysicalTank();
   }
 
   void _updateTankLineController() {
@@ -82,33 +83,28 @@ class TankViewState extends State<TankView> {
   // selectThisRackByAbsolutePosition
 
   void _prepareRacksAndTanksForCaller() async {
-    TanksViewModel tankModel =
-        Provider.of<TanksViewModel>(context, listen: false);
+    /*TanksViewModel tankModel =
+        Provider.of<TanksViewModel>(context, listen: false);*/
 
     FacilityViewModel facilityModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
-    tankModel.addListener(_updateTankLineController);
-    tankModel.addListener(_updateNumberOfFishController);
-    tankModel.addListener(_updateFishGenerationController);
+    widget.tankViewModelNoContext.addListener(_updateTankLineController);
+    widget.tankViewModelNoContext.addListener(_updateNumberOfFishController);
+    widget.tankViewModelNoContext.addListener(_updateFishGenerationController);
 
-    if (incomingRackFk != null && incomingTankPosition != null) {
-      if (incomingRackFk! != "0") {
+    if (widget.incomingRackFk != null && widget.incomingTankPosition != null) {
+      if (widget.incomingRackFk! != "0") {
         // parked cells don't have racks associated with them; rack is just 0 as a string.
 
         int? theRackAbsolutePosition =
-            await facilityModel.returnRacksAbsolutePosition(incomingRackFk!); // looks like we can just read this from the loaded racks
+            await facilityModel.returnRacksAbsolutePosition(widget.incomingRackFk!); // looks like we can just read this from the loaded racks
 
-        await tankModel.selectThisRackByAbsolutePosition(
+        await widget.tankViewModelNoContext.selectThisRackByAbsolutePosition(
             cFacilityClickableGrid, facilityModel, theRackAbsolutePosition!, cNoNotify);
       }
       // fixed bug, we do have to call notifylisteners after all
-      tankModel.selectThisTankCellConvertsVirtual(incomingTankPosition!,cNoNotify);
-      if(mounted) {
-        setState(() {
-          print('did we get called');
-        });
-      }
+      widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(widget.incomingTankPosition!,cNotify);
     }
   }
 
@@ -116,10 +112,23 @@ class TankViewState extends State<TankView> {
   void initState() {
     super.initState();
 
-    incomingRackFk = widget.arguments['incomingRack_Fk'];
+/*    incomingRackFk = widget.arguments['incomingRack_Fk'];
     incomingTankPosition = widget.arguments['incomingTankPosition'];
+    tankViewModelNoListen = widget.arguments['incomingTankViewModel'];
+    facilityViewModelNoListen = widget.arguments['incomingFacilityViewModel'];*/
 
     _prepareRacksAndTanksForCaller();
+  }
+
+  // BUG we were missing the dispose call
+  @override
+  void dispose() {
+    controllerForTankLine.dispose();
+    controllerForBirthDate.dispose();
+    controllerForScreenPositive.dispose();
+    controllerForNumberOfFish.dispose();
+    controllerForGeneration.dispose();
+    super.dispose();
   }
 
   @override
@@ -200,12 +209,14 @@ class TankViewState extends State<TankView> {
         );
       },
       onSuggestionSelected: (String suggestion) {
-        setState(() {
+        //setState(() {
           // business logic 2
           currentTank?.tankLine = suggestion;
 
           tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
-        });
+          // set state is no longer working here because we are using a listener for changes to the tankline
+          tanksModel.callNotifyListeners();
+       // });
       },
     );
   }
@@ -410,7 +421,7 @@ class TankViewState extends State<TankView> {
 ^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
 ^XZ
 """;
-    //final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   @override
@@ -487,6 +498,8 @@ class TankViewState extends State<TankView> {
                             // business logic 9
                             currentTank.parkIt();
                             tankModel.saveExistingTank(cParkedRackAbsPosition);
+                            // BUG was not selecting this parked tank
+                            widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(cParkedRackAbsPosition,cNotify);
                           });
                         },
                         child: const Text("Park it"),
@@ -540,6 +553,8 @@ class TankViewState extends State<TankView> {
                       if (confirmed) {
                         tankModel
                             .euthanizeTank(currentTank.absolutePosition);
+                        // BUG is not selecting an empty tank
+                        widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(kEmptyTankIndex,cNotify);
                       }
                     },
                     child: const Text("Delete Tank")),

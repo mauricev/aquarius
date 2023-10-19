@@ -125,12 +125,6 @@ class SearchViewModel with ChangeNotifier {
     return selectableTankLineValueList;
   }
 
-bool rejectBogusTankLineValueItems(ValueItem? newSelectedItem) {
-  List<ValueItem> listOfRealTankLineItems = returnTankLinesAsValueItems();
-  print("rejectBogusTankLineValueItems");
-  return (listOfRealTankLineItems.contains(newSelectedItem));
-}
-
   int? computeBreedingDate(int? birthDate) {
     // we will take the birthdate and add to it 6 months
     // if we want to change 6 months to some other value, we will probably

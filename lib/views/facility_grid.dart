@@ -85,7 +85,7 @@ class FacilityGridCell extends StatelessWidget {
               myPrint("we are selecting a new rack");
               // POSSIBLE BUG; this is now async
               tankModel.selectThisRackByAbsolutePosition(
-                  tankMode, facilityModel, absolutePosition, cNoNotify);
+                  tankMode, facilityModel, absolutePosition, cNotify);
             },
       child: Container(
         height: height,
@@ -225,8 +225,6 @@ class FacilityGrid extends StatelessWidget {
 
   List<Widget> buildGridDown(
       FacilityViewModel facilityViewModel, bool readOnly) {
-
-    print("buildGridDown ${facilityViewModel.gridWidth}");
 
     gridDown
         .clear(); // we clear because this is a global variable, so we want to add starting fresh each time

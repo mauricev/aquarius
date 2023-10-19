@@ -7,19 +7,19 @@ const String cParkedRackFkAddress = "0";
 
 // this will change for local, real-world output
 // 1 of 3
-const String kIPAddress = 'http://192.168.1.91/v1';
-//const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
+//const String kIPAddress = 'http://192.168.1.91/v1';
+const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
 
 //local
 // 2 of 3
-const String kProjectId = '6477fda3e6695f938f0d';
+//const String kProjectId = '6477fda3e6695f938f0d';
 
 //real-world
-//const String kProjectId = '648fc20504d0ed7a089d';
+const String kProjectId = '648fc20504d0ed7a089d';
 
 // set to true or false accordingly
 // 3 of 3
-const kRunningLocal = true;
+const kRunningLocal = false;
 
 const String kDatabaseId = '63eefc50e6d7b0cb4c4e';
 // we don’t use this; the user selects the facility by name in the dropdown
@@ -51,7 +51,7 @@ const int kEmptyTankIndex = -1;
 const int kStartingYear = 2021;
 const int kStartingMonth = 1;
 const int kEndingYear = 2024;
-const int kStartingDOBOffset = 66000000000; // 764.44 days since 1/1/70 midnight, not sure how I calculated this. it's the default dob for new tanks
+const int kStartingDOBOffset = 66000000000; // Calculated the default DOB by subtracting this value (a little over 2 years) from the current date.
 
 const int cTankLineSearch = 1;
 const int cCrossBreedSearch = 2;

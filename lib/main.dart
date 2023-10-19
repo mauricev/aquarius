@@ -21,7 +21,9 @@ void main() async {
 
   if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS) {
+
     await windowManager.ensureInitialized();
+
     WindowOptions windowOptions = const WindowOptions(
       size: Size(810, 1080), // 10.2 inch iPad portrait size
       center: true,
@@ -29,6 +31,7 @@ void main() async {
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.normal, // BUG, had been TitleBarStyle.hidden, but this hides the draggable part of the window under Windows
     );
+
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();

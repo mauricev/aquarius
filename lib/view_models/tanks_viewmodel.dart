@@ -7,7 +7,6 @@ import '../views/consts.dart';
 import '../views/utility.dart';
 import '../models/tank_model.dart';
 
-
 class TanksViewModel with ChangeNotifier {
   final ManageSession _manageSession;
 
@@ -20,7 +19,6 @@ class TanksViewModel with ChangeNotifier {
 
   void setFacilityId(String incomingFacilityId) {
     facilityId = incomingFacilityId;
-    print("setFacilityId, ${facilityId}");
   }
 
   void callNotifyListeners() {

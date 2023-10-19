@@ -121,22 +121,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.2"
-  custom_searchable_dropdown:
-    dependency: "direct main"
-    description:
-      name: custom_searchable_dropdown
-      sha256: c2676b1ee55f0b71a7cd890ae473cf97651f018b2695b3bf57c8c28a14e2fa95
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   device_info_plus:
     dependency: "direct main"
     description:
       name: device_info_plus
-      sha256: "86add5ef97215562d2e090535b0a16f197902b10c369c558a100e74ea06e8659"
+      sha256: "7035152271ff67b072a211152846e9f1259cf1be41e34cd3e0b5463d2d6b8419"
       url: "https://pub.dev"
     source: hosted
-    version: "9.0.3"
+    version: "9.1.0"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -145,38 +137,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
-  drop_down_search_field:
-    dependency: "direct main"
-    description:
-      name: drop_down_search_field
-      sha256: "79608b273b61e2842723aa564492ac112ca66261262b49aef53236ef459a7e01"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
-  dropdown_button2:
-    dependency: "direct main"
-    description:
-      name: dropdown_button2
-      sha256: b53a583649d1ceaeec74a759b5797db0a17e8790f1ac451086b5e40733941912
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0-beta.5"
-  dropdown_search:
-    dependency: "direct main"
-    description:
-      name: dropdown_search
-      sha256: "55106e8290acaa97ed15bea1fdad82c3cf0c248dd410e651f5a8ac6870f783ab"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.6"
-  dropdown_textfield:
-    dependency: "direct main"
-    description:
-      name: dropdown_textfield
-      sha256: "6e306d29d4bf8f88e2f9a4336d5e8dcc551d797fa8f541bb52a72817cc275cc4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.8"
   equatable:
     dependency: transitive
     description:
@@ -222,14 +182,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_dropdown_plus:
-    dependency: "direct main"
-    description:
-      name: flutter_dropdown_plus
-      sha256: "75d7d3ded815ecaf66e005c6717386f26187948b796e8a2628cea0babd4a526d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
   flutter_keyboard_visibility:
     dependency: transitive
     description:
@@ -351,10 +303,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_typeahead
-      sha256: f3a5f79d9a056e5108452dbec31d12bbd7f6d25e9097bf0f956e3f8d024e1747
+      sha256: b9942bd5b7611a6ec3f0730c477146cffa4cd4b051077983ba67ddfc9e7ee818
       url: "https://pub.dev"
     source: hosted
-    version: "4.7.0"
+    version: "4.8.0"
   flutter_web_auth_2:
     dependency: transitive
     description:
@@ -376,14 +328,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_zebra_sdk:
+    dependency: "direct main"
+    description:
+      name: flutter_zebra_sdk
+      sha256: cf7c528e1f7a753934529c76e20ad621b4d97ce7d555873e9c6f094df5fcf435
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4+1"
   google_fonts:
     dependency: "direct main"
     description:
       name: google_fonts
-      sha256: e20ff62b158b96f392bfc8afe29dee1503c94fbea2cbe8186fd59b756b8ae982
+      sha256: f0b8d115a13ecf827013ec9fc883390ccc0e87a96ed5347a3114cac177ef18e8
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "6.1.0"
   html:
     dependency: transitive
     description:
@@ -825,10 +785,10 @@ packages:
     dependency: "direct main"
     description:
       name: window_manager
-      sha256: "6ee795be9124f90660ea9d05e581a466de19e1c89ee74fc4bf528f60c8600edd"
+      sha256: dcc865277f26a7dad263a47d0e405d77e21f12cb71f30333a52710a408690bd7
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.6"
+    version: "0.3.7"
   window_to_front:
     dependency: transitive
     description:

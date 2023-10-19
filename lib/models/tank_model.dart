@@ -86,5 +86,4 @@ class Tank {
   int? getNumberOfFish() {
     return numberOfFish;
   }
-
 }

@@ -126,12 +126,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const TankView(
-                    arguments: {
-                      'incomingRack_Fk': null,
-                      'incomingTankPosition': null,
-                    },
-                  ))
+              builder: (context) => TankView(incomingRackFk:null,incomingTankPosition:null,tankViewModelNoContext:tankViewModel))
           ).then((data) {});
   }
 
@@ -157,7 +152,6 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
       TanksViewModel tankViewModel =
       Provider.of<TanksViewModel>(context2, listen: false);
-      tankViewModel.setFacilityId(extractFacilityId(context2));
 
       Navigator.pop(context2);
 
@@ -166,10 +160,9 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           context,
           MaterialPageRoute(
             builder: (context) => TankView(
-              arguments: {
-                'incomingRack_Fk': rackFk,
-                'incomingTankPosition': absolutePosition,
-              },
+              incomingRackFk: rackFk,
+              incomingTankPosition: absolutePosition,
+              tankViewModelNoContext: tankViewModel,
             ),
           ),
         );
@@ -178,6 +171,23 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       Navigator.pop(context);
     }
   }
+
+  void proceedWithValidBarcode(BuildContext context, String rackFk, int absolutePosition, TanksViewModel tankViewModel, FacilityViewModel facilitiesModel) {
+    // Now, this function handles the navigation without any async operation in between,
+    // ensuring that the context used here is valid and not affected by previous async gaps.
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TankView(
+          incomingRackFk: rackFk,
+          incomingTankPosition: absolutePosition,
+          tankViewModelNoContext: tankViewModel,
+        ),
+      ),
+    );
+  }
+
 
   Widget displayCameraForReadingQrCode(BuildContext context) {
     final MobileScannerController mobileScannerController =
