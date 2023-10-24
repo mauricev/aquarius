@@ -123,6 +123,10 @@ class TankViewState extends State<TankView> {
   // BUG we were missing the dispose call
   @override
   void dispose() {
+    // BUG needed to add removeListener
+    widget.tankViewModelNoContext.removeListener(_updateTankLineController);
+    widget.tankViewModelNoContext.removeListener(_updateNumberOfFishController);
+    widget.tankViewModelNoContext.removeListener(_updateFishGenerationController);
     controllerForTankLine.dispose();
     controllerForBirthDate.dispose();
     controllerForScreenPositive.dispose();
@@ -213,7 +217,7 @@ class TankViewState extends State<TankView> {
           // business logic 2
           currentTank?.tankLine = suggestion;
 
-          tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
+          tanksModel.saveExistingTank((currentTank?.absolutePosition)!); // BUG we don't wait for this save to cmomplete
           // set state is no longer working here because we are using a listener for changes to the tankline
           tanksModel.callNotifyListeners();
        // });
@@ -409,6 +413,7 @@ class TankViewState extends State<TankView> {
     String rack = await facilityModel.returnRacksRelativePosition(rackFkString);
 
     // multiline string requires three quotes
+    // last line embeds the given info into the barcode, BUG this line was part of the ZPL text
     String zplCode = """
 ^XA
 ^FO275,30^A0N,25^FD$tankLineString^FS
@@ -499,6 +504,8 @@ class TankViewState extends State<TankView> {
                             currentTank.parkIt();
                             tankModel.saveExistingTank(cParkedRackAbsPosition);
                             // BUG was not selecting this parked tank
+                            // BUG we are not awaiting saveExistingTank to complete
+                            // do we need this function to call notifylisteners if we are already calling setstate?
                             widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(cParkedRackAbsPosition,cNotify);
                           });
                         },

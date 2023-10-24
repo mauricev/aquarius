@@ -391,4 +391,52 @@ class TanksViewModel with ChangeNotifier {
     }
     return tankID; // if there is no tank, we return kEmptyTankIndex
   }
+
+  void parkedADraggedTank(Tank parkedTank, int thisPosition) {
+    // if this destination widget is a virtual tank, make the swap with the prior position numerically
+    if (isThisTankVirtual(thisPosition)) {
+      thisPosition = thisPosition - 1;
+    }
+
+    // this will be physical
+    int tankID = tankIdWithThisAbsolutePositionOnlyPhysical(
+        thisPosition); // this represents the new, not parked tank
+    if (tankID == kEmptyTankIndex) {
+
+      // there is no tank at this position
+      // the user dragged over an empty tank
+      // our parked tank needs two new pieces of info
+      // a new abs position and the rack_fk
+      // do we have a copy of the parked tank or the actual parked tank?
+
+      parkedTank.assignTankNewLocation(
+          rackDocumentid, thisPosition);
+
+      // the tank has not been saved with this new info
+      // this will be physical
+      saveExistingTank(thisPosition);
+    } else {
+      // here we are swapping tank positions
+      // this will be physical
+
+      // business logic 11, everything below should be distilled down to one method in tankModel
+
+      Tank? destinationTank = returnPhysicalTankWithThisAbsolutePosition(thisPosition);
+
+      // BUG if this tank is fat, then its fat position needs a special value, perhaps 0, so it doesn’t select anything
+      destinationTank?.parkIt();
+
+      // BUG if this tank is fat, then its fat position needs to be updated
+      parkedTank.assignTankNewLocation(
+          rackDocumentid, thisPosition);
+      // this will be physical
+      saveExistingTank(thisPosition);
+      // this will be physical
+      saveExistingTank(cParkedAbsolutePosition);
+    }
+    // below we are passing a physical tank position
+    // so selectThisTankCell should never come to the virtual tank code
+
+    selectThisTankCellConvertsVirtual(thisPosition,cNotify); // do we need notify here?
+  }
 }

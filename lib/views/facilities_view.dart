@@ -142,7 +142,6 @@ class _FacilitiesController
                         setState(() {
                           model.gridHeight = int.parse(textController.text);
                         });
-                        myPrint("gridheight is ${model.gridHeight}");
                       }
                       break;
                     case FacilityStringsEnum.gridWidth:
@@ -151,7 +150,6 @@ class _FacilitiesController
                         setState(() {
                           model.gridWidth = int.parse(textController.text);
                         });
-                        myPrint("gridWidth is ${model.gridWidth}");
                       }
                       break;
                   }
@@ -267,11 +265,9 @@ class _FacilitiesController
                           padding: const EdgeInsets.only(right: kIndentWidth),
                           child: ElevatedButton(
                             onPressed: () {
-                              myPrint("inside save button");
                               // we may be saving for the first time or for the 50th;
                               // for subsequent saves, we have the document_id and we use that to determine how this function saves
                               model.saveFacility().then((_) {
-                                myPrint("facility and racks were saved");
                                 Navigator.of(context).pop();
                               }).catchError((error) {
                                 myPrint(error.response);

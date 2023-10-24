@@ -133,6 +133,49 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   // because of https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
   // we pass build context and wrap the navigator.push/materialpageroute with
   // WidgetsBinding.instance!.addPostFrameCallback((_)
+
+  // i changed this to use a then construction eliminating the need for async
+  // do we still need context to be passed?
+  void transferFromQrCodeToTank(
+      BuildContext context2,
+      MobileScannerController mobileScannerController,
+      BarcodeCapture capture) {
+    final List<Barcode> barcodes = capture.barcodes;
+
+    mobileScannerController.stop().then((value) {
+      // launch and replace navigation screen (can this go back to the screen before this one?)
+      String? rawValue = barcodes[0].rawValue;
+      List<String> stringParts = rawValue!.split(RegExp('[;]'));
+
+      if (stringParts.length >= 2) {
+        String rackFk = stringParts[0];
+        String absolutePositionString = stringParts[1];
+        int absolutePosition = int.parse(absolutePositionString);
+
+        TanksViewModel tankViewModel =
+        Provider.of<TanksViewModel>(context2, listen: false);
+
+        Navigator.pop(context2);
+
+        // is this still needed?
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TankView(
+                incomingRackFk: rackFk,
+                incomingTankPosition: absolutePosition,
+                tankViewModelNoContext: tankViewModel,
+              ),
+            ),
+          );
+        });
+      } else {
+        Navigator.pop(context);
+      }
+    });
+  }
+  /*
   Future<void> transferFromQrCodeToTank(
       BuildContext context2,
       MobileScannerController mobileScannerController,
@@ -171,6 +214,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       Navigator.pop(context);
     }
   }
+   */
 
   void proceedWithValidBarcode(BuildContext context, String rackFk, int absolutePosition, TanksViewModel tankViewModel, FacilityViewModel facilitiesModel) {
     // Now, this function handles the navigation without any async operation in between,
@@ -187,7 +231,6 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       ),
     );
   }
-
 
   Widget displayCameraForReadingQrCode(BuildContext context) {
     final MobileScannerController mobileScannerController =

@@ -49,8 +49,6 @@ class _SearchViewState extends State<SearchView> {
 
   @override
   void initState() {
-    //_cnt = SingleValueDropDownController();
-    //_generateItems();
     super.initState();
   }
 
@@ -219,19 +217,13 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget dropDown(SearchViewModel searchModel) {
-    //return dropdown_button2();
-    //return dropdown_textfield();
-    //return flutter_dropdown_plus();
-    //return drop_down_search_field();
-    //return drop_down_search();
-    //return custom_searchable_dropdown(); // awful
     return simpleSearchDropdown(searchModel);
   }
 
   List<BarChartGroupData> getBarGroups(SearchViewModel searchModel) {
     List<BarChartGroupData> barGroups = [];
 
-    Color barColor = const Color.fromARGB(255, 165, 254, 206);
+    Color barColor = const Color.fromARGB(255, 165, 254, 206); // same light green as the tank icons are
 
     searchModel.dobNumberOfFish.forEach((xValue, yValue) {
       barGroups.add(

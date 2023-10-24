@@ -106,15 +106,15 @@ class _TankCellState extends State<TankCell> {
 
   // we can’t use widget.absoluteposition because that represents the cell the user clicked on
   // and if it’s a virtual tank, we need the tank to its immediate left
-  void assignParkedTankItsNewHome(
+  /*void assignParkedTankItsNewHome(
       Tank? parkedTank, int newTankPosition, TanksViewModel tankModel) {
     parkedTank?.assignTankNewLocation(
         tankModel.rackDocumentid, newTankPosition);
-  }
+  }*/
 
-  void parkRackedTank(Tank? destinationTank) {
+  /*void parkRackedTank(Tank? destinationTank) {
     destinationTank?.parkIt();
-  }
+  }*/
 
   bool canAbsolutePositionHostAFatTank(BuildContext context, int tankPosition) {
     FacilityViewModel facilityModel =
@@ -254,16 +254,12 @@ class _TankCellState extends State<TankCell> {
         );
       },
       onWillAccept: (data) {
-        myPrint("on will accept");
         Tank parkedTank = data as Tank;
-        myPrint("on will accept");
         // if we have a fat parked tank
         if (parkedTank.fatTankPosition != null) {
-          myPrint("on will accept, parked is fat");
           if (canAbsolutePositionHostAFatTank(
                   context, widget.absolutePosition) ==
               false) {
-            myPrint("on will accept, reject fat tank here");
             return false;
           }
         }
@@ -278,6 +274,8 @@ class _TankCellState extends State<TankCell> {
           TanksViewModel tankModel =
               Provider.of<TanksViewModel>(context, listen: false);
 
+          tankModel.parkedADraggedTank(parkedTank,widget.absolutePosition);
+/*
           // if this destination widget is a virtual tank, make the swap with the prior position numerically
           int thisPosition = widget.absolutePosition;
           if (tankModel.isThisTankVirtual(thisPosition)) {
@@ -288,7 +286,7 @@ class _TankCellState extends State<TankCell> {
           int tankID = tankModel.tankIdWithThisAbsolutePositionOnlyPhysical(
               thisPosition); // this represents the new, not parked tank
           if (tankID == kEmptyTankIndex) {
-            myPrint("we dragged to an empty tank spot");
+
             // there is no tank at this position
             // the user dragged over an empty tank
             // our parked tank needs two new pieces of info
@@ -323,7 +321,7 @@ class _TankCellState extends State<TankCell> {
           // below we are passing a physical tank position
           // so selectThisTankCell should never come to the virtual tank code
 
-          tankModel.selectThisTankCellConvertsVirtual(thisPosition,cNotify);
+          tankModel.selectThisTankCellConvertsVirtual(thisPosition,cNotify);*/
         });
       },
     );
