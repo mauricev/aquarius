@@ -15,7 +15,8 @@ class TanksViewModel with ChangeNotifier {
   int selectedRack = -2; // this is a rack cell, not a tank cell
   int selectedTankCell = kEmptyTankIndex;
   String rackDocumentid = "";
-  String facilityId = "";
+  String facilityId =
+      "not yet set, tank"; // we can set it to not yet set; that will tell us if we are not setting it
 
   void setFacilityId(String incomingFacilityId) {
     facilityId = incomingFacilityId;
@@ -55,20 +56,22 @@ class TanksViewModel with ChangeNotifier {
    is a tank ever created in the cParkedRackAbsPosition position? I don’t think so
    if it is, what happens to fatTankPosition?
    */
-  void addNewEmptyTank(String facilityFk, int absolutePosition, int? fatTankPosition) async {
+  void addNewEmptyTank(int absolutePosition, int? fatTankPosition) async {
     Tank aTank = Tank(
         documentId:
             null, // the tank entry is new, so it doesn’t have a document ID yet
-        facilityFk: facilityFk,
+        facilityFk: facilityId,
         rackFk: (absolutePosition == cParkedRackAbsPosition)
             ? "0"
             : rackDocumentid, // saved from when we switch racks; we always get it from the database
         absolutePosition: absolutePosition,
         tankLine: "",
-        birthDate: returnTimeNow() - kStartingDOBOffset,
+        birthDate:
+            returnTimeNow(), // BUGfixed removed 2 year offset per Jaslin’s request
         screenPositive: true,
         numberOfFish: 1,
-        fatTankPosition: fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
+        fatTankPosition:
+            fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
         generation: 1,
         manageSession: _manageSession);
     tankList.add(aTank);
@@ -80,18 +83,19 @@ class TanksViewModel with ChangeNotifier {
     // it just sits a placeholder to be selected
     // I am now wondering can we even get away with not having it in the tank list at all?
     //
+    myPrint("saveNewTank, facility is $facilityId");
+    // now add this to the database
+    String tankId = await saveNewTank(absolutePosition);
 
-      // now add this to the database
-      String tankId = await saveNewTank(facilityFk,
-          absolutePosition); // problem; how does the document id in the tank get updated
+    Tank? theTankJustCreated =
+        returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
 
-      Tank? theTankJustCreated =
-      returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+    theTankJustCreated?.updateTankDocumentId(
+        tankId); // when we add an empty tank, after it’s created we get its id and immediately assign it its notes class.
 
-      theTankJustCreated?.updateTankDocumentId(tankId); // when we add an empty tank, after it’s created we get its id and immediately assign it its notes class.
-      // this means in all instances, the notes have a tank id associated with them.
-      // at this point, there are no notes, so they don’t individually need this tank_fk.
-      // when we click the Notes button and then add a note, we will use the the savenewnote command. "Old" notes don’t exist yet.
+    // this means in all instances, the notes have a tank id associated with them.
+    // at this point, there are no notes, so they don’t individually need this tank_fk.
+    // when we click the Notes button and then add a note, we will use the the savenewnote command. "Old" notes don’t exist yet.
   }
 
   // problem creating tank from the above is that it is saving the rack and we a dedicated function for this
@@ -122,12 +126,14 @@ class TanksViewModel with ChangeNotifier {
     return await _manageSession.queryDocument(cTankCollection, tankQuery);
   }
 
-  Map<String, dynamic> prepareTankMap(
-      String facilityFk, int absolutePosition) {
-    Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+  Map<String, dynamic> prepareTankMap(int absolutePosition) {
+    Tank? theTank =
+        returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+
+    myPrint("prepareTankMap, facility $facilityId, tank ${theTank?.tankLine}");
 
     Map<String, dynamic> theTankMap = {
-      'facility_fk': facilityFk,
+      'facility_fk': facilityId,
       'rack_fk': (absolutePosition == cParkedRackAbsPosition)
           ? "0"
           : rackDocumentid, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
@@ -144,9 +150,9 @@ class TanksViewModel with ChangeNotifier {
 
   // this will be called after add tank when the user clicks the create button
   // this will work for parked because we just pass -2 as abs position
-  Future<String> saveNewTank(String facilityFk, int absolutePosition) async {
-    Map<String, dynamic> theTankMap =
-        prepareTankMap(facilityFk, absolutePosition);
+  Future<String> saveNewTank(int absolutePosition) async {
+    Map<String, dynamic> theTankMap = prepareTankMap(absolutePosition);
+    // can we put an alert if the facility is an empty string?
     models.Document theTankDocument =
         await _manageSession.createDocument(theTankMap, cTankCollection);
     return theTankDocument.$id;
@@ -154,30 +160,45 @@ class TanksViewModel with ChangeNotifier {
 
   // this will be called every time during the onchanged event
   Future<void> saveExistingTank(int absolutePosition) async {
-    Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
-    Map<String, dynamic> theTankMap =
-        prepareTankMap(facilityId, absolutePosition);
-    _manageSession.updateDocument(theTankMap, cTankCollection,
-        (theTank?.documentId)!); // tank’s document ID must be correct!
+    try {
+      Tank? theTank =
+          returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+      Map<String, dynamic> theTankMap = prepareTankMap(absolutePosition);
+
+      myPrint(
+          "saveExistingTank, facility $facilityId, tank ${theTank?.tankLine}");
+
+      await _manageSession.updateDocument(
+          theTankMap, cTankCollection, (theTank?.documentId)!);
+    } catch (e) {
+      print("Error in saveExistingTank: $e");
+      rethrow;
+    }
   }
 
   void euthanizeTank(int absolutePosition) async {
-    Tank? theTank = returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+    Tank? theTank =
+        returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
 
-    int tankIndex = tankIdWithThisAbsolutePositionOnlyPhysical(absolutePosition);
+    int tankIndex =
+        tankIdWithThisAbsolutePositionOnlyPhysical(absolutePosition);
     deleteTank(tankIndex);
 
-    await _manageSession.deleteDocument(cTankCollection, (theTank?.documentId)!); // await to ensure notifylisteners occurs after deletetank
+    await _manageSession.deleteDocument(
+        cTankCollection,
+        (theTank
+            ?.documentId)!); // await to ensure notifylisteners occurs after deletetank
 
-    selectThisTankCellConvertsVirtual(kEmptyTankIndex,cNotify); // the currently selected tank has been deleted
+    selectThisTankCellConvertsVirtual(kEmptyTankIndex,
+        cNotify); // the currently selected tank has been deleted
     // what happens when deleting a parked tank. there simply is no longer a parked tank??
-   // notifyListeners();  called above
+    // notifyListeners();  called above
   }
 
-  Future<void> loadTanksForThisRack(FacilityViewModel facilityModel, String theRackId) async {
-
-    models.DocumentList theTankList = await returnAssociatedTankList(
-        facilityModel.returnFacilityId(), theRackId);
+  Future<void> loadTanksForThisRack(
+      FacilityViewModel facilityModel, String theRackId) async {
+    models.DocumentList theTankList =
+        await returnAssociatedTankList(facilityId, theRackId);
 
     // all tanks must save with a rack_fk; this is for other methods here
     rackDocumentid = theRackId;
@@ -199,8 +220,9 @@ class TanksViewModel with ChangeNotifier {
       and the virtual tank of the next position over; it's a straight swap; the virtual tank never “moves”
        */
       addTankFromDatabase(
-          theTank.$id, // this is the document ID that uniquely indentifies this record
-          facilityModel.returnFacilityId(),
+          theTank
+              .$id, // this is the document ID that uniquely identifies this record
+          facilityId,
           theTank.data['rack_fk'],
           theTank.data['absolute_position'],
           theTank.data['tank_line'],
@@ -212,17 +234,21 @@ class TanksViewModel with ChangeNotifier {
     }
   }
 
-  Future<void> selectThisRackByAbsolutePosition(bool? readInTanks,
-      FacilityViewModel facilityModel, int selectThisRack, bool withNotifyListeners) async {
+  Future<void> selectThisRackByAbsolutePosition(
+      bool? readInTanks,
+      FacilityViewModel facilityModel,
+      int selectThisRack,
+      bool withNotifyListeners) async {
     selectedRack = selectThisRack;
-    myPrint("the selected rack cell is $selectedRack must be followed loading tanks");
+    myPrint(
+        "the selected rack cell is $selectedRack must be followed loading tanks");
     // the code here will query the rack via the absolute position and facility_fk from the facility mode
     // need to pass facility model and boolean for reading this stuff
     if (readInTanks!) {
       String? theRackId = await facilityModel.returnSpecificRack(selectedRack);
       if (theRackId != null) {
-
-        await loadTanksForThisRack(facilityModel,theRackId);  // BUG there is no await here, so notifylisteners may execute before this returns
+        await loadTanksForThisRack(facilityModel,
+            theRackId); // BUG there is no await here, so notifylisteners may execute before this returns
       }
     }
     if (withNotifyListeners) {
@@ -248,7 +274,7 @@ class TanksViewModel with ChangeNotifier {
     return null;
   }
 
- int returnParkedTankedIndex() {
+  int returnParkedTankedIndex() {
     for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
       if (tankList[theIndex].absolutePosition == cParkedRackAbsPosition) {
         return theIndex;
@@ -270,7 +296,8 @@ class TanksViewModel with ChangeNotifier {
   // when we park a tank,
 
   int convertVirtualTankPositionToPhysical(int selectThisTankCell) {
-    int tankId = tankIdWithThisAbsolutePositionIncludesVirtual(selectThisTankCell);
+    int tankId =
+        tankIdWithThisAbsolutePositionIncludesVirtual(selectThisTankCell);
     if (tankId == kEmptyTankIndex) {
       return kEmptyTankIndex;
     } else {
@@ -279,9 +306,11 @@ class TanksViewModel with ChangeNotifier {
   }
 
   // selectedTankCell should always contain a physical tank
-  void selectThisTankCellConvertsVirtual(int selectThisTankCell, bool withNotify) {
+  void selectThisTankCellConvertsVirtual(
+      int selectThisTankCell, bool withNotify) {
     if (selectThisTankCell != cParkedAbsolutePosition) {
-      selectedTankCell = convertVirtualTankPositionToPhysical(selectThisTankCell);
+      selectedTankCell =
+          convertVirtualTankPositionToPhysical(selectThisTankCell);
     } else {
       // parked always selects a physical tank
       selectedTankCell = selectThisTankCell;
@@ -314,7 +343,7 @@ class TanksViewModel with ChangeNotifier {
   }
 
   bool isThisTankParked(int absolutePosition) {
-    return(absolutePosition == cParkedAbsolutePosition);
+    return (absolutePosition == cParkedAbsolutePosition);
   }
 
   bool isThisTankVirtual(int absolutePosition) {
@@ -385,7 +414,8 @@ class TanksViewModel with ChangeNotifier {
     if (tankID == kEmptyTankIndex) {
       for (int theIndex = 0; theIndex < tankList.length; theIndex++) {
         if (tankList[theIndex].fatTankPosition == absolutePosition) {
-          tankID = tankIdWithThisAbsolutePositionOnlyPhysical(tankList[theIndex].absolutePosition);
+          tankID = tankIdWithThisAbsolutePositionOnlyPhysical(
+              tankList[theIndex].absolutePosition);
         }
       }
     }
@@ -402,15 +432,13 @@ class TanksViewModel with ChangeNotifier {
     int tankID = tankIdWithThisAbsolutePositionOnlyPhysical(
         thisPosition); // this represents the new, not parked tank
     if (tankID == kEmptyTankIndex) {
-
       // there is no tank at this position
       // the user dragged over an empty tank
       // our parked tank needs two new pieces of info
       // a new abs position and the rack_fk
       // do we have a copy of the parked tank or the actual parked tank?
 
-      parkedTank.assignTankNewLocation(
-          rackDocumentid, thisPosition);
+      parkedTank.assignTankNewLocation(rackDocumentid, thisPosition);
 
       // the tank has not been saved with this new info
       // this will be physical
@@ -421,14 +449,14 @@ class TanksViewModel with ChangeNotifier {
 
       // business logic 11, everything below should be distilled down to one method in tankModel
 
-      Tank? destinationTank = returnPhysicalTankWithThisAbsolutePosition(thisPosition);
+      Tank? destinationTank =
+          returnPhysicalTankWithThisAbsolutePosition(thisPosition);
 
       // BUG if this tank is fat, then its fat position needs a special value, perhaps 0, so it doesn’t select anything
       destinationTank?.parkIt();
 
       // BUG if this tank is fat, then its fat position needs to be updated
-      parkedTank.assignTankNewLocation(
-          rackDocumentid, thisPosition);
+      parkedTank.assignTankNewLocation(rackDocumentid, thisPosition);
       // this will be physical
       saveExistingTank(thisPosition);
       // this will be physical
@@ -437,6 +465,7 @@ class TanksViewModel with ChangeNotifier {
     // below we are passing a physical tank position
     // so selectThisTankCell should never come to the virtual tank code
 
-    selectThisTankCellConvertsVirtual(thisPosition,cNotify); // do we need notify here?
+    selectThisTankCellConvertsVirtual(
+        thisPosition, cNotify); // do we need notify here?
   }
 }

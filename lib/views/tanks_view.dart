@@ -32,12 +32,10 @@ class TankView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  TankViewState createState() =>
-      TankViewState();
+  TankViewState createState() => TankViewState();
 }
 
 class TankViewState extends State<TankView> {
-
   TextEditingController controllerForTankLine = TextEditingController();
   TextEditingController controllerForBirthDate = TextEditingController();
   TextEditingController controllerForScreenPositive = TextEditingController();
@@ -46,11 +44,18 @@ class TankViewState extends State<TankView> {
 
   TextEditingController controllerForGeneration = TextEditingController();
 
-  Tank? returnCurrentPhysicalTank() {
-    /*TanksViewModel tankModel =
-    Provider.of<TanksViewModel>(context, listen: false);*/
+  TextEditingController controllerForDocId = TextEditingController();
 
+  Tank? returnCurrentPhysicalTank() {
     return widget.tankViewModelNoContext.returnCurrentPhysicalTank();
+  }
+
+  void _updateDocId() {
+    Tank? currentTank = returnCurrentPhysicalTank();
+
+    if (controllerForDocId.text != currentTank?.documentId) {
+      controllerForDocId.text = currentTank?.documentId ?? 'NO ID!';
+    }
   }
 
   void _updateTankLineController() {
@@ -64,8 +69,10 @@ class TankViewState extends State<TankView> {
   void _updateNumberOfFishController() {
     Tank? currentTank = returnCurrentPhysicalTank();
 
-    if (controllerForNumberOfFish.text != currentTank?.numberOfFish.toString()) {
-      controllerForNumberOfFish.text = currentTank?.numberOfFish.toString() ?? '1';
+    if (controllerForNumberOfFish.text !=
+        currentTank?.numberOfFish.toString()) {
+      controllerForNumberOfFish.text =
+          currentTank?.numberOfFish.toString() ?? '1';
     }
   }
 
@@ -89,49 +96,57 @@ class TankViewState extends State<TankView> {
     FacilityViewModel facilityModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
+    // add listeners for the text-based widgets
     widget.tankViewModelNoContext.addListener(_updateTankLineController);
     widget.tankViewModelNoContext.addListener(_updateNumberOfFishController);
     widget.tankViewModelNoContext.addListener(_updateFishGenerationController);
+    widget.tankViewModelNoContext.addListener(_updateDocId);
 
     if (widget.incomingRackFk != null && widget.incomingTankPosition != null) {
       if (widget.incomingRackFk! != "0") {
         // parked cells don't have racks associated with them; rack is just 0 as a string.
 
         int? theRackAbsolutePosition =
-            await facilityModel.returnRacksAbsolutePosition(widget.incomingRackFk!); // looks like we can just read this from the loaded racks
+            await facilityModel.returnRacksAbsolutePosition(widget
+                .incomingRackFk!); // looks like we can just read this from the loaded racks
 
         await widget.tankViewModelNoContext.selectThisRackByAbsolutePosition(
-            cFacilityClickableGrid, facilityModel, theRackAbsolutePosition!, cNoNotify);
+            cFacilityClickableGrid,
+            facilityModel,
+            theRackAbsolutePosition!,
+            cNoNotify);
       }
       // fixed bug, we do have to call notifylisteners after all
-      widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(widget.incomingTankPosition!,cNotify);
+      widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(
+          widget.incomingTankPosition!, cNotify);
     }
   }
 
   @override
   void initState() {
     super.initState();
-
-/*    incomingRackFk = widget.arguments['incomingRack_Fk'];
-    incomingTankPosition = widget.arguments['incomingTankPosition'];
-    tankViewModelNoListen = widget.arguments['incomingTankViewModel'];
-    facilityViewModelNoListen = widget.arguments['incomingFacilityViewModel'];*/
-
     _prepareRacksAndTanksForCaller();
   }
 
-  // BUG we were missing the dispose call
+  // BUGfixed we were missing the dispose call
   @override
   void dispose() {
-    // BUG needed to add removeListener
+    // BUGfixed needed to add removeListener
     widget.tankViewModelNoContext.removeListener(_updateTankLineController);
     widget.tankViewModelNoContext.removeListener(_updateNumberOfFishController);
-    widget.tankViewModelNoContext.removeListener(_updateFishGenerationController);
+    widget.tankViewModelNoContext
+        .removeListener(_updateFishGenerationController);
+
+    widget.tankViewModelNoContext.removeListener(_updateDocId);
+
     controllerForTankLine.dispose();
     controllerForBirthDate.dispose();
     controllerForScreenPositive.dispose();
     controllerForNumberOfFish.dispose();
     controllerForGeneration.dispose();
+
+    controllerForDocId.dispose();
+
     super.dispose();
   }
 
@@ -141,8 +156,26 @@ class TankViewState extends State<TankView> {
     setState(() {});
   }
 
-  void notesDialog(BuildContext context, TanksViewModel tanksModel,
-      Tank currentTank) {
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Updated Tank Info Failed to Save!'),
+        content: Text(errorMessage),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  void notesDialog(
+      BuildContext context, TanksViewModel tanksModel, Tank currentTank) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -174,29 +207,41 @@ class TankViewState extends State<TankView> {
       hideOnEmpty: true,
       hideOnLoading: true,
       autoFlipDirection: true,
-
       textFieldConfiguration: TextFieldConfiguration(
           controller: textController,
-          onChanged: (value) {
+          /*onChanged: (value) {
             // business logic 1
             currentTank?.tankLine = textController.text;
 
-            tanksModel.saveExistingTank((currentTank?.absolutePosition)!).then((value) {
+            // BUGfixed
+            tanksModel
+                .saveExistingTank((currentTank?.absolutePosition)!)
+                .then((value) {
               tanksModel.callNotifyListeners();
             });
+          }*/
+          onChanged: (value) async {
+            try {
+              // business logic 1
+              currentTank?.tankLine = textController.text;
+
+              await tanksModel
+                  .saveExistingTank((currentTank?.absolutePosition)!);
+
+              tanksModel.callNotifyListeners();
+            } catch (e) {
+              _showErrorDialog(e.toString());
+            }
           }),
       minCharsForSuggestions: 0,
       suggestionsCallback: (String pattern) async {
         if (pattern != "") {
-          FacilityViewModel facilityModel =
-              Provider.of<FacilityViewModel>(context,
-                  listen: false);
-
           SearchViewModel searchModel =
               Provider.of<SearchViewModel>(context, listen: false);
 
-          searchModel
-              .prepareFullTankListForFacility(facilityModel.returnFacilityId());
+          // BUGfixed, this is actually an async call
+          // this may be the reason the Nemia was getting incomplete tankline names
+          await searchModel.prepareFullTankList();
 
           return searchModel
               .returnListOfTankLines(pattern)
@@ -212,15 +257,30 @@ class TankViewState extends State<TankView> {
           title: Text(suggestion),
         );
       },
-      onSuggestionSelected: (String suggestion) {
+      /*onSuggestionSelected: (String suggestion) {
         //setState(() {
+        // business logic 2
+        currentTank?.tankLine = suggestion;
+
+        tanksModel
+            .saveExistingTank((currentTank?.absolutePosition)!)
+            .then((value) {
+          tanksModel
+              .callNotifyListeners(); // we may not need to put in the then clause because we not re-reading the database
+        }); // BUGfixed we don't wait for this save to complete, but may not need to; we are not re-reading the database
+        // set state is no longer working here because we are using a listener for changes to the tankline
+        // });
+      }*/
+      onSuggestionSelected: (String suggestion) async {
+        try {
           // business logic 2
           currentTank?.tankLine = suggestion;
 
-          tanksModel.saveExistingTank((currentTank?.absolutePosition)!); // BUG we don't wait for this save to cmomplete
-          // set state is no longer working here because we are using a listener for changes to the tankline
+          await tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
           tanksModel.callNotifyListeners();
-       // });
+        } catch (e) {
+          _showErrorDialog(e.toString());
+        }
       },
     );
   }
@@ -228,7 +288,6 @@ class TankViewState extends State<TankView> {
   Widget buildInnerLabel(String labelText, TextEditingController textController,
       TanksViewModel tanksModel, TankStringsEnum tanksStringsValue,
       [double? width]) {
-
     // business logic 3
     Tank? currentTank = tanksModel.returnCurrentPhysicalTank();
 
@@ -256,27 +315,37 @@ class TankViewState extends State<TankView> {
                     style: Theme.of(context).textTheme.bodyMedium,
                     keyboardType: returnTextInputType(tanksStringsValue),
                     controller: textController,
-                    onChanged: (value) {
-                      switch (tanksStringsValue) {
-                        case TankStringsEnum.tankLine:
-                          // nothing to do here because this is handled by returnAutoCompleteForTankLine above
-                          break;
-                        case TankStringsEnum.numberOfFish:
-                          if (textController.text != "") {
-                            // business logic 4
-                            currentTank?.numberOfFish =
-                                int.parse(textController.text);
-                          }
-                          break;
-                        case TankStringsEnum.generation:
-                          if (textController.text != "") {
-                            // business logic 5
-                            currentTank?.generation =
-                                int.parse(textController.text);
-                          }
-                          break;
+                    onChanged: (value) async {
+                      try {
+                        switch (tanksStringsValue) {
+                          case TankStringsEnum.tankLine:
+                            // nothing to do here because this is handled by returnAutoCompleteForTankLine above
+                            break;
+
+                          case TankStringsEnum.numberOfFish:
+                            if (textController.text != "") {
+                              // business logic 4
+                              currentTank?.numberOfFish =
+                                  int.parse(textController.text);
+                            }
+                            break;
+
+                          case TankStringsEnum.generation:
+                            if (textController.text != "") {
+                              // business logic 5
+                              currentTank?.generation =
+                                  int.parse(textController.text);
+                            }
+                            break;
+                          case TankStringsEnum.docId:
+                            break;
+                        }
+
+                        await tanksModel
+                            .saveExistingTank((currentTank?.absolutePosition)!);
+                      } catch (e) {
+                        _showErrorDialog(e.toString());
                       }
-                      tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
                     }),
           ),
         ],
@@ -299,12 +368,15 @@ class TankViewState extends State<TankView> {
         firstDate: DateTime(kStartingYear, kStartingMonth),
         lastDate: DateTime(kEndingYear));
     if (picked != null && picked != selectedDate) {
-      setState(() {
-        // business logic 6
-        updateValue?.call(picked.millisecondsSinceEpoch);
-
-        tankModel.saveExistingTank((currentTank?.absolutePosition)!);
-      });
+      try {
+        setState(() {
+          // business logic 6
+          updateValue?.call(picked.millisecondsSinceEpoch);
+        });
+        await tankModel.saveExistingTank((currentTank?.absolutePosition)!);
+      } catch (e) {
+        _showErrorDialog(e.toString());
+      }
     }
   }
 
@@ -336,7 +408,6 @@ class TankViewState extends State<TankView> {
       String labelText,
       bool? Function()? retrieveValue,
       void Function(bool newValue)? updateValue) {
-
     return SizedBox(
       width: 150,
       child: CheckboxListTile(
@@ -347,12 +418,23 @@ class TankViewState extends State<TankView> {
         value: retrieveValue?.call() ?? false,
         onChanged: (currentTank == null)
             ? null
-            : (newValue) {
+            /*: (newValue) {
                 setState(() {
                   // business logic 7
                   updateValue?.call(newValue ?? false);
                   tankModel.saveExistingTank((currentTank.absolutePosition));
                 });
+              },*/
+            : (newValue) async {
+                try {
+                  setState(() {
+                    updateValue?.call(newValue ?? false);
+                  });
+                  await tankModel
+                      .saveExistingTank(currentTank.absolutePosition);
+                } catch (e) {
+                  _showErrorDialog(e.toString());
+                }
               },
         controlAffinity:
             ListTileControlAffinity.leading, //  <-- leading Checkbox
@@ -362,14 +444,12 @@ class TankViewState extends State<TankView> {
 
   Widget buildParkedTank(BuildContext context) {
     // here we have listen on.
-    TanksViewModel tankModel =
-        Provider.of<TanksViewModel>(context);
+    TanksViewModel tankModel = Provider.of<TanksViewModel>(context);
 
     if (tankModel.isThereAParkedTank()) {
       Tank? tank = tankModel.returnParkedTankedInfo();
 
-      FacilityViewModel facilityModel =
-          Provider.of<FacilityViewModel>(context);
+      FacilityViewModel facilityModel = Provider.of<FacilityViewModel>(context);
 
       double height = returnHeight(facilityModel);
       double width = returnWidth(facilityModel);
@@ -398,8 +478,9 @@ class TankViewState extends State<TankView> {
         ? "screen positive"
         : "screen negative";
 
-    String smallTankString =
-        (currentTank?.getSmallTank() ?? false) ? "$cThinTank tank" : "$cFatTank tank";
+    String smallTankString = (currentTank?.getSmallTank() ?? false)
+        ? "$cThinTank tank"
+        : "$cFatTank tank";
 
     String numberOfFishString = currentTank?.getNumberOfFish().toString() ?? "";
     String generationString = currentTank?.generation.toString() ?? "";
@@ -432,8 +513,7 @@ class TankViewState extends State<TankView> {
   @override
   Widget build(BuildContext context) {
     // listen is on
-    TanksViewModel tankModel =
-        Provider.of<TanksViewModel>(context);
+    TanksViewModel tankModel = Provider.of<TanksViewModel>(context);
 
     // we want a real physical tank here
     // business logic 8
@@ -484,6 +564,8 @@ class TankViewState extends State<TankView> {
                   tankModel, TankStringsEnum.numberOfFish),
               buildInnerLabel("Generation", controllerForGeneration, tankModel,
                   TankStringsEnum.generation),
+              buildInnerLabel("doc id", controllerForDocId, tankModel,
+                  TankStringsEnum.docId, 200),
             ],
           ),
           Row(
@@ -493,25 +575,31 @@ class TankViewState extends State<TankView> {
                       tankModel.isThereAParkedTank())
                   ? Container()
                   : Padding(
-                    padding: const EdgeInsets.only(left:40),
-                    child: ElevatedButton(
+                      padding: const EdgeInsets.only(left: 40),
+                      child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero, // remove any padding
                         ),
                         onPressed: () {
+                          // setStateRedundant?
                           setState(() {
                             // business logic 9
                             currentTank.parkIt();
-                            tankModel.saveExistingTank(cParkedRackAbsPosition);
-                            // BUG was not selecting this parked tank
-                            // BUG we are not awaiting saveExistingTank to complete
+                            tankModel
+                                .saveExistingTank(cParkedRackAbsPosition)
+                                .then((value) {
+                              widget.tankViewModelNoContext
+                                  .selectThisTankCellConvertsVirtual(
+                                      cParkedRackAbsPosition, cNotify);
+                            });
+                            // BUGfixed was not selecting this parked tank
+                            // BUGfixed we are not awaiting saveExistingTank to complete, but why does it matter? We are not re-reading the database
                             // do we need this function to call notifylisteners if we are already calling setstate?
-                            widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(cParkedRackAbsPosition,cNotify);
                           });
                         },
                         child: const Text("Park it"),
                       ),
-                  ),
+                    ),
               Padding(
                 padding: const EdgeInsets.only(
                   left: 30,
@@ -548,22 +636,23 @@ class TankViewState extends State<TankView> {
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-              left: 40),
+                padding: const EdgeInsets.only(left: 40),
                 child: ElevatedButton(
                     onPressed: (currentTank == null)
                         ? null
                         : () async {
-                      bool confirmed =
-                      await confirmActionSpecifiedInMessage(
-                          context, 'Delete the selected tank?');
-                      if (confirmed) {
-                        tankModel
-                            .euthanizeTank(currentTank.absolutePosition);
-                        // BUG is not selecting an empty tank
-                        widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(kEmptyTankIndex,cNotify);
-                      }
-                    },
+                            bool confirmed =
+                                await confirmActionSpecifiedInMessage(
+                                    context, 'Delete the selected tank?');
+                            if (confirmed) {
+                              tankModel
+                                  .euthanizeTank(currentTank.absolutePosition);
+                              // BUGfixed is not selecting an empty tank
+                              widget.tankViewModelNoContext
+                                  .selectThisTankCellConvertsVirtual(
+                                      kEmptyTankIndex, cNotify);
+                            }
+                          },
                     child: const Text("Delete Tank")),
               ),
             ],

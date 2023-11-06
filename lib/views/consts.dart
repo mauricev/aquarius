@@ -38,7 +38,7 @@ const double kIndentWidth = 20.0;
 
 const double kGridSize = 200;
 
-enum TankStringsEnum { tankLine, numberOfFish, generation }
+enum TankStringsEnum { tankLine, numberOfFish, generation, docId }
 
 const int kStandardTextWidth = 75;
 const double kStandardTextWidthDouble = 75;
@@ -51,7 +51,8 @@ const int kEmptyTankIndex = -1;
 const int kStartingYear = 2021;
 const int kStartingMonth = 1;
 const int kEndingYear = 2024;
-const int kStartingDOBOffset = 66000000000; // Calculated the default DOB by subtracting this value (a little over 2 years) from the current date.
+
+//const int kStartingDOBOffset = 66000000000; // Calculated the default DOB by subtracting this value (a little over 2 years) from the current date.
 
 const int cTankLineSearch = 1;
 const int cCrossBreedSearch = 2;
@@ -63,3 +64,6 @@ const bool cNoNotify = false;
 
 const String cThinTank = "3L";
 const String cFatTank = "10L";
+
+const cNotANewFacility = false;
+const cNewFacility = true;

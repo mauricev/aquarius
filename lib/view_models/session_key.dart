@@ -21,7 +21,6 @@ class ManageSession {
   bool _badUserPassword = false;
 
   ManageSession() {
-    myPrint('sessionKey THREE, ManageSession._create');
     _client.setEndpoint(kIPAddress);
     _client.setProject(kProjectId);
     // local, real-world difference
@@ -77,8 +76,6 @@ class ManageSession {
 
   Future<models.User> retrieveSession() async {
     Account theAccount = Account(_client);
-
-    myPrint("inside retrieveSession, about to account.get()");
     return theAccount.get();
   }
 
@@ -86,14 +83,11 @@ class ManageSession {
   Future<models.User> registerUser(String email, String password) async {
     Account theAccount = Account(_client);
 
-    myPrint("about to register 2");
-
     models.User theUser = await theAccount.create(
       userId: ID.unique(),
       email: email,
       password: password,
     );
-    myPrint("about to register 3, $theUser");
     return theUser;
   }
 
@@ -121,7 +115,7 @@ class ManageSession {
     Databases theDatabase = Databases(_client);
 
     String theDocumentID = ID.unique();
-    myPrint("the document id is $theDocumentID");
+
     return theDatabase.createDocument(
       databaseId: kDatabaseId,
       collectionId: collectionId,
@@ -130,15 +124,20 @@ class ManageSession {
     );
   }
 
-  Future<models.Document> updateDocument(Map<dynamic, dynamic> data, String collectionId, String documentId) {
-    Databases theDatabase = Databases(_client);
+  Future<models.Document> updateDocument(Map<dynamic, dynamic> data, String collectionId, String documentId) async {
+    try {
+      Databases theDatabase = Databases(_client);
 
-    return theDatabase.updateDocument(
-      databaseId: kDatabaseId,
-      collectionId: collectionId,
-      documentId: documentId,
-      data: data, // we pass the data raw!
-    );
+      return await theDatabase.updateDocument(
+        databaseId: kDatabaseId,
+        collectionId: collectionId,
+        documentId: documentId,
+        data: data, // we pass the data raw!
+      );
+    } catch (e) {
+      myPrint("Error updating document: $e");
+      rethrow;
+    }
   }
 
   Future<void> deleteDocument(String collectionId, String documentId) {

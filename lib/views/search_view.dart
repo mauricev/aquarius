@@ -87,6 +87,8 @@ class _SearchViewState extends State<SearchView> {
     int? birthDate = tank.getBirthDate();
     int? breedingDate = searchModel.computeBreedingDate(birthDate);
 
+    // BUGbroken could tankview here not have the facility set
+
     return GestureDetector(
       onTap: () {
         Navigator.push(

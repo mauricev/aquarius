@@ -9,7 +9,7 @@ import '../models/tank_model.dart';
 class SearchViewModel with ChangeNotifier {
   final ManageSession
       _manageSession; // we need this because manage tanks, which in turn uses Notes, which needs the session variable to save to disk
-  String facilityFk = "";
+  String facilityFk = "not yet set, search";
 
   List<Tank> tankListFull = <Tank>[];
   List<Tank> tankListSearched = <Tank>[];
@@ -219,14 +219,8 @@ class SearchViewModel with ChangeNotifier {
     return tankLineList;
   }
 
-  Future<void> prepareFullTankListForFacility(String facilityFk) async {
-    setFacilityId(facilityFk);
+  Future<void> buildInitialSearchList() async {
     await prepareFullTankList(); // we do get the full tank list from the database and the database should always be up to date.
-  }
-
-  Future<void> buildInitialSearchList(String facilityFk) async {
-    await prepareFullTankListForFacility(
-        facilityFk); // we do get the full tank list from the database and the database should always be up to date.
     prepareSearchTankList("", cTankLineSearch,cNoNotify);
   }
 }

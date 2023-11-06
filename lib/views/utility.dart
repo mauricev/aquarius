@@ -3,20 +3,9 @@ import '../view_models/facilities_viewmodel.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
 import '../view_models/tanks_viewmodel.dart';
-import '../view_models/viewmodel.dart';
-import 'package:provider/provider.dart';
 
 void myPrint(String printThis) {
-  //print(printThis);
-}
-
-String extractFacilityId(BuildContext context) {
-
-  AquariusViewModel model =
-  Provider.of<AquariusViewModel>(context, listen: false);
-
-  String facilityFk = model.selectedFacility ?? "";
-  return facilityFk;
+  print(printThis);
 }
 
 Stack returnTankWithOverlaidText(TanksViewModel tankModel, int tankPosition, String imagePath) {

@@ -4,7 +4,7 @@ import '../views/utility.dart';
 import '../views/consts.dart';
 
 class Tank {
-  String? documentId;
+  String? documentId = "bad value"; // this should never say this
   final String facilityFk;
   String rackFk;
   int absolutePosition;

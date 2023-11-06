@@ -41,25 +41,22 @@ class _TankCellState extends State<TankCell> {
   }
 
   void createTank(bool? bigTank) {
-    FacilityViewModel facilityModel =
-        Provider.of<FacilityViewModel>(context, listen: false);
     TanksViewModel tankModel =
         Provider.of<TanksViewModel>(context, listen: false);
 
     // two things here, addNewEmptyTank must set its fatTankPosition value if bigtank is picked,
 
     tankModel.addNewEmptyTank(
-        facilityModel.returnFacilityId(),
         widget.absolutePosition,
         bigTank == true
             ? (widget.absolutePosition + 1)
-            : null); // we call setstate because this function updates the current tank with a new position
+            : null);
 
     // we need to force select this tank; otherwise, there is no current tank
     tankModel.selectThisTankCellConvertsVirtual(widget
         .absolutePosition,cNotify); // we are selecting the parent tank of a fat tank cell pair
     // position will have absoluteposition as a value and will act as if it is also selected
-    // bug fixed here
+    // BUGfixed
   }
 
   Future<bool?> confirmSmallTank(BuildContext context) async {
@@ -104,24 +101,12 @@ class _TankCellState extends State<TankCell> {
     );
   }
 
-  // we can’t use widget.absoluteposition because that represents the cell the user clicked on
-  // and if it’s a virtual tank, we need the tank to its immediate left
-  /*void assignParkedTankItsNewHome(
-      Tank? parkedTank, int newTankPosition, TanksViewModel tankModel) {
-    parkedTank?.assignTankNewLocation(
-        tankModel.rackDocumentid, newTankPosition);
-  }*/
-
-  /*void parkRackedTank(Tank? destinationTank) {
-    destinationTank?.parkIt();
-  }*/
-
   bool canAbsolutePositionHostAFatTank(BuildContext context, int tankPosition) {
     FacilityViewModel facilityModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
     // are we at the end of a row? If so, then no
-    // BUG this was reversed
+    // BUGfixed this was reversed
     if ((widget.absolutePosition % facilityModel.maxTanks) == 0) {
       return false;
     }

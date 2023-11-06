@@ -23,18 +23,37 @@ class HomeScreenView extends StatefulWidget {
 }
 
 class _HomeScreenViewState extends State<HomeScreenView> {
-  final cNotANewFacility = false;
-  final cNewFacility = true;
+
+  // when the app starts and managesession is initialized, we read from local storage any saved facility
+  // we can then assign it to the dropdown and everything else
+
+  void informViewModelsOfTheFacility(AquariusViewModel model, BuildContext context, String facilityFk) {
+    // we are going to tell the other models what the facility is
+
+    FacilityViewModel facilityViewModel =
+    Provider.of<FacilityViewModel>(context, listen: false);
+
+    // this fetches the facility info; it’s async, but we don’t need to await it because we don”t use it here
+    facilityViewModel.getFacilityInfo(model.selectedFacility);
+
+    SearchViewModel searchViewModel =
+    Provider.of<SearchViewModel>(context, listen: false);
+
+    searchViewModel.setFacilityId(model.selectedFacility!);
+
+    TanksViewModel tanksViewModel =
+    Provider.of<TanksViewModel>(context, listen: false);
+
+    tanksViewModel.setFacilityId(model.selectedFacility!);
+  }
 
   Widget facilityDropDown(BuildContext context) {
     AquariusViewModel model =
         Provider.of<AquariusViewModel>(context, listen: false);
 
-    // can we set the facility here?
+    // if we are not null, a facility had been previously selected
     if (model.selectedFacility != null) {
-      FacilityViewModel facilityViewModel =
-      Provider.of<FacilityViewModel>(context, listen: false);
-      facilityViewModel.getFacilityInfo(model.selectedFacility);
+      informViewModelsOfTheFacility(model,context,model.selectedFacility!);
     }
 
     return FutureBuilder<List<Map<String, String>>>(
@@ -67,6 +86,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                 if (value != null) {
                   model.setSelectedFacility(
                       value); // this is the document id, not the name itself
+                  informViewModelsOfTheFacility(model,context,model.selectedFacility!);
                 }
               });
             },
@@ -99,6 +119,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
         Provider.of<FacilityViewModel>(context, listen: false);
 
     String? whichFacility = model.selectedFacility;
+
+    // if we are creating a new facility, clear out this variable
     if (newFacility == cNewFacility) {
       whichFacility = null;
     }
@@ -111,7 +133,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                   const FacilitiesView()) // this will read from facility model, which has already been updated
           ).then((data) {
         setState(() {
-          // does this work?, yes it does
+          // does this work?, yes it does; this should trigger the future builder to make a new facilities list
         });
       });
     });
@@ -121,7 +143,6 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
     TanksViewModel tankViewModel =
     Provider.of<TanksViewModel>(context, listen: false);
-    tankViewModel.setFacilityId(extractFacilityId(context));
 
       Navigator.push(
           context,
@@ -220,6 +241,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     // Now, this function handles the navigation without any async operation in between,
     // ensuring that the context used here is valid and not affected by previous async gaps.
 
+    // BUGbroken could tankview here not have facility set?
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -271,7 +294,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     SearchViewModel searchModel =
         Provider.of<SearchViewModel>(context, listen: false);
 
-    searchModel.buildInitialSearchList(extractFacilityId(context)).then((data) {
+    searchModel.buildInitialSearchList().then((data) {
       Navigator.push(
           context,
           MaterialPageRoute(

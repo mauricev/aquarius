@@ -23,9 +23,9 @@ class FacilityViewModel with ChangeNotifier {
 
   FacilityViewModel(this._manageSession);
 
-  String returnFacilityId() {
+  /*String returnFacilityId() {
     return documentId;
-  }
+  }*/
 
   void addRack(int absolutePosition, String relativePosition) {
     Rack aRack = Rack(absolutePosition, relativePosition);
@@ -192,11 +192,10 @@ class FacilityViewModel with ChangeNotifier {
     if (documentId == "") {
       // this is a new facility; give it a new id
       theFacility = await _manageSession.createDocument(  // we have to await to get the new facility id
-          theFacilityMap, kFacilityCollection); // how does document_id get updated? elsewhere apparently
+          theFacilityMap, kFacilityCollection); // how does document_id get updated? we haven't selected this facility yet; it gets assigned when the user picks it
     } else {
       theFacility = await _manageSession.updateDocument( // since we are using facility id, we need to wait
           theFacilityMap, kFacilityCollection, documentId);
-      myPrint("is facility id right? facility is ${theFacility.$id} and saved value is $documentId");
     }
 
     // save off each rack associated with this facility
