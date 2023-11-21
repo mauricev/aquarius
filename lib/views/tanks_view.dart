@@ -15,7 +15,7 @@ import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
 
 // for local, comment out
-import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
@@ -209,21 +209,11 @@ class TankViewState extends State<TankView> {
       autoFlipDirection: true,
       textFieldConfiguration: TextFieldConfiguration(
           controller: textController,
-          /*onChanged: (value) {
-            // business logic 1
-            currentTank?.tankLine = textController.text;
-
-            // BUGfixed
-            tanksModel
-                .saveExistingTank((currentTank?.absolutePosition)!)
-                .then((value) {
-              tanksModel.callNotifyListeners();
-            });
-          }*/
           onChanged: (value) async {
             try {
               // business logic 1
-              currentTank?.tankLine = textController.text;
+              // BUGfixed 11.19.2023
+              currentTank?.tankLine = textController.text.trimRight();
 
               await tanksModel
                   .saveExistingTank((currentTank?.absolutePosition)!);
@@ -507,7 +497,7 @@ class TankViewState extends State<TankView> {
 ^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
 ^XZ
 """;
-    final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    //final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   @override
@@ -543,7 +533,23 @@ class TankViewState extends State<TankView> {
               buildParkedTank(context),
             ],
           ),
-          buildOuterLabel(context, "Tank Info"),
+          Row(
+            children: [
+              buildOuterLabel(context, "Tank Info"),
+              TextButton(
+                onPressed: (currentTank == null) ? null : () {
+                  tankModel.copyTank();
+                },
+                child: const Text("Copy Tank Template"),
+              ),
+              TextButton(
+                onPressed: (currentTank == null) ? null : () {
+                  tankModel.clearTankTemplate();
+                },
+                child: const Text("Clear Tank Template"),
+              ),
+            ],
+          ),
           Row(
             children: [
               buildInnerLabel("Tank Line", controllerForTankLine, tankModel,

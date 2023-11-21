@@ -26,7 +26,8 @@ void main() async {
 
     WindowOptions windowOptions = const WindowOptions(
       size: Size(810, 1080), // 10.2 inch iPad portrait size
-      //maximumSize: Size(810, 1080), BUG to be added
+      minimumSize: Size(810, 1080), //BUGfixed
+      maximumSize: Size(810, 1080), //BUGfixed
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,

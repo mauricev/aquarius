@@ -12,6 +12,12 @@ class TanksViewModel with ChangeNotifier {
 
   List<Tank> tankList = <Tank>[];
 
+  // we initialize this in the constructor
+  late Tank _tankTemplate;
+  bool _isTemplateInPlay = false;
+
+  bool get isTemplateInPlay => _isTemplateInPlay;
+
   int selectedRack = -2; // this is a rack cell, not a tank cell
   int selectedTankCell = kEmptyTankIndex;
   String rackDocumentid = "";
@@ -52,27 +58,23 @@ class TanksViewModel with ChangeNotifier {
     tankList.add(aTank);
   }
 
-  /*
-   is a tank ever created in the cParkedRackAbsPosition position? I don’t think so
-   if it is, what happens to fatTankPosition?
-   */
-  void addNewEmptyTank(int absolutePosition, int? fatTankPosition) async {
+  void addNewTank(int absolutePosition, int? fatTankPosition, String tankLine, int birthDate, int numberOfFish, int generation, bool screenPositive) async {
     Tank aTank = Tank(
         documentId:
-            null, // the tank entry is new, so it doesn’t have a document ID yet
+        null, // the tank entry is new, so it doesn’t have a document ID yet
         facilityFk: facilityId,
         rackFk: (absolutePosition == cParkedRackAbsPosition)
             ? "0"
             : rackDocumentid, // saved from when we switch racks; we always get it from the database
         absolutePosition: absolutePosition,
-        tankLine: "",
+        tankLine: tankLine,
         birthDate:
-            returnTimeNow(), // BUGfixed removed 2 year offset per Jaslin’s request
-        screenPositive: true,
-        numberOfFish: 1,
+        birthDate,
+        screenPositive: screenPositive,
+        numberOfFish: numberOfFish,
         fatTankPosition:
-            fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
-        generation: 1,
+        fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
+        generation: generation,
         manageSession: _manageSession);
     tankList.add(aTank);
 
@@ -88,7 +90,7 @@ class TanksViewModel with ChangeNotifier {
     String tankId = await saveNewTank(absolutePosition);
 
     Tank? theTankJustCreated =
-        returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+    returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
 
     theTankJustCreated?.updateTankDocumentId(
         tankId); // when we add an empty tank, after it’s created we get its id and immediately assign it its notes class.
@@ -96,6 +98,14 @@ class TanksViewModel with ChangeNotifier {
     // this means in all instances, the notes have a tank id associated with them.
     // at this point, there are no notes, so they don’t individually need this tank_fk.
     // when we click the Notes button and then add a note, we will use the the savenewnote command. "Old" notes don’t exist yet.
+  }
+  /*
+   is a tank ever created in the cParkedRackAbsPosition position? I don’t think so
+   if it is, what happens to fatTankPosition?
+   */
+  void addNewEmptyTank(int absolutePosition, int? fatTankPosition) {
+    // BUGfixed removed 2 year offset per Jaslin’s request
+    addNewTank(absolutePosition, fatTankPosition, "", returnTimeNow(), 1, 1, true);
   }
 
   // problem creating tank from the above is that it is saving the rack and we a dedicated function for this
@@ -110,7 +120,9 @@ class TanksViewModel with ChangeNotifier {
     tankList.removeAt(index);
   }
 
-  TanksViewModel(this._manageSession);
+  TanksViewModel(this._manageSession) {
+    _tankTemplate = Tank(facilityFk: '0',rackFk: '',absolutePosition: 0, manageSession: _manageSession);
+  }
 
   Future<models.DocumentList> returnAssociatedTankList(
       String facilityId, String rackId) async {
@@ -253,6 +265,31 @@ class TanksViewModel with ChangeNotifier {
     }
     if (withNotifyListeners) {
       notifyListeners();
+    }
+  }
+
+  void clearTankTemplate() {
+    _isTemplateInPlay = false;
+    notifyListeners();
+  }
+
+  void copyTank() {
+    Tank? currentTank = returnCurrentPhysicalTank();
+    if (currentTank != null) {
+      _tankTemplate.tankLine = currentTank.tankLine;
+      _tankTemplate.birthDate = currentTank.birthDate;
+      _tankTemplate.generation = currentTank.generation;
+      _tankTemplate.numberOfFish = currentTank.numberOfFish;
+      _tankTemplate.screenPositive = currentTank.screenPositive;
+      _isTemplateInPlay = true;
+      notifyListeners();
+    }
+  }
+
+  void pasteTank(int absolutePosition, int? fatTankPosition) {
+    if (selectedTankCell != kEmptyTankIndex) {
+      addNewTank(absolutePosition, fatTankPosition, _tankTemplate.tankLine!, _tankTemplate.birthDate!, _tankTemplate.numberOfFish!, _tankTemplate.generation!, _tankTemplate.screenPositive!);
+      _isTemplateInPlay = false;
     }
   }
 

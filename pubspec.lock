@@ -328,14 +328,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_zebra_sdk:
-    dependency: "direct main"
-    description:
-      name: flutter_zebra_sdk
-      sha256: cf7c528e1f7a753934529c76e20ad621b4d97ce7d555873e9c6f094df5fcf435
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.4+1"
   google_fonts:
     dependency: "direct main"
     description:

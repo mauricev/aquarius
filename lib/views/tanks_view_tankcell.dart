@@ -59,6 +59,26 @@ class _TankCellState extends State<TankCell> {
     // BUGfixed
   }
 
+  void pasteTank(bool? bigTank){
+    // we will create a new tank internally and copy the info from the tank template;
+    TanksViewModel tankModel =
+    Provider.of<TanksViewModel>(context, listen: false);
+
+    tankModel.pasteTank(
+        widget.absolutePosition,
+        bigTank == true
+            ? (widget.absolutePosition + 1)
+            : null);
+
+    // we need to force select this tank; otherwise, there is no current tank
+    tankModel.selectThisTankCellConvertsVirtual(widget
+        .absolutePosition,cNotify); // we are selecting the parent tank of a fat tank cell pair
+  }
+
+  void prepareForNewTank(bool? bigTank) {
+
+  }
+
   Future<bool?> confirmSmallTank(BuildContext context) async {
     bool isFatTank = false;
 
@@ -208,19 +228,27 @@ class _TankCellState extends State<TankCell> {
                                 if (fatTankState != null) {
                                   // null means the user cancelled
                                   setState(() {
-                                    createTank(fatTankState);
+                                    if (tankModel.isTemplateInPlay) {
+                                      pasteTank(fatTankState);
+                                    } else {
+                                      createTank(fatTankState);
+                                    }
                                   });
                                 }
                               });
                             } else {
                               setState(() {
-                                createTank(false); // false means small tank
+                                // false to bigtank, means a thin tank
+                                if (tankModel.isTemplateInPlay) {
+                                  pasteTank(false);
+                                } else {
+                                  createTank(false);
+                                }
                               });
                             }
                           },
-                          child: const Text(
-                            "Create Tank",
-                            style: TextStyle(
+                          child: Text( (tankModel.isTemplateInPlay) ? "Paste Tank" : "Create Tank",
+                            style: const TextStyle(
                               fontSize: 7,
                             ),
                             textDirection: TextDirection.ltr,
