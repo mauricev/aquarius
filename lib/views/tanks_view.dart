@@ -213,7 +213,7 @@ class TankViewState extends State<TankView> {
             try {
               // business logic 1
               // BUGfixed 11.19.2023
-              currentTank?.tankLine = textController.text.trimRight();
+              currentTank?.tankLine = textController.text;
 
               await tanksModel
                   .saveExistingTank((currentTank?.absolutePosition)!);
@@ -543,7 +543,8 @@ class TankViewState extends State<TankView> {
                 child: const Text("Copy Tank Template"),
               ),
               TextButton(
-                onPressed: (currentTank == null) ? null : () {
+                // BUGfixed, was testing the wrong boolean
+                onPressed: (!tankModel.isTemplateInPlay) ? null : () {
                   tankModel.clearTankTemplate();
                 },
                 child: const Text("Clear Tank Template"),

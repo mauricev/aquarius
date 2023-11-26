@@ -1,35 +1,14 @@
-import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import '../view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
-import '../views/consts.dart';
-import '../views/utility.dart';
 
 class AquariusViewModel with ChangeNotifier {
-  final cFacilityNameKey = "faciltyNameKey";
+
   final ManageSession _manageSession;
-  String? selectedFacility; // we start out with no facility selected; this value is null
+
   bool badPassword = false;
 
-  void assignSavedFacility() async {
-    // when we need to test with no saved facility
-    // remove for real-world
-    //_manageSession.deleteSecureStorage(cFacilityNameKey); <- must be commented out for real-world
-
-    selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
-
-    myPrint("the saved facility is $selectedFacility");
-  }
-
-  AquariusViewModel(this._manageSession ) {
-    assignSavedFacility();
-    notifyListeners();
-  }
-
-  void setSelectedFacility(String? facilityName) {
-    selectedFacility = facilityName;
-    _manageSession.setToSecureStorage(cFacilityNameKey, selectedFacility);
-  }
+  AquariusViewModel(this._manageSession );
 
   bool getDoesUserWantToRegister() {
     return _manageSession.getDoesUserWantToRegister();
@@ -47,7 +26,6 @@ class AquariusViewModel with ChangeNotifier {
   // even this class temporarily ignores the return string
   Future registerUser(String email, String password) {
     setFailedToRegister(false);
-    myPrint("about to register 1");
     return _manageSession.registerUser(email, password);
   }
 
@@ -70,10 +48,6 @@ class AquariusViewModel with ChangeNotifier {
     return _manageSession.retrieveSession();
   }
 
-  void callNotifyListeners() {
-    notifyListeners();
-  }
-
   Future<dynamic> logOut() async {
     return _manageSession.logOut();
   }
@@ -85,7 +59,6 @@ class AquariusViewModel with ChangeNotifier {
   }
 
   bool getIsUserPasswordBad() {
-    myPrint("am i getting called at all?");
     return badPassword;
   }
 // errors we need to handle;
@@ -96,32 +69,5 @@ class AquariusViewModel with ChangeNotifier {
 
   Future<models.Session> loginUser(String username, String password) async {
     return _manageSession.loginUser(username, password);
-  }
-
-  Future<List<Map<String, String>>> getFacilityNames2() async {
-    List<Map<String, String>> facilitiesNameList = [];
-
-    List<String>? query = [
-      Query.notEqual("facility_name", [""]) // empty string should bring back all facilities
-    ];
-
-    models.DocumentList facilitiesDocumentList = await _manageSession.queryDocument(kFacilityCollection,query);
-
-    for (int theIndex = 0; theIndex < facilitiesDocumentList.total; theIndex++) {
-      models.Document theFacility = facilitiesDocumentList.documents[theIndex];
-
-      Map<String, String> facilityData = {
-        'facility_name': theFacility.data['facility_name'].toString(),
-        'facility_fk': theFacility.$id,
-      };
-
-      facilitiesNameList.add(facilityData);
-    }
-
-    return facilitiesNameList;
-  }
-
-  String? returnSelectedFacility() {
-   return selectedFacility;
   }
 }

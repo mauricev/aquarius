@@ -58,22 +58,28 @@ class TanksViewModel with ChangeNotifier {
     tankList.add(aTank);
   }
 
-  void addNewTank(int absolutePosition, int? fatTankPosition, String tankLine, int birthDate, int numberOfFish, int generation, bool screenPositive) async {
+  void addNewTank(
+      int absolutePosition,
+      int? fatTankPosition,
+      String tankLine,
+      int birthDate,
+      int numberOfFish,
+      int generation,
+      bool screenPositive) async {
     Tank aTank = Tank(
         documentId:
-        null, // the tank entry is new, so it doesn’t have a document ID yet
+            null, // the tank entry is new, so it doesn’t have a document ID yet
         facilityFk: facilityId,
         rackFk: (absolutePosition == cParkedRackAbsPosition)
             ? "0"
             : rackDocumentid, // saved from when we switch racks; we always get it from the database
         absolutePosition: absolutePosition,
         tankLine: tankLine,
-        birthDate:
-        birthDate,
+        birthDate: birthDate,
         screenPositive: screenPositive,
         numberOfFish: numberOfFish,
         fatTankPosition:
-        fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
+            fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
         generation: generation,
         manageSession: _manageSession);
     tankList.add(aTank);
@@ -85,12 +91,11 @@ class TanksViewModel with ChangeNotifier {
     // it just sits a placeholder to be selected
     // I am now wondering can we even get away with not having it in the tank list at all?
     //
-    myPrint("saveNewTank, facility is $facilityId");
     // now add this to the database
     String tankId = await saveNewTank(absolutePosition);
 
     Tank? theTankJustCreated =
-    returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+        returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
 
     theTankJustCreated?.updateTankDocumentId(
         tankId); // when we add an empty tank, after it’s created we get its id and immediately assign it its notes class.
@@ -99,13 +104,15 @@ class TanksViewModel with ChangeNotifier {
     // at this point, there are no notes, so they don’t individually need this tank_fk.
     // when we click the Notes button and then add a note, we will use the the savenewnote command. "Old" notes don’t exist yet.
   }
+
   /*
    is a tank ever created in the cParkedRackAbsPosition position? I don’t think so
    if it is, what happens to fatTankPosition?
    */
   void addNewEmptyTank(int absolutePosition, int? fatTankPosition) {
     // BUGfixed removed 2 year offset per Jaslin’s request
-    addNewTank(absolutePosition, fatTankPosition, "", returnTimeNow(), 1, 1, true);
+    addNewTank(
+        absolutePosition, fatTankPosition, "", returnTimeNow(), 1, 1, true);
   }
 
   // problem creating tank from the above is that it is saving the rack and we a dedicated function for this
@@ -121,13 +128,32 @@ class TanksViewModel with ChangeNotifier {
   }
 
   TanksViewModel(this._manageSession) {
-    _tankTemplate = Tank(facilityFk: '0',rackFk: '',absolutePosition: 0, manageSession: _manageSession);
+    _tankTemplate = Tank(
+        facilityFk: '0',
+        rackFk: '',
+        absolutePosition: 0,
+        manageSession: _manageSession);
   }
 
-  Future<models.DocumentList> returnAssociatedTankList(
+  /* Future<models.DocumentList> returnAssociatedTankList(
       String facilityId, String rackId) async {
     List<String>? tankQuery = [
       Query.equal("facility_fk", facilityId),
+      Query.equal("rack_fk", [
+        rackId,
+        cParkedRackFkAddress
+      ]), // potential solution make this an or search and just pass in this or 0, so get both
+      Query.limit(
+          5000), // BUG fixed, internal default appwrite limit is 25 items returned
+    ];
+    return await _manageSession.queryDocument(cTankCollection, tankQuery);
+  }*/
+
+  // adds the ability to find parkedtanks which have no associated facility
+  Future<models.DocumentList> returnAssociatedTankList(
+      String facilityId, String rackId) async {
+    List<String>? tankQuery = [
+      Query.equal("facility_fk", [facilityId, cParkedTankFacility]),
       Query.equal("rack_fk", [
         rackId,
         cParkedRackFkAddress
@@ -142,10 +168,10 @@ class TanksViewModel with ChangeNotifier {
     Tank? theTank =
         returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
 
-    myPrint("prepareTankMap, facility $facilityId, tank ${theTank?.tankLine}");
+    // here if we are saving a parked tank, set the facility id to ""
 
     Map<String, dynamic> theTankMap = {
-      'facility_fk': facilityId,
+      'facility_fk': (absolutePosition == cParkedRackAbsPosition) ? cParkedTankFacility : facilityId,
       'rack_fk': (absolutePosition == cParkedRackAbsPosition)
           ? "0"
           : rackDocumentid, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
@@ -176,9 +202,6 @@ class TanksViewModel with ChangeNotifier {
       Tank? theTank =
           returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
       Map<String, dynamic> theTankMap = prepareTankMap(absolutePosition);
-
-      myPrint(
-          "saveExistingTank, facility $facilityId, tank ${theTank?.tankLine}");
 
       await _manageSession.updateDocument(
           theTankMap, cTankCollection, (theTank?.documentId)!);
@@ -215,7 +238,7 @@ class TanksViewModel with ChangeNotifier {
     // all tanks must save with a rack_fk; this is for other methods here
     rackDocumentid = theRackId;
 
-    clearTanks(); // we do want the parked rack deleted because it will get re-added, but how? its rack id is “wrong’
+    clearTanks(); // we do want the parked rack deleted because it will get re-added, but how? its rack id is “wrong’; we search for it specifically
 
     for (int theIndex = 0; theIndex < theTankList.total; theIndex++) {
       models.Document theTank = theTankList.documents[theIndex];
@@ -234,7 +257,7 @@ class TanksViewModel with ChangeNotifier {
       addTankFromDatabase(
           theTank
               .$id, // this is the document ID that uniquely identifies this record
-          facilityId,
+          theTank.data['facility_fk'], // we were assigned the facilityId, but now we are reading it, so parked tanks preserve their id; any downside?
           theTank.data['rack_fk'],
           theTank.data['absolute_position'],
           theTank.data['tank_line'],
@@ -252,15 +275,14 @@ class TanksViewModel with ChangeNotifier {
       int selectThisRack,
       bool withNotifyListeners) async {
     selectedRack = selectThisRack;
-    myPrint(
-        "the selected rack cell is $selectedRack must be followed loading tanks");
+
     // the code here will query the rack via the absolute position and facility_fk from the facility mode
     // need to pass facility model and boolean for reading this stuff
     if (readInTanks!) {
       String? theRackId = await facilityModel.returnSpecificRack(selectedRack);
       if (theRackId != null) {
         await loadTanksForThisRack(facilityModel,
-            theRackId); // BUG there is no await here, so notifylisteners may execute before this returns
+            theRackId); // BUGfixed there was no await here, so notifylisteners may execute before this returns
       }
     }
     if (withNotifyListeners) {
@@ -288,7 +310,14 @@ class TanksViewModel with ChangeNotifier {
 
   void pasteTank(int absolutePosition, int? fatTankPosition) {
     if (selectedTankCell != kEmptyTankIndex) {
-      addNewTank(absolutePosition, fatTankPosition, _tankTemplate.tankLine!, _tankTemplate.birthDate!, _tankTemplate.numberOfFish!, _tankTemplate.generation!, _tankTemplate.screenPositive!);
+      addNewTank(
+          absolutePosition,
+          fatTankPosition,
+          _tankTemplate.tankLine!,
+          _tankTemplate.birthDate!,
+          _tankTemplate.numberOfFish!,
+          _tankTemplate.generation!,
+          _tankTemplate.screenPositive!);
       _isTemplateInPlay = false;
     }
   }

@@ -67,3 +67,6 @@ const String cFatTank = "10L";
 
 const cNotANewFacility = false;
 const cNewFacility = true;
+
+const String cFacilityNameKey = "faciltyNameKey";
+const String cParkedTankFacility = "no associated facility";

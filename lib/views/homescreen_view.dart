@@ -12,9 +12,6 @@ import '../views/consts.dart';
 import '../views/login_view.dart';
 import '../view_models/tanks_viewmodel.dart';
 
-import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform;
-
 class HomeScreenView extends StatefulWidget {
   const HomeScreenView({Key? key}) : super(key: key);
 
@@ -27,37 +24,37 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   // when the app starts and managesession is initialized, we read from local storage any saved facility
   // we can then assign it to the dropdown and everything else
 
-  void informViewModelsOfTheFacility(AquariusViewModel model, BuildContext context, String facilityFk) {
+  void informViewModelsOfTheFacility(BuildContext context) {
     // we are going to tell the other models what the facility is
 
     FacilityViewModel facilityViewModel =
     Provider.of<FacilityViewModel>(context, listen: false);
 
     // this fetches the facility info; it’s async, but we don’t need to await it because we don”t use it here
-    facilityViewModel.getFacilityInfo(model.selectedFacility);
+    facilityViewModel.getFacilityInfo(facilityViewModel.selectedFacility);
 
     SearchViewModel searchViewModel =
     Provider.of<SearchViewModel>(context, listen: false);
 
-    searchViewModel.setFacilityId(model.selectedFacility!);
+    searchViewModel.setFacilityId(facilityViewModel.selectedFacility!);
 
     TanksViewModel tanksViewModel =
     Provider.of<TanksViewModel>(context, listen: false);
 
-    tanksViewModel.setFacilityId(model.selectedFacility!);
+    tanksViewModel.setFacilityId(facilityViewModel.selectedFacility!);
   }
 
   Widget facilityDropDown(BuildContext context) {
-    AquariusViewModel model =
-        Provider.of<AquariusViewModel>(context, listen: false);
+    FacilityViewModel facilityViewModel =
+    Provider.of<FacilityViewModel>(context, listen: false);
 
     // if we are not null, a facility had been previously selected
-    if (model.selectedFacility != null) {
-      informViewModelsOfTheFacility(model,context,model.selectedFacility!);
+    if (facilityViewModel.selectedFacility != null) {
+      informViewModelsOfTheFacility(context);
     }
 
     return FutureBuilder<List<Map<String, String>>>(
-      future: model.getFacilityNames2(),
+      future: facilityViewModel.getFacilityNames2(),
       builder: (BuildContext context,
           AsyncSnapshot<List<Map<String, String>>> snapshot) {
         if (snapshot.hasData) {
@@ -70,7 +67,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
             ));
           }
 
-          String? selectedValue = model.selectedFacility; // what if this is null?
+          String? selectedValue = facilityViewModel.selectedFacility; // what if this is null?
 
           return DropdownButton<String>(
             value: selectedValue,
@@ -84,9 +81,9 @@ class _HomeScreenViewState extends State<HomeScreenView> {
             onChanged: (String? value) {
               setState(() {
                 if (value != null) {
-                  model.setSelectedFacility(
+                  facilityViewModel.setSelectedFacility(
                       value); // this is the document id, not the name itself
-                  informViewModelsOfTheFacility(model,context,model.selectedFacility!);
+                  informViewModelsOfTheFacility(context);
                 }
               });
             },
@@ -112,13 +109,10 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   }
 
   void loadFacilitiesPage(BuildContext context, bool newFacility) {
-    AquariusViewModel model =
-        Provider.of<AquariusViewModel>(context, listen: false);
-
     FacilityViewModel facilitiesModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
-    String? whichFacility = model.selectedFacility;
+    String? whichFacility = facilitiesModel.selectedFacility;
 
     // if we are creating a new facility, clear out this variable
     if (newFacility == cNewFacility) {
@@ -273,13 +267,9 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   }
 
   void loadQRCodeController(BuildContext context) {
-    AquariusViewModel model =
-        Provider.of<AquariusViewModel>(context, listen: false);
-
-    FacilityViewModel facilitiesModel =
-        Provider.of<FacilityViewModel>(context, listen: false);
-
-    facilitiesModel.getFacilityInfo(model.selectedFacility).then((data) {
+    // I am not sure why I am selecting the facility here; it had to have been set by the dropdown
+    // plus why do we need all that info loaded here
+   // facilitiesModel.getFacilityInfo(facilitiesModel.selectedFacility).then((data) {
       // are we wrong to assume this will be filled in?
       showModalBottomSheet(
         context: context,
@@ -287,7 +277,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           return displayCameraForReadingQrCode(context);
         },
       );
-    });
+    //});
   }
 
   void loadSearchController(BuildContext context) {
@@ -319,40 +309,17 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     });
   }
 
-  bool isAFacilitySelectedAndOnIos(BuildContext context) {
-    AquariusViewModel model =
-        Provider.of<AquariusViewModel>(context, listen: false);
-
-    return (model.returnSelectedFacility() != null) &
-        (defaultTargetPlatform == TargetPlatform.iOS);
-  }
-
-  bool isAFacilitySelected(BuildContext context) {
-    AquariusViewModel model =
-        Provider.of<AquariusViewModel>(context, listen: false);
-
-    return model.returnSelectedFacility() != null;
-  }
-
-  bool pretendFacilityIsAlwaysSelected(BuildContext context) {
-    AquariusViewModel model =
-        Provider.of<AquariusViewModel>(context, listen: false);
-
-    return model.returnSelectedFacility() ==
-        null; // if a facility is not selected, return true
-  }
-
   Widget loadCommonButton(
       BuildContext context,
       void Function(BuildContext) loadController,
-      bool Function(BuildContext) enableOnPressed,
+      bool Function() enableOnPressed,
       String buttonTitle) {
     return Padding(
       padding: const EdgeInsets.only(
         left: 60,
       ),
       child: ElevatedButton(
-        onPressed: enableOnPressed(context)
+        onPressed: enableOnPressed()
             ? () {
                 // if we return true, then enable the button; for new facility must return true
                 loadController(context);
@@ -372,7 +339,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       BuildContext context,
       bool controllerState,
       void Function(BuildContext, bool) loadController,
-      bool Function(BuildContext) disableOnPressed,
+      bool Function() disableOnPressed,
       String buttonTitle) {
     return Padding(
       padding: const EdgeInsets.only(
@@ -380,7 +347,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       ),
       child: ElevatedButton(
         // if disableOnPressed is true, then
-        onPressed: disableOnPressed(context)
+        onPressed: disableOnPressed()
             ? () {
                 loadController(context, controllerState);
               }
@@ -397,6 +364,10 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
   // we already have a scaffold created in the main body
   Widget buildHomeScreen(BuildContext context) {
+
+    FacilityViewModel facilityViewModel =
+    Provider.of<FacilityViewModel>(context, listen: true);
+
     return Column(
       children: [
         Row(
@@ -424,7 +395,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                 context,
                 cNewFacility,
                 loadFacilitiesPage,
-                pretendFacilityIsAlwaysSelected,
+                facilityViewModel.pretendFacilityIsAlwaysSelected,
                 "New Facility…"),
           ],
         ),
@@ -435,9 +406,9 @@ class _HomeScreenViewState extends State<HomeScreenView> {
         Row(
           children: [
             loadCommonButtonWithParameter(context, cNotANewFacility,
-                loadFacilitiesPage, isAFacilitySelected, "Facility…"),
+                loadFacilitiesPage, facilityViewModel.isAFacilitySelected, "Facility…"),
             loadCommonButton(
-                context, loadTanksController, isAFacilitySelected, "Tanks…"),
+                context, loadTanksController, facilityViewModel.isAFacilitySelected, "Tanks…"),
           ],
         ),
         const SizedBox(
@@ -450,8 +421,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
             // we the button for loadQRCodeController to be enabled only if a facility is selected
             // and we are on ios, new function isAFacilitySelectedAndOnIos
             loadCommonButton(context, loadQRCodeController,
-                isAFacilitySelectedAndOnIos, "Scan a Tank’s Barcode…"),
-            loadCommonButton(context, loadSearchController, isAFacilitySelected,
+                facilityViewModel.isAFacilitySelectedAndOnIos, "Scan a Tank’s Barcode…"),
+            loadCommonButton(context, loadSearchController, facilityViewModel.isAFacilitySelected,
                 "Search For a Tank…"),
           ],
         ),
@@ -462,7 +433,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           children: [
             // we might want to add an indent value to align this button with the above
             loadCommonButton(
-                context, logoutController, isAFacilitySelected, "Logout"),
+                context, logoutController, facilityViewModel.isAFacilitySelected, "Logout"),
           ],
         ),
       ],

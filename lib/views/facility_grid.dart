@@ -82,8 +82,7 @@ class FacilityGridCell extends StatelessWidget {
       onTap: (tankMode! && (index == -1))
           ? null
           : () {
-              myPrint("we are selecting a new rack");
-              // POSSIBLE BUG; this is now async
+              // BUGfixed; this is now async
               tankModel.selectThisRackByAbsolutePosition(
                   tankMode, facilityModel, absolutePosition, cNotify);
             },

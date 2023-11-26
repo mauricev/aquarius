@@ -6,6 +6,9 @@ import '../views/consts.dart';
 import '../views/utility.dart';
 import '../models/rack_model.dart';
 
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
+
 class FacilityViewModel with ChangeNotifier {
   final ManageSession _manageSession;
   List<Rack> rackList = <Rack>[];
@@ -21,11 +24,67 @@ class FacilityViewModel with ChangeNotifier {
   int gridWidth = 0;
   bool? entranceBottom;
 
-  FacilityViewModel(this._manageSession);
+  String? selectedFacility; // we start out with no facility selected; this value is null
 
-  /*String returnFacilityId() {
-    return documentId;
-  }*/
+  Future<void> loadUpSavedFacility() async {
+    // when we need to test with no saved facility
+    // remove for real-world
+    //_manageSession.deleteSecureStorage(cFacilityNameKey); <- must be commented out for real-world
+
+    selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
+
+    myPrint("the saved facility is $selectedFacility");
+  }
+
+  FacilityViewModel(this._manageSession) {
+    loadUpSavedFacility().then((value) => notifyListeners());
+  }
+
+  void setSelectedFacility(String? facilityFk) {
+    selectedFacility = facilityFk;
+    _manageSession.setToSecureStorage(cFacilityNameKey, selectedFacility);
+  }
+
+  Future<List<Map<String, String>>> getFacilityNames2() async {
+    List<Map<String, String>> facilitiesNameList = [];
+
+    List<String>? query = [
+      Query.notEqual("facility_name", [""]) // empty string should bring back all facilities
+    ];
+
+    models.DocumentList facilitiesDocumentList = await _manageSession.queryDocument(kFacilityCollection,query);
+
+    for (int theIndex = 0; theIndex < facilitiesDocumentList.total; theIndex++) {
+      models.Document theFacility = facilitiesDocumentList.documents[theIndex];
+
+      Map<String, String> facilityData = {
+        'facility_name': theFacility.data['facility_name'].toString(),
+        'facility_fk': theFacility.$id,
+      };
+
+      facilitiesNameList.add(facilityData);
+    }
+
+    return facilitiesNameList;
+  }
+
+  String? returnSelectedFacility() {
+    return selectedFacility;
+  }
+
+  bool isAFacilitySelectedAndOnIos() {
+   return (returnSelectedFacility() != null) &
+    (defaultTargetPlatform == TargetPlatform.iOS);
+  }
+
+  bool isAFacilitySelected() {
+    return returnSelectedFacility() != null;
+  }
+
+  bool pretendFacilityIsAlwaysSelected() {
+    return returnSelectedFacility() ==
+        null; // if a facility is not selected, return true
+  }
 
   void addRack(int absolutePosition, String relativePosition) {
     Rack aRack = Rack(absolutePosition, relativePosition);
@@ -118,8 +177,6 @@ class FacilityViewModel with ChangeNotifier {
       Query.equal("absolute_position", absolutePosition),
     ];
 
-    myPrint("facility_fk is $documentId and abs pos is $absolutePosition");
-
     models.DocumentList theRackList = await _manageSession.queryDocument(
         cRackCollection, rackQuery);
 
@@ -128,6 +185,7 @@ class FacilityViewModel with ChangeNotifier {
     return theRack.$id;
   }
 
+  // this method has special case code for setting up a new facility
   Future<void> getFacilityInfo(String? theFacilityFk) async {
     if (theFacilityFk != null) {
       // if we are null, then we are in the new facility page
@@ -215,11 +273,9 @@ class FacilityViewModel with ChangeNotifier {
       models.DocumentList theRackList = await _manageSession.queryDocument(cRackCollection, rackQuery);
 
       if (theRackList.total > 0) { // racks are already existing
-        myPrint("we found an existing rack, ${theRackList.documents[0].$id}");
         await _manageSession.updateDocument(
         theRackMap, cRackCollection, theRackList.documents[0].$id);
       } else {
-        myPrint('we are saving a new rack, ${rackList[theIndex].relativePosition}'); // how did this rack get created? we gave it a name.
         await _manageSession.createDocument(theRackMap, cRackCollection); // if this fails, we created on an existing rack in error
       }
      }
