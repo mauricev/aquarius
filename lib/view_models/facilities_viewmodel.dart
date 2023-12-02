@@ -86,6 +86,10 @@ class FacilityViewModel with ChangeNotifier {
         null; // if a facility is not selected, return true
   }
 
+  bool pretendFacilityIsIrrelevant() {
+    return true; // if a facility is not selected, return true
+  }
+
   void addRack(int absolutePosition, String relativePosition) {
     Rack aRack = Rack(absolutePosition, relativePosition);
     rackList.add(aRack);

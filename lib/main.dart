@@ -9,6 +9,7 @@ import 'view_models/tanks_viewmodel.dart';
 import 'view_models/search_viewmodel.dart';
 import 'views/consts.dart';
 import 'package:flutter/services.dart';
+import 'view_models/tanklines_viewmodel.dart';
 
 import 'package:window_manager/window_manager.dart';
 
@@ -68,6 +69,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<SearchViewModel>(
           create: (_) => SearchViewModel(manageSession),
+        ),
+        ChangeNotifierProvider<TanksLineViewModel>(
+          create: (_) => TanksLineViewModel(manageSession),
         ),
       ],
       child: MaterialApp(

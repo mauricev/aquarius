@@ -1,3 +1,5 @@
+import 'package:aquarius/view_models/tanklines_viewmodel.dart';
+
 import '../view_models/search_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +13,7 @@ import '../views/utility.dart';
 import '../views/consts.dart';
 import '../views/login_view.dart';
 import '../view_models/tanks_viewmodel.dart';
+import '../views/tanklines_view.dart';
 
 class HomeScreenView extends StatefulWidget {
   const HomeScreenView({Key? key}) : super(key: key);
@@ -294,6 +297,20 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     });
   }
 
+  void loadTankLinesView(BuildContext context) {
+    TanksLineViewModel tankLinesViewModel =
+    Provider.of<TanksLineViewModel>(context, listen: false);
+
+    tankLinesViewModel.buildTankLinesList().then((data) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+              const TankslineView()),
+      );
+    });
+  }
+
   void logoutController(BuildContext context) {
     AquariusViewModel model =
         Provider.of<AquariusViewModel>(context, listen: false);
@@ -424,6 +441,13 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                 facilityViewModel.isAFacilitySelectedAndOnIos, "Scan a Tank’s Barcode…"),
             loadCommonButton(context, loadSearchController, facilityViewModel.isAFacilitySelected,
                 "Search For a Tank…"),
+          ],
+        ),
+        buildOuterLabelHeadlineSmall(context, "TankLines"),
+        Row(
+          children: [
+            loadCommonButton(context, loadTankLinesView,
+                facilityViewModel.pretendFacilityIsIrrelevant, "Tanklines"),
           ],
         ),
         const SizedBox(

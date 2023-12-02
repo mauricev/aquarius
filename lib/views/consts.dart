@@ -30,6 +30,7 @@ const String kFacilityCollection = "63eefc630814627ea850";
 const String cRackCollection = '63f97b76c200d9237cea';
 const String cTankCollection = '6408223c577dec6908e7';
 const String cNotesCollection = '64239dc4f03b6125e61d';
+const String cTankLinesCollection = '6563c50e67141c771cc2';
 
 const double kFullWidth = 200;
 const double kHalfWidth  = 100;
@@ -70,3 +71,11 @@ const cNewFacility = true;
 
 const String cFacilityNameKey = "faciltyNameKey";
 const String cParkedTankFacility = "no associated facility";
+
+const int cNewTankline = -1;
+
+const bool cTankLineToBeEdited = false;
+const bool cTankLineToBeCreated = true;
+const bool cTankLineDialogCancelled = false;
+const bool cTankLineDialogOKed = true;
+enum TankLineStatusEnum { eTankLineBlank, eTankLineInUse, eTankLineReadyToEdit }

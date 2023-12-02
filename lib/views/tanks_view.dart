@@ -128,6 +128,24 @@ class TankViewState extends State<TankView> {
     _prepareRacksAndTanksForCaller();
   }
 
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Updated Tank Info Failed to Save!'),
+        content: Text(errorMessage),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
   // BUGfixed we were missing the dispose call
   @override
   void dispose() {
@@ -154,24 +172,6 @@ class TankViewState extends State<TankView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     setState(() {});
-  }
-
-  void _showErrorDialog(String errorMessage) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Updated Tank Info Failed to Save!'),
-        content: Text(errorMessage),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-          )
-        ],
-      ),
-    );
   }
 
   void notesDialog(
@@ -203,6 +203,8 @@ class TankViewState extends State<TankView> {
       TanksViewModel tanksModel,
       TextEditingController textController,
       Tank? currentTank) {
+    return Text(currentTank!.tankLine!);
+    /*
     return TypeAheadField<String>(
       hideOnEmpty: true,
       hideOnLoading: true,
@@ -214,9 +216,7 @@ class TankViewState extends State<TankView> {
               // business logic 1
               // BUGfixed 11.19.2023
               currentTank?.tankLine = textController.text;
-
-              await tanksModel
-                  .saveExistingTank((currentTank?.absolutePosition)!);
+              await tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
 
               tanksModel.callNotifyListeners();
             } catch (e) {
@@ -247,32 +247,17 @@ class TankViewState extends State<TankView> {
           title: Text(suggestion),
         );
       },
-      /*onSuggestionSelected: (String suggestion) {
-        //setState(() {
-        // business logic 2
-        currentTank?.tankLine = suggestion;
-
-        tanksModel
-            .saveExistingTank((currentTank?.absolutePosition)!)
-            .then((value) {
-          tanksModel
-              .callNotifyListeners(); // we may not need to put in the then clause because we not re-reading the database
-        }); // BUGfixed we don't wait for this save to complete, but may not need to; we are not re-reading the database
-        // set state is no longer working here because we are using a listener for changes to the tankline
-        // });
-      }*/
       onSuggestionSelected: (String suggestion) async {
         try {
           // business logic 2
           currentTank?.tankLine = suggestion;
-
           await tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
           tanksModel.callNotifyListeners();
         } catch (e) {
           _showErrorDialog(e.toString());
         }
       },
-    );
+    );*/
   }
 
   Widget buildInnerLabel(String labelText, TextEditingController textController,
@@ -330,7 +315,6 @@ class TankViewState extends State<TankView> {
                           case TankStringsEnum.docId:
                             break;
                         }
-
                         await tanksModel
                             .saveExistingTank((currentTank?.absolutePosition)!);
                       } catch (e) {

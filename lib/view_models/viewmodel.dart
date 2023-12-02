@@ -8,7 +8,7 @@ class AquariusViewModel with ChangeNotifier {
 
   bool badPassword = false;
 
-  AquariusViewModel(this._manageSession );
+  AquariusViewModel(this._manageSession);
 
   bool getDoesUserWantToRegister() {
     return _manageSession.getDoesUserWantToRegister();
