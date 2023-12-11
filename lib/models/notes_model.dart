@@ -22,13 +22,30 @@ class Notes {
     return parentTank.documentId;
   }
 
+  Future<void> euthanizeNotes(String expiredTankFk) async {
+    // loop through every note changing tank_fk to expiredTankFk
+    // the note will not be orphaned but be associated with an expired tank
+
+    // there is a slight risk of a collision between an existing tank’s document it and that of the expired tank’s
+
+    for (int theIndex = 0; theIndex < notesList.length; theIndex++) {
+      // the following list is about to be deleted, so no reason to update it.
+      // notesList[theIndex]['tank_fk'] = expiredTankFk;
+      Map<String, dynamic> theNoteMap = {
+        'tank_fk': expiredTankFk,
+      };
+      await manageSession.updateDocument(theNoteMap, cNotesCollection,
+      notesList[theIndex]['document id']);
+    }
+  }
+
+  // we don’t pass an index because only the first note, [0], is “live”
   Map<String, dynamic> prepareNoteMap() {
     Map<String, dynamic> theNoteMap = {
       'note': notesList[0]['note'],
       'date': notesList[0]['date'],
       'tank_fk': notesList[0]['tank_fk'],
     };
-    myPrint("3 did the notes array really update: ${notesList[0]['note']}?");
     return theNoteMap;
   }
 
@@ -48,18 +65,18 @@ class Notes {
   // this will be called every time during the onchanged event
   void saveExistingNote() async {
     if (isParentTankIDValid()) {
-      myPrint("2 save existing note");
       Map<String, dynamic> theNoteMap = prepareNoteMap();
       manageSession.updateDocument(theNoteMap, cNotesCollection,
           notesList[0]['document id']); // this should be the NOTE's document ID, but how did this value get put into map
     }
   }
 
+  // notes don’t get deleted; they get reassigned to the expiredtanks_collection
+
   // when we add a note, we are in the dialog and we know the tank this is a part of
   void addNote() {
     if (isParentTankIDValid()) {
-      // notes without a valid tank_fk CANNOT be saved!
-      myPrint("adding a note to tank ${returnParentTankID()}");
+      // notes without a valid tank_fk cannot be saved!
       Map<String, dynamic> theNotesMap = {
         'note': "", // when a new note is initially added, it contains no text
         'date': returnTimeNow(),
@@ -67,7 +84,7 @@ class Notes {
       };
       notesList.insert(
           0, theNotesMap); // added new items to the beginning of the list
-      saveNewNote(); // save the first index; this will append the documnt id for future saving of this note
+      saveNewNote(); // save the first index; this will append the document id for future saving of this note
     } else {
       myPrint("NOT adding a note, ${returnParentTankID()}");
     }
@@ -78,7 +95,6 @@ class Notes {
     Map<String, dynamic> note = notesList.elementAt(0);
     note['note'] = noteText;
     note['date'] = returnTimeNow();
-    myPrint("1 this is incoming note text, ${note['note']}");
     // need to save note for the first time; will always have a valid tank_fk
     saveExistingNote();
   }

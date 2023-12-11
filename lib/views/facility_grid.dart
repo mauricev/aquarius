@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../view_models/facilities_viewmodel.dart';
 import '../view_models/tanks_viewmodel.dart';
 import '../views/consts.dart';
-import '../views/utility.dart';
 
 enum FacilityStringsEnum {
   facilityName,
@@ -33,14 +32,13 @@ class FacilityGridCell extends StatelessWidget {
   final bool? tankMode;
 
   const FacilityGridCell(
-      {Key? key,
+      {super.key,
       this.absolutePosition =
           0, // index starts at 1, so 0 means it’s not yet assigned, which is never the case
       this.height = 0,
       this.width = 0,
       this.relativePosition = "",
-      this.tankMode})
-      : super(key: key);
+      this.tankMode});
 
   Color returnGridCellColor(
       bool isInFacility, int index, bool isRackCellSelected) {
@@ -132,7 +130,7 @@ class FacilityGridCell extends StatelessWidget {
 }
 
 class FacilityGrid extends StatelessWidget {
-  FacilityGrid({Key? key, this.tankMode}) : super(key: key);
+  FacilityGrid({super.key, this.tankMode});
 
   final bool? tankMode;
   final List<Row> gridDown = <Row>[];

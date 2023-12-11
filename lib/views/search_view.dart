@@ -1,3 +1,5 @@
+import 'package:aquarius/view_models/tanklines_viewmodel.dart';
+
 import '../views/tanks_view.dart';
 import '../view_models/search_viewmodel.dart';
 import '../views/consts.dart';
@@ -23,28 +25,27 @@ Widget returnDOBTitle(double value, TitleMeta meta) {
 }
 
 class SearchView extends StatefulWidget {
-  const SearchView({Key? key}) : super(key: key);
+  const SearchView({super.key});
 
   @override
   State<SearchView> createState() => _SearchViewState();
 }
 
 class _SearchViewState extends State<SearchView> {
-  final TextEditingController controllerForSearch = TextEditingController();
-  final TextEditingController textEditingController = TextEditingController();
 
   int? searchSelection = cTankLineSearch;
 
   final GlobalKey<SearchDropDownState> singleSearchKey = GlobalKey();
 
-  ValueItem? selectedSingleItem;
+  ValueItem selectedSingleItem = const ValueItem(label: cTankLineLabelNotYetAssigned, value: cTankLineValueNotYetAssigned);
 
   void addItem(ValueItem item) {
   }
 
   void updateSelectedItem(ValueItem? newSelectedItem) {
-    selectedSingleItem = newSelectedItem;
+    selectedSingleItem = newSelectedItem!;
     conductSearch(cNotify);
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -54,7 +55,6 @@ class _SearchViewState extends State<SearchView> {
 
   @override
   void dispose() {
-    controllerForSearch.dispose();
     super.dispose();
   }
 
@@ -84,6 +84,11 @@ class _SearchViewState extends State<SearchView> {
     TanksViewModel tankViewModel =
     Provider.of<TanksViewModel>(context, listen: false);
 
+    TanksLineViewModel tanksLineViewModel =
+    Provider.of<TanksLineViewModel>(context, listen: false);
+
+    ValueItem theTankLineValueItem = tanksLineViewModel.returnTankLineFromDocId((tank.tankLineDocId));
+
     int? birthDate = tank.getBirthDate();
     int? breedingDate = searchModel.computeBreedingDate(birthDate);
 
@@ -98,6 +103,7 @@ class _SearchViewState extends State<SearchView> {
               incomingRackFk: tank.rackFk,
               incomingTankPosition: tank.absolutePosition,
               tankViewModelNoContext: tankViewModel,
+              tankLineViewModelNoContext: tanksLineViewModel,
             ),
           ),
         );
@@ -111,7 +117,7 @@ class _SearchViewState extends State<SearchView> {
               child: Row(
                 children: [
                   Text(
-                    tank.tankLine!,
+                    theTankLineValueItem.label, //BUGfixed want label, not value
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
@@ -170,8 +176,9 @@ class _SearchViewState extends State<SearchView> {
     SearchViewModel searchModel =
         Provider.of<SearchViewModel>(context, listen: false);
     // "" will have a value for tankline and dob searches
+    // we search for the tanklineFk not the label (actual tankline)
     searchModel.prepareSearchTankList(
-        selectedSingleItem?.label ?? "",
+        selectedSingleItem.value,
         searchSelection,
         withNotify); //prepareSearchTankList will call notifylisteners
   }
@@ -206,15 +213,17 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget simpleSearchDropdown(SearchViewModel searchModel) {
+
+    SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(dropdownWidth: 350, hint:"Select a tank line");
+
     return SearchDropDown(
-      key: singleSearchKey,
-      listItems: (searchSelection == cTankLineSearch) ? searchModel.returnTankLinesAsValueItems():returnEmptyTankLineValueList(),
+      listItems: (searchSelection == cTankLineSearch) ?  searchModel.returnTankLinesAsValueItems(): returnEmptyTankLineValueList(),
       onAddItem: addItem,
       addMode: false,
       deleteMode: false,
       updateSelectedItem: updateSelectedItem,
       selectedItem: null,
-      hint: "Select a tank line",
+      searchBarSettings: searchBarSettings,
     );
   }
 
@@ -262,23 +271,22 @@ class _SearchViewState extends State<SearchView> {
           ),
           Row(
             children: [
-              Expanded(
-                flex: 2,
+              // BUGfixed fixed layout
+              Padding(
+                padding: const EdgeInsets.only(left: 75.0),
                 child: dropDown(searchModel),
               ),
-              expandedFlex1(),
-              expandedFlex1(),
             ],
           ),
           buildOuterLabelHeadlineSmall(context, "Results"),
           SizedBox(
             height: MediaQuery.of(context).size.height *
-                (((searchSelection == cTankLineSearch) &&
-                        (selectedSingleItem != null))
+                ((searchSelection == cTankLineSearch)
                     ? 5
                     : 7) /
                 12,
             width: MediaQuery.of(context).size.width * 5 / 6,
+
             child: Center(
               child: ListView.builder(
                 itemCount: searchModel.tankListSearched.length,
@@ -288,19 +296,20 @@ class _SearchViewState extends State<SearchView> {
                 },
               ),
             ),
+
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ((searchSelection == cTankLineSearch) &&
-                      (selectedSingleItem != null))
+              //BUGfixed print the graph only if there are fish selected
+              ((searchSelection == cTankLineSearch) && (searchModel.getTotalNumberOfFish > cNoFishSelected))
                   ? RichText(
                 text: TextSpan(
                   style: Theme.of(context).textTheme.bodyLarge,
                   children: <TextSpan>[
                     const TextSpan(text: 'The average age of the', style: TextStyle(fontWeight: FontWeight.normal)),
                     TextSpan(text: ' ${searchModel.getTotalNumberOfFish} fish ', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(text: 'in tankline ${selectedSingleItem?.label ?? ""} is', style: const TextStyle(fontWeight: FontWeight.normal)),
+                    TextSpan(text: 'in tankline ${selectedSingleItem.label} is', style: const TextStyle(fontWeight: FontWeight.normal)),
                     TextSpan(text: ' ${(returnTimeNow() - searchModel.getAverageAgeOfFish.toInt()) ~/ kDayInMilliseconds} days', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
@@ -308,7 +317,8 @@ class _SearchViewState extends State<SearchView> {
             ],
           ),
         const SizedBox(height:30),
-          ((searchSelection == cTankLineSearch) && (selectedSingleItem != null))
+          // BUGfixed print the graph only if there are fish selected
+          ((searchSelection == cTankLineSearch) && (searchModel.getTotalNumberOfFish > cNoFishSelected))
               ? Expanded(
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 5 / 6,

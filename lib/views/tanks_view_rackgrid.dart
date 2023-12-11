@@ -8,8 +8,8 @@ import '../models/tank_model.dart';
 
 class RackGrid extends StatelessWidget {
   RackGrid({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<Row> gridDown = <Row>[];
 
@@ -37,7 +37,7 @@ class RackGrid extends StatelessWidget {
         absolutePosition: absolutePosition,
         height: height,
         width: width,
-        tankLine: tank?.tankLine,
+        tankLine: tank?.tankLineDocId,
         dateOfBirth: tank?.getBirthDate(),
         screenPositive: tank?.getScreenPositive(),
         numberOfFish: tank?.getNumberOfFish(),

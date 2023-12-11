@@ -3,7 +3,6 @@ import '../view_models/session_key.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import '../views/consts.dart';
-import '../views/utility.dart';
 import '../models/rack_model.dart';
 
 import 'package:flutter/foundation.dart'
@@ -28,12 +27,11 @@ class FacilityViewModel with ChangeNotifier {
 
   Future<void> loadUpSavedFacility() async {
     // when we need to test with no saved facility
+    // 5 of 5
     // remove for real-world
-    //_manageSession.deleteSecureStorage(cFacilityNameKey); <- must be commented out for real-world
+    //_manageSession.deleteSecureStorage(cFacilityNameKey); //<- must be commented out for real-world
 
     selectedFacility = await _manageSession.retrieveFromSecureStorage(cFacilityNameKey);
-
-    myPrint("the saved facility is $selectedFacility");
   }
 
   FacilityViewModel(this._manageSession) {

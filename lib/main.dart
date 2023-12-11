@@ -49,10 +49,20 @@ void main() async {
   });
 }
 
+// another option for sending messages between providers is to have a class like managesession
+// and pass it to each provider. each provider registers itself
+// we have to wait until the user logins and then send a message to the common class
+// that we are ready to accept messages from each ChangeNotifierProvider
+// ChangeNotifierProvider.startAcceptingMessages();
+
+// this class then calls each ChangeNotifierProvider letting it know that the app has been logged in
+// and stuff can be initialized.
+// it initializes TanksLineViewModel and sends a message to TanksViewModel that messages can be received
+// TanksLineViewModel
 class MyApp extends StatelessWidget {
   final ManageSession manageSession;
 
-  const MyApp({required this.manageSession, Key? key}) : super(key: key);
+  const MyApp({required this.manageSession, super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'package:aquarius/view_models/tanklines_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/facilities_viewmodel.dart';
@@ -18,7 +19,7 @@ class TankCell extends StatefulWidget {
   final int? generation;
 
   const TankCell({
-    Key? key,
+    super.key,
     this.absolutePosition =
         0, // index starts at 1, so 0 means it’s not yet assigned, which is never the case
     this.height = 0,
@@ -29,7 +30,7 @@ class TankCell extends StatefulWidget {
     this.numberOfFish,
     this.fatTankPosition,
     this.generation,
-  }) : super(key: key);
+  });
   @override
   State<TankCell> createState() => _TankCellState();
 }
@@ -147,6 +148,8 @@ class _TankCellState extends State<TankCell> {
   Widget build(BuildContext context) {
     TanksViewModel tankModel = Provider.of<TanksViewModel>(context);
 
+    TanksLineViewModel tanksLineViewModel = Provider.of<TanksLineViewModel>(context, listen: false);
+
     int rackID = tankModel.whichRackCellIsSelected();
 
     // this can return a physical tank or a virtual tank
@@ -259,10 +262,10 @@ class _TankCellState extends State<TankCell> {
                     // we need a compound widget that draws a portion of the tank line
                     // and the icon; i just noticed that the fat icon takes up the cell
                     : tankModel.isThisTankVirtual(widget.absolutePosition + 1)
-                        ? returnTankWithOverlaidText(tankModel, widget.absolutePosition,"assets/tank_fat_left.png")
+                        ? returnTankWithOverlaidText(tankModel, tanksLineViewModel, widget.absolutePosition,"assets/tank_fat_left.png")
                         : tankModel.isThisTankVirtual(widget.absolutePosition)
                             ? Image.asset("assets/tank_fat_right.png")
-                            : returnTankWithOverlaidText(tankModel, widget.absolutePosition,"assets/tank_thin.png"),
+                            : returnTankWithOverlaidText(tankModel, tanksLineViewModel, widget.absolutePosition,"assets/tank_thin.png"),
           ),
         );
       },
@@ -288,53 +291,6 @@ class _TankCellState extends State<TankCell> {
               Provider.of<TanksViewModel>(context, listen: false);
 
           tankModel.parkedADraggedTank(parkedTank,widget.absolutePosition);
-/*
-          // if this destination widget is a virtual tank, make the swap with the prior position numerically
-          int thisPosition = widget.absolutePosition;
-          if (tankModel.isThisTankVirtual(thisPosition)) {
-            thisPosition = widget.absolutePosition - 1;
-          }
-
-          // this will be physical
-          int tankID = tankModel.tankIdWithThisAbsolutePositionOnlyPhysical(
-              thisPosition); // this represents the new, not parked tank
-          if (tankID == kEmptyTankIndex) {
-
-            // there is no tank at this position
-            // the user dragged over an empty tank
-            // our parked tank needs two new pieces of info
-            // a new abs position and the rack_fk
-            // do we have a copy of the parked tank or the actual parked tank?
-
-            // business logic 10
-
-            assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
-            // the tank has not been saved with this new info
-            // this will be physical
-            tankModel.saveExistingTank(thisPosition);
-          } else {
-            // here we are swapping tank positions
-            // this will be physical
-
-            // business logic 11, everything below should be distilled down to one method in tankModel
-
-            Tank? destinationTank = tankModel
-                .returnPhysicalTankWithThisAbsolutePosition(thisPosition);
-
-            // BUG if this tank is fat, then its fat position needs a special value, perhaps 0, so it doesn’t select anything
-            parkRackedTank(destinationTank);
-
-            // BUG if this tank is fat, then its fat position needs to be updated
-            assignParkedTankItsNewHome(parkedTank, thisPosition, tankModel);
-            // this will be physical
-            tankModel.saveExistingTank(thisPosition);
-            // this will be physical
-            tankModel.saveExistingTank(cParkedAbsolutePosition);
-          }
-          // below we are passing a physical tank position
-          // so selectThisTankCell should never come to the virtual tank code
-
-          tankModel.selectThisTankCellConvertsVirtual(thisPosition,cNotify);*/
         });
       },
     );

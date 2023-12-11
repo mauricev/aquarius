@@ -37,7 +37,7 @@ class TanksViewModel with ChangeNotifier {
       String facilityFk,
       String rackFk,
       int absolutePosition,
-      String? tankLine,
+      String tankLine,
       int birthDate,
       bool? screenPositive,
       int? numberOfFish,
@@ -48,7 +48,7 @@ class TanksViewModel with ChangeNotifier {
         facilityFk: facilityFk,
         rackFk: rackFk,
         absolutePosition: absolutePosition,
-        tankLine: tankLine,
+        tankLineDocId: tankLine,
         birthDate: birthDate,
         screenPositive: screenPositive,
         numberOfFish: numberOfFish,
@@ -74,7 +74,7 @@ class TanksViewModel with ChangeNotifier {
             ? "0"
             : rackDocumentid, // saved from when we switch racks; we always get it from the database
         absolutePosition: absolutePosition,
-        tankLine: tankLine,
+        tankLineDocId: tankLine,
         birthDate: birthDate,
         screenPositive: screenPositive,
         numberOfFish: numberOfFish,
@@ -111,8 +111,9 @@ class TanksViewModel with ChangeNotifier {
    */
   void addNewEmptyTank(int absolutePosition, int? fatTankPosition) {
     // BUGfixed removed 2 year offset per Jaslin’s request
+    // BUGfixed, was passing "" instead of cTankLineValueNotYetAssigned
     addNewTank(
-        absolutePosition, fatTankPosition, "", returnTimeNow(), 1, 1, true);
+        absolutePosition, fatTankPosition, cTankLineValueNotYetAssigned, returnTimeNow(), 1, 1, true);
   }
 
   // problem creating tank from the above is that it is saving the rack and we a dedicated function for this
@@ -135,21 +136,7 @@ class TanksViewModel with ChangeNotifier {
         manageSession: _manageSession);
   }
 
-  /* Future<models.DocumentList> returnAssociatedTankList(
-      String facilityId, String rackId) async {
-    List<String>? tankQuery = [
-      Query.equal("facility_fk", facilityId),
-      Query.equal("rack_fk", [
-        rackId,
-        cParkedRackFkAddress
-      ]), // potential solution make this an or search and just pass in this or 0, so get both
-      Query.limit(
-          5000), // BUG fixed, internal default appwrite limit is 25 items returned
-    ];
-    return await _manageSession.queryDocument(cTankCollection, tankQuery);
-  }*/
-
-  // adds the ability to find parkedtanks which have no associated facility
+  // adds the ability to find parkedtanks which no longer have an associated facility
   Future<models.DocumentList> returnAssociatedTankList(
       String facilityId, String rackId) async {
     List<String>? tankQuery = [
@@ -176,7 +163,7 @@ class TanksViewModel with ChangeNotifier {
           ? "0"
           : rackDocumentid, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
       'absolute_position': absolutePosition,
-      'tank_line': theTank?.tankLine,
+      'tank_line': theTank?.tankLineDocId,
       'date_of_birth': theTank?.getBirthDate(),
       'screen_positive': theTank?.getScreenPositive(),
       'number_of_fish': theTank?.getNumberOfFish(),
@@ -206,28 +193,50 @@ class TanksViewModel with ChangeNotifier {
       await _manageSession.updateDocument(
           theTankMap, cTankCollection, (theTank?.documentId)!);
     } catch (e) {
-      print("Error in saveExistingTank: $e");
-      rethrow;
+      rethrow; // we rethrow so caller can put up a dialog
     }
   }
 
-  void euthanizeTank(int absolutePosition) async {
+  Future<String> saveEuthanizedTank(Tank? tankToSave, String tankLine) async {
+    Map<String, dynamic> theTankMap = {
+      'facility_fk': tankToSave?.facilityFk,
+      'rack_fk': tankToSave?.rackFk,
+      'absolute_position': tankToSave?.absolutePosition,
+      //BUGfixed saves the actual tankline (in case it had been deleted
+      'tank_line': tankLine,
+      'date_of_birth': tankToSave?.getBirthDate(),
+      'screen_positive': tankToSave?.getScreenPositive(),
+      'number_of_fish': tankToSave?.getNumberOfFish(),
+      'fat_tank_position': tankToSave?.fatTankPosition,
+      'generation': tankToSave?.generation,
+    };
+    models.Document theTankDocument = await _manageSession.createDocument(theTankMap, cEuthanizedTankCollection);
+    return theTankDocument.$id;
+  }
+
+  void euthanizeTank(String tankLine, int absolutePosition) async {
     Tank? theTank =
         returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
+    // first store the tank’s document it for deletion at the end
+    String? documentId = theTank?.documentId;
+
+    String expiredTankFk = await saveEuthanizedTank(theTank, tankLine);
+    await theTank!.notes.euthanizeNotes(expiredTankFk);
+
+    // we need to create a document in the euthanizedtank_collection
+    // and copy the tank to it.
+    // we also need to update the notes of the to be deleted tank with the document id of the expired tank
+    // but a problem; what if the document id of a tank happens to match with the document id of an expired tank
+    // the tank and its expired partner will share the note.
 
     int tankIndex =
         tankIdWithThisAbsolutePositionOnlyPhysical(absolutePosition);
     deleteTank(tankIndex);
 
-    await _manageSession.deleteDocument(
-        cTankCollection,
-        (theTank
-            ?.documentId)!); // await to ensure notifylisteners occurs after deletetank
+    await _manageSession.deleteDocument(cTankCollection, documentId!); // await to ensure notifylisteners occurs after deletetank
 
     selectThisTankCellConvertsVirtual(kEmptyTankIndex,
         cNotify); // the currently selected tank has been deleted
-    // what happens when deleting a parked tank. there simply is no longer a parked tank??
-    // notifyListeners();  called above
   }
 
   Future<void> loadTanksForThisRack(
@@ -298,7 +307,7 @@ class TanksViewModel with ChangeNotifier {
   void copyTank() {
     Tank? currentTank = returnCurrentPhysicalTank();
     if (currentTank != null) {
-      _tankTemplate.tankLine = currentTank.tankLine;
+      _tankTemplate.tankLineDocId = currentTank.tankLineDocId;
       _tankTemplate.birthDate = currentTank.birthDate;
       _tankTemplate.generation = currentTank.generation;
       _tankTemplate.numberOfFish = currentTank.numberOfFish;
@@ -313,7 +322,7 @@ class TanksViewModel with ChangeNotifier {
       addNewTank(
           absolutePosition,
           fatTankPosition,
-          _tankTemplate.tankLine!,
+          _tankTemplate.tankLineDocId,
           _tankTemplate.birthDate!,
           _tankTemplate.numberOfFish!,
           _tankTemplate.generation!,

@@ -136,7 +136,7 @@ class ManageSession {
       );
     } catch (e) {
       myPrint("Error updating document: $e");
-      rethrow;
+      rethrow;  // we rethrow so the caller can put up a dialog
     }
   }
 

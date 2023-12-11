@@ -1,25 +1,29 @@
 const int kGridHSize = 650;
 const int kGridVSize = 500;
 const String kProgramName = 'Aquarius';
+const String kVersion = "2.5.0";
 
 const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";
 
 // this will change for local, real-world output
-// 1 of 3
-const String kIPAddress = 'http://192.168.1.91/v1';
-//const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
+// 1 of 5
+//const String kIPAddress = 'http://192.168.1.91/v1';
+const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
 
 //local
-// 2 of 3
-const String kProjectId = '6477fda3e6695f938f0d';
+// 2 of 5
+//const String kProjectId = '6477fda3e6695f938f0d';
 
 //real-world
-//const String kProjectId = '648fc20504d0ed7a089d';
+const String kProjectId = '648fc20504d0ed7a089d';
 
 // set to true or false accordingly
-// 3 of 3
-const kRunningLocal = true;
+// 3 of 5
+const kRunningLocal = false;
+
+// 4 of 5, zebra printing
+// 5 of 5, loadUpSavedFacility
 
 const String kDatabaseId = '63eefc50e6d7b0cb4c4e';
 // we don’t use this; the user selects the facility by name in the dropdown
@@ -31,6 +35,7 @@ const String cRackCollection = '63f97b76c200d9237cea';
 const String cTankCollection = '6408223c577dec6908e7';
 const String cNotesCollection = '64239dc4f03b6125e61d';
 const String cTankLinesCollection = '6563c50e67141c771cc2';
+const String cEuthanizedTankCollection = '656f9013b742c0becbd7';
 
 const double kFullWidth = 200;
 const double kHalfWidth  = 100;
@@ -79,3 +84,7 @@ const bool cTankLineToBeCreated = true;
 const bool cTankLineDialogCancelled = false;
 const bool cTankLineDialogOKed = true;
 enum TankLineStatusEnum { eTankLineBlank, eTankLineInUse, eTankLineReadyToEdit }
+
+const String cTankLineValueNotYetAssigned = "not yet assigned"; // value is document id
+const String cTankLineLabelNotYetAssigned = ""; // label actual tank line text
+const int cNoFishSelected = 0;

@@ -8,8 +8,8 @@ import '../views/consts.dart';
 
 class FacilitiesView extends StatefulWidget {
   const FacilitiesView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FacilitiesView> createState() =>

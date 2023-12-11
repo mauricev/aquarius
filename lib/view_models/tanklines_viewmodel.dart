@@ -4,6 +4,7 @@ import '../view_models/session_key.dart';
 import 'package:appwrite/models.dart' as models;
 import '../views/consts.dart';
 import '../models/tankline_model.dart';
+import 'package:simple_search_dropdown/simple_search_dropdown.dart';
 
 class TanksLineViewModel with ChangeNotifier {
   final ManageSession _manageSession;
@@ -11,13 +12,19 @@ class TanksLineViewModel with ChangeNotifier {
 
   TanksLineViewModel(this._manageSession);
 
+  void callNotifyListeners() {
+    notifyListeners();
+  }
+
   void addTankLineFromDatabase(
       String documentId,
       String tankline) {
     TankLine aTankLine = TankLine(
         documentId: documentId,
         tankline: tankline);
+
     tankLinesList.add(aTankLine);
+
   }
 
   void sortTankLines() {
@@ -27,27 +34,24 @@ class TanksLineViewModel with ChangeNotifier {
   Future<void> saveTankLine(String tankLineToSave, index) async {
 
     Map<String, dynamic> theTankLineMap = {
-      'tankline': tankLineToSave,
+      'tank_line': tankLineToSave,
     };
 
     if (index == cNewTankline) {
       // after saving, we read in the document id and record it in the tankline object so we can know which document it is for future editing
-      _manageSession.createDocument(theTankLineMap, cTankLinesCollection).then((value) {
+      models.Document theTankLineDocument = await _manageSession.createDocument(theTankLineMap, cTankLinesCollection);
 
-        models.Document theTankLineDocument = value;
-        print("addTankLineFromDatabase");
-        addTankLineFromDatabase(theTankLineDocument.$id,tankLineToSave);
-        sortTankLines();
-      });
+      addTankLineFromDatabase(theTankLineDocument.$id,tankLineToSave);
+      sortTankLines();
     } else {
 
       //BUGfixed, was passing tankline and not document id
-      _manageSession.updateDocument(
+      await _manageSession.updateDocument(
           theTankLineMap, cTankLinesCollection, tankLinesList[index].documentId!);
 
-      //BUGfixed, we never update the list
+      //BUGfixed, we weren’t updating the list itself
       tankLinesList[index].tankline = tankLineToSave;
-      // do not sort because if the edited tankline ends up in a different position, it will appear to disappear fron the list and confuse the user
+      // do not sort because if the edited tankline ends up in a different position, it will appear to disappear from the list and confuse the user
     }
   }
 
@@ -65,6 +69,18 @@ class TanksLineViewModel with ChangeNotifier {
       // we are testing against the embedded the tankline string inside the tankline class here
       return tankLinesList.any((tankLine) => tankLine.tankline.toLowerCase() == editedTankLine.toLowerCase());
     }
+  }
+
+  // new tanks will have "" as tankLineFk
+  ValueItem returnTankLineFromDocId(String tankLineFk) {
+    String? matchingTankLine = "";
+    for (TankLine tankLine in tankLinesList) {
+      if (tankLine.documentId?.contains(tankLineFk) == true) {
+        matchingTankLine = tankLine.tankline;
+        break;
+      }
+    }
+    return ValueItem(label: matchingTankLine!, value: tankLineFk);
   }
 
   void clearTankLines() {
@@ -87,8 +103,22 @@ class TanksLineViewModel with ChangeNotifier {
     for (int theIndex = 0; theIndex < theTankLinesList.total; theIndex++) {
       models.Document theTankLine = theTankLinesList.documents[theIndex];
       addTankLineFromDatabase(theTankLine
-          .$id, theTankLine.data['tankline']);
+          .$id, theTankLine.data['tank_line']);
     }
     sortTankLines();
   }
+
+  List<ValueItem> convertTankLinesToValueItems() {
+    List<ValueItem> tankLineListAsValueItemList = <ValueItem>[];
+
+    // new tanks get assigned this value
+    // problem is that we do have a real tank line with this value: removed it
+    tankLineListAsValueItemList.add(const ValueItem(label: cTankLineLabelNotYetAssigned, value: ""));
+
+    for (int theIndex = 0; theIndex < tankLinesList.length; theIndex++) {
+      tankLineListAsValueItemList.add(ValueItem(label: tankLinesList[theIndex].tankline, value: tankLinesList[theIndex].documentId));
+    }
+    return tankLineListAsValueItemList;
+  }
+
 }

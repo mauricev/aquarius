@@ -8,7 +8,7 @@ class Tank {
   final String facilityFk;
   String rackFk;
   int absolutePosition;
-  String? tankLine;
+  String tankLineDocId;
   int? birthDate;
   bool? screenPositive;
   int? numberOfFish;
@@ -22,7 +22,7 @@ class Tank {
     required this.facilityFk,
     required this.rackFk,
     required this.absolutePosition,
-    this.tankLine,
+    this.tankLineDocId = cTankLineLabelNotYetAssigned,
     int? birthDate,
     this.screenPositive,
     this.numberOfFish,
@@ -52,9 +52,7 @@ class Tank {
     rackFk = rackIdentifier;
     // fat tanks get a new virtual partner
     // we need to know if fatTankPosition has a valid value when it’s a parked tank
-    myPrint("in assignTankNewLocation");
     if (fatTankPosition != null) {
-      myPrint("in assignTankNewLocation fatTankPosition contains a value");
       fatTankPosition = position + 1;
     }
   }

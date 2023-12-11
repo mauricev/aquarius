@@ -89,13 +89,13 @@ class TankslineView extends StatelessWidget {
                   },
                 ),
                 TextButton(
-                  child: const Text('OK'),
                   onPressed: (tankLineStatus !=
                           TankLineStatusEnum.eTankLineReadyToEdit)
                       ? null
                       : () {
                           Navigator.of(context).pop(cTankLineDialogOKed);
                         },
+                  child: const Text('OK'),
                 ),
               ],
             );
@@ -109,8 +109,9 @@ class TankslineView extends StatelessWidget {
 
         tanksLineViewModel
             .saveTankLine(controllerForTankLine.text, index)
-            .then((value) {})
-            .catchError((error) {
+            .then((value) {
+          tanksLineViewModel.callNotifyListeners();
+        }).catchError((error) {
           _showErrorDialog(context, error);
         });
       }
@@ -130,14 +131,14 @@ class TankslineView extends StatelessWidget {
           const Size(200, 50),
         ),
       ),
-      child: Text("Create New Tankline…"),
+      child: const Text("Create New Tankline…"),
     );
   }
 
   Widget searchedItem(context, String tankLine, int index) {
     return GestureDetector(
       onTap: () {
-        //BUGfixed, had new tank constant
+        //BUGfixed, had the new tank constant
         editTankLine(context, cTankLineToBeEdited,
             tankLine: tankLine, index: index);
       },
@@ -174,15 +175,16 @@ class TankslineView extends StatelessWidget {
         children: [
           buildOuterLabelHeadlineSmall(context, "Tanklines (tap to edit)"),
           SizedBox(
-            height: MediaQuery.of(context).size.height * 7 / 12,
+            height: MediaQuery.of(context).size.height * 9 / 12,
             width: MediaQuery.of(context).size.width * 5 / 6,
-            child: ListView.builder(
-              itemCount: tanksLineViewModel.tankLinesList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return searchedItem(context,
-                    tanksLineViewModel.tankLinesList[index].tankline, index);
-              },
-            ),
+            child:
+                ListView.builder(
+                  itemCount: tanksLineViewModel.tankLinesList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return searchedItem(context,
+                        tanksLineViewModel.tankLinesList[index].tankline, index);
+                  },
+                ),
           ),
           buildOuterLabelHeadlineSmall(context, "Create Tanklines"),
           createNewTankLineBtn(context),

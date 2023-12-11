@@ -5,14 +5,18 @@ import 'package:appwrite/models.dart' as models;
 import 'package:appwrite/appwrite.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
+import '../view_models/tanklines_viewmodel.dart';
 
 class SearchViewModel with ChangeNotifier {
   final ManageSession
       _manageSession; // we need this because manage tanks, which in turn uses Notes, which needs the session variable to save to disk
   String facilityFk = "not yet set, search";
 
+  TanksLineViewModel? tanksLineViewModel;
+
   List<Tank> tankListFull = <Tank>[];
   List<Tank> tankListSearched = <Tank>[];
+
   Map<int,int> dobNumberOfFish = <int,int>{};
   int totalNumberOfFish = 0;
   double averageAgeOfFish = 0;
@@ -28,7 +32,7 @@ class SearchViewModel with ChangeNotifier {
       String facilityFk,
       String rackFk,
       int absolutePosition,
-      String? tankLine,
+      String tankLine,
       int birthDate,
       bool? screenPositive,
       int? numberOfFish,
@@ -39,7 +43,7 @@ class SearchViewModel with ChangeNotifier {
         facilityFk: facilityFk,
         rackFk: rackFk,
         absolutePosition: absolutePosition,
-        tankLine: tankLine,
+        tankLineDocId: tankLine,
         birthDate: birthDate,
         screenPositive: screenPositive,
         numberOfFish: numberOfFish,
@@ -61,11 +65,12 @@ class SearchViewModel with ChangeNotifier {
     dobNumberOfFish.clear();
   }
 
+  // parked tanks are not technically part of any facility, so they don’t show up in this search
   Future<models.DocumentList> returnAllTheTanks() async {
     List<String>? tankQuery = [
       Query.equal("facility_fk", facilityFk),
       Query.limit(
-          5000), // BUG fixed, internal default appwrite limit is 25 items returned
+          5000), // BUGfixed, internal default appwrite limit is 25 items returned
     ];
     return await _manageSession.queryDocument(cTankCollection, tankQuery);
   }
@@ -113,15 +118,23 @@ class SearchViewModel with ChangeNotifier {
     });
   }
 
-  // this code prepares the dropdown
+  // Prepare the dropdown
   List<ValueItem> returnTankLinesAsValueItems() {
-    List<ValueItem> selectableTankLineValueList = tankListFull
-        .where((obj) => obj.tankLine != null && obj.tankLine!.isNotEmpty)  // Filter out objects with null or empty names
-        .map((obj) => ValueItem(label: obj.tankLine!))  // Map to ValueItems
-        .toSet()  // Remove duplicates
-        .toList();  // Convert back to list
+    // we use a set to ensure duplicates don’t get added to the list.
+    Set<ValueItem> uniqueTankLines = {};
 
-    selectableTankLineValueList.sort((a, b) => a.label.compareTo(b.label)); // ValueItem contains a string label, which is the tankline
+    for (Tank tank in tankListFull) {
+      if (tank.tankLineDocId.isNotEmpty) {
+        ValueItem? tankLine = tanksLineViewModel?.returnTankLineFromDocId(tank.tankLineDocId);
+        if (tankLine != null) {
+          uniqueTankLines.add(tankLine);
+        }
+      }
+    }
+    List<ValueItem> selectableTankLineValueList = uniqueTankLines.toList();
+    // BUGfixed wasn’t sorting according to lower case
+    selectableTankLineValueList.sort((a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()));
+
     return selectableTankLineValueList;
   }
 
@@ -168,11 +181,11 @@ class SearchViewModel with ChangeNotifier {
       }
 
       averageAgeOfFish = birthDateTally / totalNumberOfFish;
-
     }
   }
 
-  void prepareSearchTankList(String tankLineTextToSearchFor, int? searchType, bool withNotify) {
+  // tankLineTextToSearchFor searches value (document id), not label (actual text)
+  void prepareSearchTankList(String tankLineDocumentIdToSearchFor, int? searchType, bool withNotify) {
 
     tankListSearched.clear();
 
@@ -182,17 +195,15 @@ class SearchViewModel with ChangeNotifier {
         tankListSearched.add(tankListFull[theIndex]);
       }
     } else {
-      if (tankLineTextToSearchFor != "") { // if tankline has yet to be assigned, we show nothing!
+      // just in case tankLineDocumentIdToSearchFor == cTankLineValueNotYetAssigned, we still do the search
+      //if (tankLineDocumentIdToSearchFor != cTankLineValueNotYetAssigned) {
         for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
-          if (tankListFull[theIndex].tankLine != null) {
             if (tankListFull[theIndex]
-                .tankLine!
-                .toLowerCase() == (tankLineTextToSearchFor.toLowerCase())) {
+                .tankLineDocId == tankLineDocumentIdToSearchFor) {
               tankListSearched.add(tankListFull[theIndex]);
             }
-          }
         }
-      }
+      //}
     }
 
     // both are sorted according to dob, but they contain different things. cTankLineSearch contains a specific tankline; the other contains them all
@@ -205,22 +216,13 @@ class SearchViewModel with ChangeNotifier {
     }
   }
 
-  // we exclude exact matches so the dropdown doesn’t automatically come down on the mere loading of the tank cell
-  // bug, we are searching only the tanks in this particular rack, not in all racks
-  Set<String> returnListOfTankLines(String excludeThisString) {
-    Set<String> tankLineList = {};
+  // we save tanksLineViewModelModel to prepare the dropdown
+  Future<void> buildInitialSearchList(TanksLineViewModel tanksLineViewModelParam) async {
 
-    for (int theIndex = 0; theIndex < tankListFull.length; theIndex++) {
-      String? tankLine = tankListFull[theIndex].tankLine;
-      if (tankLine != null && tankLine != excludeThisString) {
-        tankLineList.add(tankLine);
-      }
-    }
-    return tankLineList;
-  }
+    // we need access later on to the tanksLineViewModel to convert the tanklineFk’s to actual tanklines
+    tanksLineViewModel = tanksLineViewModelParam;
 
-  Future<void> buildInitialSearchList() async {
-    await prepareFullTankList(); // we do get the full tank list from the database and the database should always be up to date.
-    prepareSearchTankList("", cTankLineSearch,cNoNotify);
+    await prepareFullTankList(); // get the full tank list from the database and the database should always be up to date.
+    prepareSearchTankList(cTankLineValueNotYetAssigned, cTankLineSearch,cNoNotify);
   }
 }

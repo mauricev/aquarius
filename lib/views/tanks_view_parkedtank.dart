@@ -1,3 +1,4 @@
+import 'package:aquarius/view_models/tanklines_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/tanks_viewmodel.dart';
@@ -16,7 +17,7 @@ class ParkedTank extends StatelessWidget {
   final int? generation;
 
   const ParkedTank({
-    Key? key,
+    super.key,
     this.height = 0,
     this.width = 0,
     this.tankLine,
@@ -25,12 +26,15 @@ class ParkedTank extends StatelessWidget {
     this.numberOfFish,
     this.fatTankPosition,
     this.generation,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     TanksViewModel tankModel =
     Provider.of<TanksViewModel>(context, listen: false);
+
+    TanksLineViewModel tanksLineViewModel =
+    Provider.of<TanksLineViewModel>(context, listen: false);
 
     // we want these two functions below to always return a physical tank
     // because only a physical tank can live inside the parked tank
@@ -74,7 +78,7 @@ class ParkedTank extends StatelessWidget {
                 : Colors
                 .transparent, // this grid cell does not have a tank, but we need a third state here
           ),
-          child: tankModel.isThisTankPhysicalAndFat(cParkedAbsolutePosition) ? returnTankWithOverlaidText(tankModel, cParkedAbsolutePosition, "assets/tank_fat.png") : returnTankWithOverlaidText(tankModel, cParkedAbsolutePosition, "assets/tank_thin.png"),
+          child: tankModel.isThisTankPhysicalAndFat(cParkedAbsolutePosition) ? returnTankWithOverlaidText(tankModel, tanksLineViewModel, cParkedAbsolutePosition, "assets/tank_fat.png") : returnTankWithOverlaidText(tankModel, tanksLineViewModel, cParkedAbsolutePosition, "assets/tank_thin.png"),
         ),
         onTap: () {
           if (tankID != kEmptyTankIndex) {

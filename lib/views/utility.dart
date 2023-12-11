@@ -1,3 +1,4 @@
+import 'package:aquarius/view_models/tanklines_viewmodel.dart';
 import 'package:flutter/material.dart';
 import '../view_models/facilities_viewmodel.dart';
 import '../views/consts.dart';
@@ -5,23 +6,28 @@ import '../models/tank_model.dart';
 import '../view_models/tanks_viewmodel.dart';
 
 void myPrint(String printThis) {
-  print(printThis);
+  //print(printThis);
 }
 
-Stack returnTankWithOverlaidText(TanksViewModel tankModel, int tankPosition, String imagePath) {
+Stack returnTankWithOverlaidText(TanksViewModel tankModel, TanksLineViewModel tanksLineViewModel, int tankPosition, String imagePath) {
   const cMaxAbbreviatedLength = 5;
 
   Tank? tankItself = tankModel.returnPhysicalTankWithThisAbsolutePosition(tankPosition);
+
   int length = 0;
   String abbreviatedTankLine = "";
+
   if (tankItself != null) {
-    length = (tankItself.tankLine?.length) ?? 0;
+    // BUGfixed previous code was using tankLineDocId instead of actual tankline
+    String tankLine = tanksLineViewModel.returnTankLineFromDocId(tankItself.tankLineDocId).label;
+    length = tankLine.length;
     if (length < cMaxAbbreviatedLength) {
-      abbreviatedTankLine = (tankItself.tankLine)!.substring(0, length);
+      abbreviatedTankLine = tankLine.substring(0, length);
     } else {
-      abbreviatedTankLine = (tankItself.tankLine)!.substring(0, cMaxAbbreviatedLength);
+      abbreviatedTankLine = tankLine.substring(0, cMaxAbbreviatedLength);
     }
   }
+
   return Stack(alignment: Alignment.center,children: <Widget>[
     Image.asset(imagePath),
     Align(
