@@ -82,7 +82,6 @@ class _LoginViewState
                     .loginUser(controllerForLoginEmail.text,
                         controllerForPassword.text)
                     .then((sessionValue) {
-                  myPrint("calling homescreen route");
                   // we are done with the login screens, remove them from the navigation stack
                   // we can get it back by navigating to it again
                   //Navigator.pushReplacementNamed(context, '/homescreen');
@@ -182,12 +181,10 @@ class _LoginViewState
                                 .registerUser(controllerForEmail.text,
                                     controllerForNewPassword1.text)
                                 .then((registeredUserResult) {
-                              myPrint("returning from register user, $registeredUserResult");
                               model.setDoesUserWantToRegister(false);
                             }).catchError((onError) {
                               model.setDoesUserWantToRegister(true);
                               setState(() {
-                                myPrint("inside setstate 2");
                                 registerError = onError.toString();
                               });
                               // we can set a variable here to true to indicate there

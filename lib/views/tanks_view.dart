@@ -71,6 +71,7 @@ class TankViewState extends State<TankView> {
         .then((value) {
       widget.tankViewModelNoContext.callNotifyListeners();
     });
+
   }
 
   void _updateNumberOfFishController() {
@@ -97,8 +98,6 @@ class TankViewState extends State<TankView> {
   // selectThisRackByAbsolutePosition
 
   void _prepareRacksAndTanksForCaller() async {
-    /*TanksViewModel tankModel =
-        Provider.of<TanksViewModel>(context, listen: false);*/
 
     FacilityViewModel facilityModel =
         Provider.of<FacilityViewModel>(context, listen: false);
@@ -514,7 +513,8 @@ class TankViewState extends State<TankView> {
 
     ValueItem theTankLineValueItem = tanksLineViewModel
         .returnTankLineFromDocId((currentTank?.tankLineDocId)!);
-    String tankLineString = theTankLineValueItem.value;
+    //BUGFixed was using value and not label.
+    String tankLineString = theTankLineValueItem.label;
 
     String screenPositiveString = (currentTank?.getScreenPositive() ?? false)
         ? "screen positive"
@@ -549,7 +549,7 @@ class TankViewState extends State<TankView> {
 ^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
 ^XZ
 """;
-    final rep = ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   @override

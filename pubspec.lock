@@ -532,10 +532,10 @@ packages:
     dependency: "direct main"
     description:
       name: simple_search_dropdown
-      sha256: feba0fee3c56062b18eb6456af7939f85eff0b3466c865b42b2d1ca79909fa10
+      sha256: "621ee560bc9563cce9b794417df8e8a315589d7e42e769d46295bc625d331cb6"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "4.1.1"
   sky_engine:
     dependency: transitive
     description: flutter

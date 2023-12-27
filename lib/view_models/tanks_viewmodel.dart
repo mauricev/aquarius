@@ -209,6 +209,8 @@ class TanksViewModel with ChangeNotifier {
       'number_of_fish': tankToSave?.getNumberOfFish(),
       'fat_tank_position': tankToSave?.fatTankPosition,
       'generation': tankToSave?.generation,
+      'date_euthanized': returnTimeNow(), // record the time we euthanize the tank
+
     };
     models.Document theTankDocument = await _manageSession.createDocument(theTankMap, cEuthanizedTankCollection);
     return theTankDocument.$id;

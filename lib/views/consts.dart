@@ -1,15 +1,15 @@
 const int kGridHSize = 650;
 const int kGridVSize = 500;
 const String kProgramName = 'Aquarius';
-const String kVersion = "2.5.0";
+const String kVersion = "2.5.1";
 
 const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";
 
 // this will change for local, real-world output
 // 1 of 5
-//const String kIPAddress = 'http://192.168.1.91/v1';
-const String kIPAddress = 'https://aquarius-at-peredalab.org/v1';
+//const String kIPAddress = 'http://192.168.1.91:8080/v1';
+const String kIPAddress = 'https://aquarius-appwrite-at-peredalab.org/v1';
 
 //local
 // 2 of 5
@@ -23,7 +23,7 @@ const String kProjectId = '648fc20504d0ed7a089d';
 const kRunningLocal = false;
 
 // 4 of 5, zebra printing
-// 5 of 5, loadUpSavedFacility
+// 5 of 5, main (window code)
 
 const String kDatabaseId = '63eefc50e6d7b0cb4c4e';
 // we don’t use this; the user selects the facility by name in the dropdown

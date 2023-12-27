@@ -6,8 +6,11 @@ import '../views/consts.dart';
 import '../views/typography.dart';
 import 'package:flutter/services.dart';
 
-class TankslineView extends StatelessWidget {
-  const TankslineView({super.key});
+class TanksLineView extends StatelessWidget {
+
+  final ScrollController _scrollController = ScrollController();
+
+  TanksLineView({super.key});
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
@@ -107,8 +110,9 @@ class TankslineView extends StatelessWidget {
         TanksLineViewModel tanksLineViewModel =
             Provider.of<TanksLineViewModel>(context, listen: false);
 
+        // we compared a trim right version of the text above; we save it that way too.
         tanksLineViewModel
-            .saveTankLine(controllerForTankLine.text, index)
+            .saveTankLine(controllerForTankLine.text.trimRight(), index)
             .then((value) {
           tanksLineViewModel.callNotifyListeners();
         }).catchError((error) {
@@ -178,12 +182,18 @@ class TankslineView extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 9 / 12,
             width: MediaQuery.of(context).size.width * 5 / 6,
             child:
-                ListView.builder(
-                  itemCount: tanksLineViewModel.tankLinesList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return searchedItem(context,
-                        tanksLineViewModel.tankLinesList[index].tankline, index);
-                  },
+                Scrollbar(
+                  controller: _scrollController,
+                  thumbVisibility: true,
+                  thickness: 20,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: tanksLineViewModel.tankLinesList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return searchedItem(context,
+                          tanksLineViewModel.tankLinesList[index].tankline, index);
+                    },
+                  ),
                 ),
           ),
           buildOuterLabelHeadlineSmall(context, "Create Tanklines"),

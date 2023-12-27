@@ -56,6 +56,10 @@ class TanksLineViewModel with ChangeNotifier {
   }
 
   bool isThisTankLineInUse(String editedTankLine, index) {
+
+    // strip trailing space character and then do the comparison
+    editedTankLine = editedTankLine.trimRight();
+
     if (index != cNewTankline) {
       List<String> tankLinesTempList = <String>[];
       for (int theIndex = 0; theIndex < tankLinesList.length; theIndex++) {

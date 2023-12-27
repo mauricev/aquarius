@@ -11,6 +11,7 @@ import 'views/consts.dart';
 import 'package:flutter/services.dart';
 import 'view_models/tanklines_viewmodel.dart';
 
+// 5 of 6 remove for real-world web
 import 'package:window_manager/window_manager.dart';
 
 import 'package:flutter/foundation.dart'
@@ -18,7 +19,10 @@ import 'package:flutter/foundation.dart'
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   ManageSession manageSession = ManageSession();
+
+  // real-world 5 of 5, comment out for web
 
   if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS) {
@@ -47,6 +51,7 @@ void main() async {
       .then((_) {
     runApp(MyApp(manageSession: manageSession));
   });
+
 }
 
 // another option for sending messages between providers is to have a class like managesession

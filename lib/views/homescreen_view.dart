@@ -274,7 +274,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     tankLinesViewModel.buildTankLinesList().then((data) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const TankslineView()),
+        MaterialPageRoute(builder: (context) => TanksLineView()),
       );
     });
   }
