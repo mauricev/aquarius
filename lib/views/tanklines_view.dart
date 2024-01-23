@@ -57,7 +57,7 @@ class TanksLineView extends StatelessWidget {
                 children: <Widget>[
                   TextField(
                     autofocus: true,
-                    maxLength: 60,
+                    maxLength: cTankLineMaxLength,
                     maxLengthEnforcement: MaxLengthEnforcement.enforced,
                     style: Theme.of(context).textTheme.bodyMedium,
                     keyboardType: TextInputType.text,

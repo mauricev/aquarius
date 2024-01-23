@@ -216,15 +216,19 @@ class TanksViewModel with ChangeNotifier {
     return theTankDocument.$id;
   }
 
-  void euthanizeTank(String tankLine, int absolutePosition) async {
+  void deleteEuthanizeTank(String tankLine, int absolutePosition, String whichDeleteAction) async {
     Tank? theTank =
         returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
     // first store the tank’s document it for deletion at the end
     String? documentId = theTank?.documentId;
 
-    String expiredTankFk = await saveEuthanizedTank(theTank, tankLine);
-    await theTank!.notes.euthanizeNotes(expiredTankFk);
+    print("deleteEuthanizeTank, ${whichDeleteAction}");
 
+    if (whichDeleteAction == cEuthanizeTank) {
+      print("we are euthanizing");
+      String expiredTankFk = await saveEuthanizedTank(theTank, tankLine);
+      await theTank!.notes.euthanizeNotes(expiredTankFk);
+    }
     // we need to create a document in the euthanizedtank_collection
     // and copy the tank to it.
     // we also need to update the notes of the to be deleted tank with the document id of the expired tank

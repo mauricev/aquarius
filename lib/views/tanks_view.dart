@@ -71,7 +71,6 @@ class TankViewState extends State<TankView> {
         .then((value) {
       widget.tankViewModelNoContext.callNotifyListeners();
     });
-
   }
 
   void _updateNumberOfFishController() {
@@ -98,7 +97,6 @@ class TankViewState extends State<TankView> {
   // selectThisRackByAbsolutePosition
 
   void _prepareRacksAndTanksForCaller() async {
-
     FacilityViewModel facilityModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
@@ -198,8 +196,15 @@ class TankViewState extends State<TankView> {
     ValueItem selectedTank =
         tanksLineViewModel.returnTankLineFromDocId(currentTank.tankLineDocId);
 
-    SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(dropdownHeight: 34, dropdownWidth: 220,hintStyle: TextStyle(fontSize: 10), hint:"Select a tank line");
-    SimpleOverlaySettings overlayListSettings = const SimpleOverlaySettings(dialogHeight:300,selectedItemTextStyle: TextStyle(fontSize: 10,color: Colors.black),unselectedItemTextStyle:TextStyle(fontSize: 9,color: Colors.black45));
+    SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(
+        dropdownHeight: 34,
+        dropdownWidth: 220,
+        hintStyle: TextStyle(fontSize: 10),
+        hint: "Select a tank line");
+    SimpleOverlaySettings overlayListSettings = const SimpleOverlaySettings(
+        dialogHeight: 300,
+        selectedItemTextStyle: TextStyle(fontSize: 10, color: Colors.black),
+        unselectedItemTextStyle: TextStyle(fontSize: 9, color: Colors.black45));
 
     return SearchDropDown(
       key: searchDropDownKey,
@@ -208,7 +213,8 @@ class TankViewState extends State<TankView> {
       addMode: false,
       deleteMode: false,
       updateSelectedItem: updateSelectedItem,
-      selectedItem: selectedTank, // this doesn’t get reapplied when we change the selected tank, so we give it a unique key to force rebuilding
+      selectedItem:
+          selectedTank, // this doesn’t get reapplied when we change the selected tank, so we give it a unique key to force rebuilding
       searchBarSettings: searchBarSettings,
       overlayListSettings: overlayListSettings,
     );
@@ -344,7 +350,7 @@ class TankViewState extends State<TankView> {
           ),
           Container(
             padding: const EdgeInsets.only(
-              left: 20,
+              left: 10,
             ),
             width: (width == null) ? kStandardTextWidthDouble : width,
             child: (tanksStringsValue == TankStringsEnum.tankLine) &&
@@ -405,7 +411,8 @@ class TankViewState extends State<TankView> {
         context: context,
         initialDate: selectedDate,
         firstDate: DateTime(kStartingYear, kStartingMonth),
-        lastDate: DateTime(kEndingYear));
+        //BUGfixed, was DateTime(kEndingYear)
+        lastDate: DateTime.now());
     if (picked != null && picked != selectedDate) {
       try {
         setState(() {
@@ -461,7 +468,7 @@ class TankViewState extends State<TankView> {
             ? null
             : (newValue) async {
                 try {
-                    updateValue?.call(newValue ?? false);
+                  updateValue?.call(newValue ?? false);
                   await tankModel
                       .saveExistingTank(currentTank.absolutePosition);
                   // BUGfixed wasn’t telling listeners, despite updating state (now removed).
@@ -513,7 +520,7 @@ class TankViewState extends State<TankView> {
 
     ValueItem theTankLineValueItem = tanksLineViewModel
         .returnTankLineFromDocId((currentTank?.tankLineDocId)!);
-    //BUGFixed was using value and not label.
+    //BUGFixed was using value and not label. 2023_12_27
     String tankLineString = theTankLineValueItem.label;
 
     String screenPositiveString = (currentTank?.getScreenPositive() ?? false)
@@ -550,6 +557,70 @@ class TankViewState extends State<TankView> {
 ^XZ
 """;
     ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+  }
+
+  Future<Map<String, dynamic>> deleteTankDialog(BuildContext context) async {
+    String tankLineDeleteOption = "";
+
+    Map<String, dynamic>? dialogResult = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Euthanize/Delete Tank'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RadioListTile<String>(
+                    title: const Text('Euthanize Tank'),
+                    value: cEuthanizeTank,
+                    groupValue: tankLineDeleteOption,
+                    onChanged: (value) {
+                      setState(() {
+                        tankLineDeleteOption = value ?? cEuthanizeTank;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Delete Tank'),
+                    value: cDeleteTank,
+                    groupValue: tankLineDeleteOption,
+                    onChanged: (value) {
+                      setState(() {
+                        tankLineDeleteOption = value ?? cDeleteTank;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop({'confirm': false});
+                  },
+                ),
+                TextButton(
+                  onPressed: (tankLineDeleteOption != cEuthanizeTank) &&
+                          (tankLineDeleteOption != cDeleteTank)
+                      ? null
+                      : () {
+                          Navigator.of(context).pop({
+                            'confirm': true,
+                            'tankLineDeleteOption': tankLineDeleteOption
+                          });
+                        },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    return dialogResult ??
+        {'confirm': false, 'tankLineDeleteOption': tankLineDeleteOption};
   }
 
   @override
@@ -610,7 +681,7 @@ class TankViewState extends State<TankView> {
           Row(
             children: [
               buildInnerLabel(
-                  "Tank Line", null, tankModel, TankStringsEnum.tankLine, 300),
+                  "Tank Line", null, tankModel, TankStringsEnum.tankLine, 270),
               drawDateOfBirth(tankModel, currentTank, currentTank?.getBirthDate,
                   currentTank?.setBirthDate),
               buildCheckBox(
@@ -704,23 +775,23 @@ class TankViewState extends State<TankView> {
                     onPressed: (currentTank == null)
                         ? null
                         : () async {
-                            bool confirmed =
-                                await confirmActionSpecifiedInMessage(
-                                    context, 'Delete the selected tank?');
-                            if (confirmed) {
+                            Map<String, dynamic> deleteTankResult =
+                                await deleteTankDialog(context);
+                            if (deleteTankResult['confirm'] == true) {
+                                ValueItem tankLineValueItem = widget
+                                    .tankLineViewModelNoContext
+                                    .returnTankLineFromDocId(
+                                        currentTank.tankLineDocId);
 
-                              ValueItem tankLineValueItem = widget.tankLineViewModelNoContext.returnTankLineFromDocId(currentTank.tankLineDocId);
-
-                              tankModel
-                                  .euthanizeTank(tankLineValueItem.label, currentTank.absolutePosition);
-                              // BUGfixed is not selecting an empty tank
-                              widget.tankViewModelNoContext
-                                  .selectThisTankCellConvertsVirtual(
-                                      kEmptyTankIndex, cNotify);
-
-                            }
+                                tankModel.deleteEuthanizeTank(tankLineValueItem.label,
+                                    currentTank.absolutePosition, deleteTankResult['tankLineDeleteOption']);
+                                // BUGfixed is not selecting an empty tank
+                                widget.tankViewModelNoContext
+                                    .selectThisTankCellConvertsVirtual(
+                                        kEmptyTankIndex, cNotify);
+                              }
                           },
-                    child: const Text("Delete Tank")),
+                    child: const Text("Delete/Euthanize Tank")),
               ),
             ],
           ),

@@ -1,7 +1,7 @@
 const int kGridHSize = 650;
 const int kGridVSize = 500;
 const String kProgramName = 'Aquarius';
-const String kVersion = "2.5.1";
+const String kVersion = "2.6.0";
 
 const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";
@@ -20,6 +20,7 @@ const String kProjectId = '648fc20504d0ed7a089d';
 
 // set to true or false accordingly
 // 3 of 5
+//const kRunningLocal = true;
 const kRunningLocal = false;
 
 // 4 of 5, zebra printing
@@ -56,7 +57,6 @@ const int kEmptyTankIndex = -1;
 
 const int kStartingYear = 2021;
 const int kStartingMonth = 1;
-const int kEndingYear = 2024;
 
 //const int kStartingDOBOffset = 66000000000; // Calculated the default DOB by subtracting this value (a little over 2 years) from the current date.
 
@@ -85,6 +85,11 @@ const bool cTankLineDialogCancelled = false;
 const bool cTankLineDialogOKed = true;
 enum TankLineStatusEnum { eTankLineBlank, eTankLineInUse, eTankLineReadyToEdit }
 
+const String cEuthanizeTank = 'euthanize';
+const String cDeleteTank = 'delete';
+
 const String cTankLineValueNotYetAssigned = "not yet assigned"; // value is document id
 const String cTankLineLabelNotYetAssigned = ""; // label actual tank line text
+
+const int cTankLineMaxLength = 60;
 const int cNoFishSelected = 0;

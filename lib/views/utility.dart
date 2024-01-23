@@ -29,7 +29,12 @@ Stack returnTankWithOverlaidText(TanksViewModel tankModel, TanksLineViewModel ta
   }
 
   return Stack(alignment: Alignment.center,children: <Widget>[
-    Image.asset(imagePath),
+    ClipRRect(
+      clipBehavior: Clip.none,
+      child: Image.asset(imagePath,
+      filterQuality: FilterQuality.high,
+      ),
+    ),
     Align(
       alignment: Alignment.centerLeft,
       child: Padding(
