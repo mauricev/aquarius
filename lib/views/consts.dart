@@ -1,7 +1,7 @@
 const int kGridHSize = 650;
 const int kGridVSize = 500;
 const String kProgramName = 'Aquarius';
-const String kVersion = "2.6.0";
+const String kVersion = "2.7.0";
 
 const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";

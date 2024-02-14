@@ -16,7 +16,7 @@ import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
 
 // for local, comment out
-import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 class TankView extends StatefulWidget {
   final String? incomingRackFk;
@@ -556,7 +556,7 @@ class TankViewState extends State<TankView> {
 ^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
 ^XZ
 """;
-    ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    //ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   Future<Map<String, dynamic>> deleteTankDialog(BuildContext context) async {

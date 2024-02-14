@@ -24,7 +24,7 @@ void main() async {
 
   // real-world 5 of 5, comment out for web
 
-  if (defaultTargetPlatform == TargetPlatform.windows ||
+  /*if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS) {
 
     await windowManager.ensureInitialized();
@@ -36,14 +36,14 @@ void main() async {
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.normal, // BUG, had been TitleBarStyle.hidden, but this hides the draggable part of the window under Windows
+      titleBarStyle: TitleBarStyle.normal, // BUGfixed, had been TitleBarStyle.hidden, but this hides the draggable part of the window under Windows
     );
 
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
     });
-  }
+  }*/
 
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]

@@ -222,10 +222,7 @@ class TanksViewModel with ChangeNotifier {
     // first store the tank’s document it for deletion at the end
     String? documentId = theTank?.documentId;
 
-    print("deleteEuthanizeTank, ${whichDeleteAction}");
-
     if (whichDeleteAction == cEuthanizeTank) {
-      print("we are euthanizing");
       String expiredTankFk = await saveEuthanizedTank(theTank, tankLine);
       await theTank!.notes.euthanizeNotes(expiredTankFk);
     }
