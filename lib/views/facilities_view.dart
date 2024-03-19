@@ -49,6 +49,14 @@ class _FacilitiesController
     super.initState();
   }
 
+  // basic gist of the problem is that we have a facility loaded somehow and we are reading its values
+  // when opening new facility, we need to have a clear function that clears all values of the currently selected facility
+  // and then we can safely play with any values
+  // void clearCurrentFacilityForNewFacilityEdit()
+  // what happens when user cancels? we need to reload selected facility: no, only when clicking facility button
+  // plain facility button needs to load selectedfacility's values (since after clicking new facility, items will have been cleared
+  // what reads the facilitygrid layout in the rack's page
+
   @override
   void dispose() {
     // Dispose of the TextEditingController instances
@@ -251,7 +259,8 @@ class _FacilitiesController
                           padding: const EdgeInsets.only(left: kIndentWidth),
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.of(context).pop();
+                              Navigator.of(context).pop(); // BUGBroken, we have a problem selected facility is set, but model info is set to whatever
+                              // was set here; we need to re-read facility values
                             },
                             child: const Text("Cancel"),
                           ),
@@ -269,6 +278,7 @@ class _FacilitiesController
                               // for subsequent saves, we have the document_id and we use that to determine how this function saves
                               model.saveFacility().then((_) {
                                 Navigator.of(context).pop();
+                                // BUGBroken evaluate to decided just error or Appwrite extension
                               }).catchError((error) {
                                 myPrint(error.response);
                               });

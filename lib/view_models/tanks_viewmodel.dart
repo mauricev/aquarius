@@ -6,11 +6,14 @@ import 'facilities_viewmodel.dart';
 import '../views/consts.dart';
 import '../views/utility.dart';
 import '../models/tank_model.dart';
+import 'package:simple_search_dropdown/simple_search_dropdown.dart';
 
 class TanksViewModel with ChangeNotifier {
   final ManageSession _manageSession;
 
   List<Tank> tankList = <Tank>[];
+  List<ValueItem<dynamic>> genoTypeList =
+      <ValueItem<dynamic>>[]; // this is a list of different genotypes
 
   // we initialize this in the constructor
   late Tank _tankTemplate;
@@ -18,13 +21,13 @@ class TanksViewModel with ChangeNotifier {
 
   bool get isTemplateInPlay => _isTemplateInPlay;
 
-  int selectedRack = -2; // this is a rack cell, not a tank cell
+  int selectedRack = kNoRackSelected; // this is a rack cell, not a tank cell
   int selectedTankCell = kEmptyTankIndex;
   String rackDocumentid = "";
-  String facilityId =
+  String? facilityId =
       "not yet set, tank"; // we can set it to not yet set; that will tell us if we are not setting it
 
-  void setFacilityId(String incomingFacilityId) {
+  void setFacilityId(String? incomingFacilityId) {
     facilityId = incomingFacilityId;
   }
 
@@ -33,16 +36,20 @@ class TanksViewModel with ChangeNotifier {
   }
 
   void addTankFromDatabase(
-      String documentId,
-      String facilityFk,
-      String rackFk,
-      int absolutePosition,
-      String tankLine,
-      int birthDate,
-      bool? screenPositive,
-      int? numberOfFish,
-      int? fatTankPosition,
-      int? generation) {
+    String documentId,
+    String facilityFk,
+    String rackFk,
+    int absolutePosition,
+    String tankLine,
+    int birthDate,
+    bool? screenPositive,
+    int? numberOfFish,
+    int? fatTankPosition,
+    int? generation,
+    String? genotype,
+    String? parent1,
+    String? parent2,
+  ) {
     Tank aTank = Tank(
         documentId: documentId,
         facilityFk: facilityFk,
@@ -54,18 +61,25 @@ class TanksViewModel with ChangeNotifier {
         numberOfFish: numberOfFish,
         fatTankPosition: fatTankPosition,
         generation: generation,
+        genoType: genotype,
+        parent1: parent1,
+        parent2: parent2,
         manageSession: _manageSession);
     tankList.add(aTank);
   }
 
   void addNewTank(
-      int absolutePosition,
-      int? fatTankPosition,
-      String tankLine,
-      int birthDate,
-      int numberOfFish,
-      int generation,
-      bool screenPositive) async {
+    int absolutePosition,
+    int? fatTankPosition,
+    String tankLine,
+    int birthDate,
+    int numberOfFish,
+    int generation,
+    bool screenPositive,
+    String? genoType,
+    String? parent1,
+    String? parent2,
+  ) async {
     Tank aTank = Tank(
         documentId:
             null, // the tank entry is new, so it doesn’t have a document ID yet
@@ -81,6 +95,9 @@ class TanksViewModel with ChangeNotifier {
         fatTankPosition:
             fatTankPosition, // value will be decided based whether user has chosen a fat tank; we will need abs position of next tank
         generation: generation,
+        genoType: genoType,
+        parent1: parent1,
+        parent2: parent2,
         manageSession: _manageSession);
     tankList.add(aTank);
 
@@ -112,8 +129,8 @@ class TanksViewModel with ChangeNotifier {
   void addNewEmptyTank(int absolutePosition, int? fatTankPosition) {
     // BUGfixed removed 2 year offset per Jaslin’s request
     // BUGfixed, was passing "" instead of cTankLineValueNotYetAssigned
-    addNewTank(
-        absolutePosition, fatTankPosition, cTankLineValueNotYetAssigned, returnTimeNow(), 1, 1, true);
+    addNewTank(absolutePosition, fatTankPosition, cTankLineValueNotYetAssigned,
+        returnTimeNow(), 1, 1, true, null, null, null);
   }
 
   // problem creating tank from the above is that it is saving the rack and we a dedicated function for this
@@ -128,17 +145,76 @@ class TanksViewModel with ChangeNotifier {
     tankList.removeAt(index);
   }
 
+  Future<void> _buildGenoTypesList() async {
+    List<String>? genoTypeQuery = [
+      Query.notEqual("genotype", [""]) // empty string brings back all genotypes
+    ];
+
+    models.DocumentList? theGenoTypeList =
+        await _manageSession.queryDocument(cGenoTypeCollection, genoTypeQuery);
+
+    for (int theIndex = 0;
+        theIndex < theGenoTypeList.documents.length;
+        theIndex++) {
+      models.Document theGenoTypeDocument = theGenoTypeList.documents[theIndex];
+      ValueItem genoType = ValueItem(
+          label: theGenoTypeDocument.data['genotype'],
+          value: theGenoTypeDocument.data["\$id"]);
+      genoTypeList.add(genoType);
+    }
+  }
+
+  List<ValueItem<dynamic>> returnGenoTypes() {
+    return genoTypeList;
+  }
+
+  ValueItem? convertGenoTypeToValueItem(String? genoType) {
+    // the initial genotype is null, not empty string
+    if (genoType == null) return null;
+
+    for (int theIndex = 0; theIndex <= genoTypeList.length; theIndex++) {
+      if (genoTypeList[theIndex].value == genoType) {
+        return genoTypeList[theIndex];
+      }
+    }
+    return null;
+  }
+
   TanksViewModel(this._manageSession) {
     _tankTemplate = Tank(
         facilityFk: '0',
         rackFk: '',
         absolutePosition: 0,
         manageSession: _manageSession);
+    _buildGenoTypesList();
+  }
+
+  Future<Map<String, dynamic>?> findTankLocationInfoByID(
+      String tankDocId) async {
+    List<String>? tankQuery = [
+      Query.equal("\$id", tankDocId),
+    ];
+
+    models.DocumentList? theTankList =
+        await _manageSession.queryDocument(cTankCollection, tankQuery);
+
+    if (theTankList.documents.isEmpty) {
+      return null;
+    }
+    models.Document theTank = theTankList.documents[0];
+
+    Map<String, dynamic> theTankMap = {
+      'facility_fk': theTank.data['facility_fk'],
+      'rack_fk': theTank.data['rack_fk'],
+      'absolute_position': theTank.data['absolute_position'],
+    };
+
+    return theTankMap;
   }
 
   // adds the ability to find parkedtanks which no longer have an associated facility
   Future<models.DocumentList> returnAssociatedTankList(
-      String facilityId, String rackId) async {
+      String? facilityId, String rackId) async {
     List<String>? tankQuery = [
       Query.equal("facility_fk", [facilityId, cParkedTankFacility]),
       Query.equal("rack_fk", [
@@ -158,7 +234,9 @@ class TanksViewModel with ChangeNotifier {
     // here if we are saving a parked tank, set the facility id to ""
 
     Map<String, dynamic> theTankMap = {
-      'facility_fk': (absolutePosition == cParkedRackAbsPosition) ? cParkedTankFacility : facilityId,
+      'facility_fk': (absolutePosition == cParkedRackAbsPosition)
+          ? cParkedTankFacility
+          : facilityId,
       'rack_fk': (absolutePosition == cParkedRackAbsPosition)
           ? "0"
           : rackDocumentid, // it’s going to save the wrong rack; we special case code this, if abs pos is 2, we put zero here
@@ -169,7 +247,11 @@ class TanksViewModel with ChangeNotifier {
       'number_of_fish': theTank?.getNumberOfFish(),
       'fat_tank_position': theTank?.fatTankPosition,
       'generation': theTank?.generation,
+      'genotype': theTank?.genoType,
+      'parent1': theTank?.parent1,
+      'parent2': theTank?.parent2,
     };
+    print("prepareTankMap, ${theTank?.parent1} and ${theTank?.parent2}");
     return theTankMap;
   }
 
@@ -197,9 +279,17 @@ class TanksViewModel with ChangeNotifier {
     }
   }
 
-  Future<String> saveEuthanizedTank(Tank? tankToSave, String tankLine) async {
+  // BUGBroken no try catch block
+  Future<String> saveEuthanizedTank(
+      Tank? tankToSave,
+      String tankLine,
+      String? genoType,
+      String facilityName,
+      String? parent1,
+      String? parent2) async {
     Map<String, dynamic> theTankMap = {
-      'facility_fk': tankToSave?.facilityFk,
+      'facility_fk':
+          facilityName, //BUGFixed we save off the facility name in case the facility is ever deleted
       'rack_fk': tankToSave?.rackFk,
       'absolute_position': tankToSave?.absolutePosition,
       //BUGfixed saves the actual tankline (in case it had been deleted
@@ -209,21 +299,34 @@ class TanksViewModel with ChangeNotifier {
       'number_of_fish': tankToSave?.getNumberOfFish(),
       'fat_tank_position': tankToSave?.fatTankPosition,
       'generation': tankToSave?.generation,
-      'date_euthanized': returnTimeNow(), // record the time we euthanize the tank
-
+      'date_euthanized':
+          returnTimeNow(), // record the time we euthanize the tank
+      'genotype': genoType,
+      'parent1': parent1,
+      'parent2': parent2,
     };
-    models.Document theTankDocument = await _manageSession.createDocument(theTankMap, cEuthanizedTankCollection);
+    models.Document theTankDocument = await _manageSession.createDocument(
+        theTankMap, cEuthanizedTankCollection);
     return theTankDocument.$id;
   }
 
-  void deleteEuthanizeTank(String tankLine, int absolutePosition, String whichDeleteAction) async {
+  // BUGBroken no try catch block
+  void deleteEuthanizeTank(
+      String tankLine,
+      String? genoType,
+      String? parent1,
+      String? parent2,
+      String facilityName,
+      int absolutePosition,
+      String whichDeleteAction) async {
     Tank? theTank =
         returnPhysicalTankWithThisAbsolutePosition(absolutePosition);
     // first store the tank’s document it for deletion at the end
     String? documentId = theTank?.documentId;
 
     if (whichDeleteAction == cEuthanizeTank) {
-      String expiredTankFk = await saveEuthanizedTank(theTank, tankLine);
+      String expiredTankFk = await saveEuthanizedTank(
+          theTank, tankLine, genoType, facilityName, parent1, parent2);
       await theTank!.notes.euthanizeNotes(expiredTankFk);
     }
     // we need to create a document in the euthanizedtank_collection
@@ -236,7 +339,8 @@ class TanksViewModel with ChangeNotifier {
         tankIdWithThisAbsolutePositionOnlyPhysical(absolutePosition);
     deleteTank(tankIndex);
 
-    await _manageSession.deleteDocument(cTankCollection, documentId!); // await to ensure notifylisteners occurs after deletetank
+    await _manageSession.deleteDocument(cTankCollection,
+        documentId!); // await to ensure notifylisteners occurs after deletetank
 
     selectThisTankCellConvertsVirtual(kEmptyTankIndex,
         cNotify); // the currently selected tank has been deleted
@@ -269,7 +373,8 @@ class TanksViewModel with ChangeNotifier {
       addTankFromDatabase(
           theTank
               .$id, // this is the document ID that uniquely identifies this record
-          theTank.data['facility_fk'], // we were assigned the facilityId, but now we are reading it, so parked tanks preserve their id; any downside?
+          theTank.data[
+              'facility_fk'], // we were assigned the facilityId, but now we are reading it, so parked tanks preserve their id; any downside?
           theTank.data['rack_fk'],
           theTank.data['absolute_position'],
           theTank.data['tank_line'],
@@ -277,7 +382,10 @@ class TanksViewModel with ChangeNotifier {
           theTank.data['screen_positive'],
           theTank.data['number_of_fish'],
           theTank.data['fat_tank_position'],
-          theTank.data['generation']);
+          theTank.data['generation'],
+          theTank.data['genotype'],
+          theTank.data['parent1'],
+          theTank.data['parent2']);
     }
   }
 
@@ -315,6 +423,9 @@ class TanksViewModel with ChangeNotifier {
       _tankTemplate.generation = currentTank.generation;
       _tankTemplate.numberOfFish = currentTank.numberOfFish;
       _tankTemplate.screenPositive = currentTank.screenPositive;
+      _tankTemplate.genoType = currentTank.genoType;
+      _tankTemplate.parent1 = currentTank.parent1;
+      _tankTemplate.parent2 = currentTank.parent2;
       _isTemplateInPlay = true;
       notifyListeners();
     }
@@ -329,7 +440,10 @@ class TanksViewModel with ChangeNotifier {
           _tankTemplate.birthDate!,
           _tankTemplate.numberOfFish!,
           _tankTemplate.generation!,
-          _tankTemplate.screenPositive!);
+          _tankTemplate.screenPositive!,
+          _tankTemplate.genoType,
+          _tankTemplate.parent1,
+          _tankTemplate.parent2);
       _isTemplateInPlay = false;
     }
   }

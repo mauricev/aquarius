@@ -23,7 +23,6 @@ void main() async {
   ManageSession manageSession = ManageSession();
 
   // real-world 5 of 5, comment out for web
-
   /*if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS) {
 

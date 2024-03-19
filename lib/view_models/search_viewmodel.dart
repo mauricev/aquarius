@@ -10,7 +10,7 @@ import '../view_models/tanklines_viewmodel.dart';
 class SearchViewModel with ChangeNotifier {
   final ManageSession
       _manageSession; // we need this because manage tanks, which in turn uses Notes, which needs the session variable to save to disk
-  String facilityFk = "not yet set, search";
+  String? facilityFk = "not yet set, search";
 
   TanksLineViewModel? tanksLineViewModel;
 
@@ -23,13 +23,13 @@ class SearchViewModel with ChangeNotifier {
 
   SearchViewModel(this._manageSession);
 
-  void setFacilityId(String facilityFk) {
+  void setFacilityId(String? facilityFk) {
     this.facilityFk = facilityFk;
   }
 
   void addTankFromDatabase(
       String documentId,
-      String facilityFk,
+      String? facilityFk,
       String rackFk,
       int absolutePosition,
       String tankLine,

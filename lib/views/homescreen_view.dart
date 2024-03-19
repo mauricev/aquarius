@@ -13,6 +13,7 @@ import '../views/consts.dart';
 import '../views/login_view.dart';
 import '../view_models/tanks_viewmodel.dart';
 import '../views/tanklines_view.dart';
+import '../view_models/facilities_stream_controller.dart';
 
 class HomeScreenView extends StatefulWidget {
   const HomeScreenView({super.key});
@@ -31,7 +32,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     FacilityViewModel facilityViewModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
-    // this fetches the facility info; it’s async, but we don’t need to await it because we don”t use it here
+    // this fetches the facility info
     // I am passing the facility to itself. How does that make any sense?
     // getFacilityInfo will also be called when a new facility is being created.
     // so we call getFacilityInfo with an empty facility, and that new facility has not been selected
@@ -45,12 +46,12 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     SearchViewModel searchViewModel =
         Provider.of<SearchViewModel>(context, listen: false);
 
-    searchViewModel.setFacilityId(facilityViewModel.selectedFacility!);
+    searchViewModel.setFacilityId(facilityViewModel.selectedFacility);
 
     TanksViewModel tanksViewModel =
         Provider.of<TanksViewModel>(context, listen: false);
 
-    tanksViewModel.setFacilityId(facilityViewModel.selectedFacility!);
+    tanksViewModel.setFacilityId(facilityViewModel.selectedFacility);
   }
 
   Widget facilityDropDown(BuildContext context) {
@@ -62,79 +63,96 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       informViewModelsOfTheFacility(context);
     }
 
-    return FutureBuilder<List<Map<String, String>>>(
-      future: facilityViewModel.getFacilityNames2(),
-      builder: (BuildContext context,
-          AsyncSnapshot<List<Map<String, String>>> snapshot) {
-        if (snapshot.hasData) {
-          List<DropdownMenuItem<String>> dropdownItems = [];
+    // StreamBuilder is used to trigger rebuilds when we programmatically change the selected facility
+    // if a tank qr code is selected and it's in a facility different from the selected one, we change
+    // facilities programmatically
+    return StreamBuilder<String>(
+        stream: facilityStreamController.stream,
+        builder: (context, snapshot) {
+          return FutureBuilder<List<Map<String, String>>>(
+            future: facilityViewModel.getFacilityNames2(),
+            builder: (BuildContext context,
+                AsyncSnapshot<List<Map<String, String>>> snapshot) {
+              if (snapshot.hasData) {
+                List<DropdownMenuItem<String>> dropdownItems = [];
 
-          // now handles the situation if the saved facility doesn’t match anything in the list
-          bool isSelectedValueValid = false;
-          String? selectedValue =
-              facilityViewModel.selectedFacility;
+                // now handles the situation if the saved facility doesn’t match anything in the list
+                bool isSelectedValueValid = false;
+                String? selectedValue = facilityViewModel
+                    .selectedFacility; // this is where the current facility is stored
 
-          for (Map<String, String> item in snapshot.data!) {
-
-            if (selectedValue == item['facility_fk']) isSelectedValueValid = true;
-
-            dropdownItems.add(DropdownMenuItem<String>(
-              value: item['facility_fk'],
-              child: Text(item['facility_name'].toString()),
-            ));
-          }
-
-          return DropdownButton<String>(
-            value: (isSelectedValueValid) ? selectedValue : null,
-            icon: const Icon(Icons.arrow_downward),
-            elevation: 16,
-            style: const TextStyle(color: Colors.deepPurple),
-            underline: Container(
-              height: 2,
-              color: Colors.deepPurpleAccent,
-            ),
-            onChanged: (String? value) {
-              setState(() {
-                if (value != null) {
-                  facilityViewModel.setSelectedFacility(
-                      value); // this is the document id, not the name itself
-                  informViewModelsOfTheFacility(context);
+                for (Map<String, String> item in snapshot.data!) {
+                  // BUGFixed 2024-03-07, added block around if
+                  if (selectedValue == item['facility_fk']) {
+                    isSelectedValueValid = true;
                 }
-              });
+                  dropdownItems.add(DropdownMenuItem<String>(
+                    value: item['facility_fk'],
+                    child: Text(item['facility_name'].toString()),
+                  ));
+                }
+
+                return DropdownButton<String>(
+                  value: (isSelectedValueValid) ? selectedValue : null,
+                  icon: const Icon(Icons.arrow_downward),
+                  elevation: 16,
+                  style: const TextStyle(color: Colors.deepPurple),
+                  underline: Container(
+                    height: 2,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String? value) {
+                    setState(() {
+                      if (value != null) {
+                        facilityViewModel.setSelectedFacility(
+                            value); // this is the document id, not the name itself
+                        informViewModelsOfTheFacility(
+                            context); // we apparently have to inform others of the newly selected facility
+                      }
+                    });
+                  },
+                  items: dropdownItems.isNotEmpty
+                      ? dropdownItems
+                      : [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: const Text('No facility selected'),
+                            onTap:
+                                () {}, // Disable the "No facility selected" option
+                          ),
+                        ],
+                );
+              } else if (snapshot.hasError) {
+                // Handle the error state
+                return Text('Error: ${snapshot.error}');
+              } else {
+                // Handle the loading state
+                return const CircularProgressIndicator();
+              }
             },
-            items: dropdownItems.isNotEmpty
-                ? dropdownItems
-                : [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: const Text('No facility selected'),
-                      onTap: () {}, // Disable the "No facility selected" option
-                    ),
-                  ],
           );
-        } else if (snapshot.hasError) {
-          // Handle the error state
-          return Text('Error: ${snapshot.error}');
-        } else {
-          // Handle the loading state
-          return const CircularProgressIndicator();
-        }
-      },
-    );
+        });
   }
 
   void loadFacilitiesPage(BuildContext context, bool newFacility) {
     FacilityViewModel facilitiesModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
-    String? whichFacility = facilitiesModel.selectedFacility;
+    // to fix this, we need to save the selected facility in case the user cancels
+    // then we need to nullify selectedFacility and call inform to notify the other providers
+    // if we save a new facility, we need to set selectedFacility and also call inform
 
     // if we are creating a new facility, clear out this variable
     if (newFacility == cNewFacility) {
-      whichFacility = null;
+      facilitiesModel.rememberSelectedFacility();
+      facilitiesModel.setSelectedFacility(null);
+      informViewModelsOfTheFacility(context);
     }
 
-    facilitiesModel.getFacilityInfo(whichFacility).then((data) {
+    facilitiesModel
+        .getFacilityInfo(facilitiesModel.selectedFacility)
+        .then((data) {
+      // this will be null!
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -142,7 +160,19 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                   const FacilitiesView()) // this will read from facility model, which has already been updated
           ).then((data) {
         setState(() {
-          // does this work?, yes it does; this should trigger the future builder to make a new facilities list
+          // needs setstate to the set the buttons enabled and disabled
+          if (facilitiesModel.selectedFacility == null) {
+            // when creating a new facility, selectedFacility is set to null
+            // if it’s still null, it means the user cancelled
+            // we set the facility back to what was selected beforehand
+            facilitiesModel.selectedFacility =
+                facilitiesModel.restoreRememberedFacility();
+            informViewModelsOfTheFacility(context);
+          } else {
+            informViewModelsOfTheFacility(context); // do we need to call this?
+          }
+          facilityStreamController
+              .add("update"); // this should trigger a rebuild of the facility dropdown
         });
       });
     });
@@ -155,18 +185,72 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     TanksLineViewModel tankLinesViewModel =
         Provider.of<TanksLineViewModel>(context, listen: false);
 
-    // TankView depends on having the list of tanks
+    FacilityViewModel facilityModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
+
+    // TankView depends on having the list of tanklines
     tankLinesViewModel.buildTankLinesList().then((data) {
       Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => TankView(
-                  incomingRackFk: null,
-                  incomingTankPosition: null,
-                  tankViewModelNoContext: tankViewModel, tankLineViewModelNoContext: tankLinesViewModel,))).then((data) {});
+                    incomingRackFk: null,
+                    incomingTankPosition: null,
+                    tankViewModelNoContext: tankViewModel,
+                    tankLineViewModelNoContext: tankLinesViewModel,
+                    facilityViewModelNoContext: facilityModel,
+                  ))).then((data) {});
     });
   }
 
+  void jumpToTheTank(BuildContext context2, String tankDocumentId) {
+    TanksViewModel tankViewModel =
+        Provider.of<TanksViewModel>(context2, listen: false);
+
+    TanksLineViewModel tanksLineViewModel =
+        Provider.of<TanksLineViewModel>(context2, listen: false);
+
+    FacilityViewModel facilitiesModel =
+        Provider.of<FacilityViewModel>(context2, listen: false);
+
+    // i want to read the tank info and get the rack info
+    // then i want to read the facility info
+    // then I want to switch facilities if need be (I will always “switch” them)
+
+    // what we need to do is make the below a function
+    // then call this function on some tank and then move that tank into parkedposition
+    // and then into another position to see if I can find the tank
+    // move a second time into the other facility to see if I can still track it
+
+    tankViewModel.findTankLocationInfoByID(tankDocumentId).then((theTankMap) {
+      // it's OK to pass rack and tank but we also need to change the facility if need be
+      // we don’t need to save the old facility; it’s a permanent switch
+
+      facilitiesModel.setSelectedFacility(theTankMap!['facility_fk']);
+      informViewModelsOfTheFacility(
+          context2); // is this a problem because I have just popped off the context?
+      facilityStreamController.add("update"); // this should trigger a rebuild
+
+      Navigator.pop(
+          context2); // we move the pop after sending the inform method just our context would have gone out of scope
+
+      // is this still needed?
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TankView(
+              incomingRackFk: theTankMap!['rack_fk'],
+              incomingTankPosition: theTankMap!['absolute_position'],
+              tankViewModelNoContext: tankViewModel,
+              tankLineViewModelNoContext: tanksLineViewModel,
+              facilityViewModelNoContext: facilitiesModel,
+            ),
+          ),
+        );
+      });
+    });
+  }
   // because of https://dart-lang.github.io/linter/lints/use_build_context_synchronously.html
   // we pass build context and wrap the navigator.push/materialpageroute with
   // WidgetsBinding.instance!.addPostFrameCallback((_)
@@ -180,35 +264,11 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     mobileScannerController.stop().then((value) {
       // launch and replace navigation screen (can this go back to the screen before this one?)
       String? rawValue = barcodes[0].rawValue;
-      List<String> stringParts = rawValue!.split(RegExp('[;]'));
 
-      if (stringParts.length >= 2) {
-        String rackFk = stringParts[0];
-        String absolutePositionString = stringParts[1];
-        int absolutePosition = int.parse(absolutePositionString);
+      if (rawValue != null) {
+        String tankDocumentId = rawValue;
 
-        TanksViewModel tankViewModel =
-            Provider.of<TanksViewModel>(context2, listen: false);
-
-        TanksLineViewModel tanksLineViewModel =
-        Provider.of<TanksLineViewModel>(context2, listen: false);
-
-        Navigator.pop(context2);
-
-        // is this still needed?
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TankView(
-                incomingRackFk: rackFk,
-                incomingTankPosition: absolutePosition,
-                tankViewModelNoContext: tankViewModel,
-                tankLineViewModelNoContext: tanksLineViewModel,
-              ),
-            ),
-          );
-        });
+        jumpToTheTank(context2, tankDocumentId);
       } else {
         Navigator.pop(context);
       }
@@ -233,17 +293,13 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   }
 
   void loadQRCodeController(BuildContext context) {
-    // I am not sure why I am selecting the facility here; it had to have been set by the dropdown
-    // plus why do we need all that info loaded here
-    // facilitiesModel.getFacilityInfo(facilitiesModel.selectedFacility).then((data) {
-    // are we wrong to assume this will be filled in?
+    //jumpToTheTank(context, "65e69dc4108a18427361"); // hardcoded test
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return displayCameraForReadingQrCode(context);
       },
     );
-    //});
   }
 
   void loadSearchController(BuildContext context) {
@@ -257,12 +313,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     // so it needs TanksLineViewModel to build the mapping of the facility’s tanks to the tanklines
     tankLinesViewModel.buildTankLinesList().then((data) {
       searchModel.buildInitialSearchList(tankLinesViewModel).then((data) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const SearchView())
-            );
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const SearchView()));
       });
     });
   }
@@ -274,7 +326,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     tankLinesViewModel.buildTankLinesList().then((data) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => TanksLineView()),
+        MaterialPageRoute(builder: (context) => const TanksLineView()),
       );
     });
   }
@@ -306,7 +358,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       child: ElevatedButton(
         onPressed: enableOnPressed()
             ? () {
-                // if we return true, then enable the button; for new facility must return true
+                // if we return true, then enable the button
                 loadController(context);
               }
             : null,
@@ -379,7 +431,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                 context,
                 cNewFacility,
                 loadFacilitiesPage,
-                facilityViewModel.pretendFacilityIsAlwaysSelected,
+                facilityViewModel.pretendFacilityIsIrrelevant,
                 "New Facility…"),
           ],
         ),
@@ -408,11 +460,11 @@ class _HomeScreenViewState extends State<HomeScreenView> {
             // we might want to add an indent value to align this button with the above
             // we the button for loadQRCodeController to be enabled only if a facility is selected
             // and we are on ios, new function isAFacilitySelectedAndOnIos
-            loadCommonButton(
-                context,
-                loadQRCodeController,
-                facilityViewModel.isAFacilitySelectedAndOnIos,
-                "Scan a Tank’s Barcode…"),
+            loadCommonButton(context, loadQRCodeController,
+                //facilityViewModel.isAFacilitySelectedAndOnIos,
+                () {
+              return true;
+            }, "Scan a Tank’s Barcode…"),
             loadCommonButton(context, loadSearchController,
                 facilityViewModel.isAFacilitySelected, "Search For a Tank…"),
           ],
@@ -449,7 +501,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
         return GestureDetector(
           onTap: () {
             Navigator.of(context).pop();
-            },
+          },
           child: const AlertDialog(
             title: Center(child: Text(kProgramName)),
             content: Row(
@@ -464,7 +516,6 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -475,15 +526,12 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           },
           child: const Text(
             kProgramName,
-            style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ),
       body: buildHomeScreen(context),
     );
   }
-
-  // Widget build(BuildContext context) {
-  //   return buildHomeScreen(context);
-  // }
 }

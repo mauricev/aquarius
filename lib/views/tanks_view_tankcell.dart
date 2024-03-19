@@ -269,8 +269,8 @@ class _TankCellState extends State<TankCell> {
           ),
         );
       },
-      onWillAccept: (data) {
-        Tank parkedTank = data as Tank;
+    onWillAcceptWithDetails: (DragTargetDetails<Tank> dragTargetDetails) {
+        Tank parkedTank = dragTargetDetails.data;
         // if we have a fat parked tank
         if (parkedTank.fatTankPosition != null) {
           if (canAbsolutePositionHostAFatTank(
@@ -281,11 +281,11 @@ class _TankCellState extends State<TankCell> {
         }
         return true;
       },
-      onAccept: (data) {
+      onAcceptWithDetails: (DragTargetDetails<Tank> dragTargetDetails) {
         //we have to guard against a race condition
         // what was this race condition?
         setState(() {
-          Tank parkedTank = data as Tank;
+          Tank parkedTank = dragTargetDetails.data;
 
           TanksViewModel tankModel =
               Provider.of<TanksViewModel>(context, listen: false);

@@ -1,3 +1,4 @@
+import 'package:aquarius/view_models/facilities_viewmodel.dart';
 import 'package:aquarius/view_models/tanklines_viewmodel.dart';
 
 import '../views/tanks_view.dart';
@@ -87,6 +88,9 @@ class _SearchViewState extends State<SearchView> {
     TanksLineViewModel tanksLineViewModel =
     Provider.of<TanksLineViewModel>(context, listen: false);
 
+    FacilityViewModel facilitiesViewModel =
+        Provider.of<FacilityViewModel>(context, listen: false);
+
     ValueItem theTankLineValueItem = tanksLineViewModel.returnTankLineFromDocId((tank.tankLineDocId));
 
     int? birthDate = tank.getBirthDate();
@@ -104,6 +108,7 @@ class _SearchViewState extends State<SearchView> {
               incomingTankPosition: tank.absolutePosition,
               tankViewModelNoContext: tankViewModel,
               tankLineViewModelNoContext: tanksLineViewModel,
+              facilityViewModelNoContext: facilitiesViewModel,
             ),
           ),
         );
@@ -149,7 +154,7 @@ class _SearchViewState extends State<SearchView> {
                   ),
                   Expanded(
                     flex: 3,
-                    child: buildCheckBox(context, "Screen Positive", tank.getScreenPositive),
+                    child: buildCheckBox(context, "Screen +", tank.getScreenPositive),
                   ),
                   Expanded(
                     flex:2,

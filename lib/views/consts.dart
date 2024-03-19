@@ -1,7 +1,7 @@
 const int kGridHSize = 650;
 const int kGridVSize = 500;
 const String kProgramName = 'Aquarius';
-const String kVersion = "2.7.0";
+const String kVersion = "3.0.0";
 
 const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";
@@ -27,8 +27,6 @@ const kRunningLocal = false;
 // 5 of 5, main (window code)
 
 const String kDatabaseId = '63eefc50e6d7b0cb4c4e';
-// we don’t use this; the user selects the facility by name in the dropdown
-// we look up the id and store that
 
 // the kFacilityCollection is NOT the same as the document id of the facility document id
 const String kFacilityCollection = "63eefc630814627ea850";
@@ -37,22 +35,22 @@ const String cTankCollection = '6408223c577dec6908e7';
 const String cNotesCollection = '64239dc4f03b6125e61d';
 const String cTankLinesCollection = '6563c50e67141c771cc2';
 const String cEuthanizedTankCollection = '656f9013b742c0becbd7';
+const String cGenoTypeCollection = "65e95407dda8f5538dd4";
 
 const double kFullWidth = 200;
 const double kHalfWidth  = 100;
 const double kNumberWidth = 50;
 const double kIndentWidth = 20.0;
 
-const double kGridSize = 200;
+const double kGridSize = 170;
 
-enum TankStringsEnum { tankLine, numberOfFish, generation, docId }
+enum TankStringsEnum { tankLine, numberOfFish, generation, genotype, parents }
 
 const int kStandardTextWidth = 75;
 const double kStandardTextWidthDouble = 75;
 
-const int kNoRackSelected = -2;
 const int cParkedAbsolutePosition = -2;
-
+const int kNoRackSelected = -2;
 const int kEmptyTankIndex = -1;
 
 const int kStartingYear = 2021;
@@ -62,6 +60,10 @@ const int kStartingMonth = 1;
 
 const int cTankLineSearch = 1;
 const int cCrossBreedSearch = 2;
+
+const int cEditTankMode = 1;
+const int cDeleteTankMode = 2;
+
 const int kCrossBreedTime = 15552000000; // new value at 180 days; 15774336000 was the old value
 const int kDayInMilliseconds = 86400000;
 
@@ -78,6 +80,8 @@ const String cFacilityNameKey = "faciltyNameKey";
 const String cParkedTankFacility = "no associated facility";
 
 const int cNewTankline = -1;
+const int cInvalidTankLine = -1;
+const bool cTankLineNotInUse = false;
 
 const bool cTankLineToBeEdited = false;
 const bool cTankLineToBeCreated = true;
@@ -93,3 +97,5 @@ const String cTankLineLabelNotYetAssigned = ""; // label actual tank line text
 
 const int cTankLineMaxLength = 60;
 const int cNoFishSelected = 0;
+
+const double stdLeftIndent = 40;

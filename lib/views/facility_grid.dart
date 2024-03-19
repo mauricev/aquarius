@@ -101,6 +101,9 @@ class FacilityGridCell extends StatelessWidget {
 
             if (controllerForRelativePosition.text == "") {
               if (index != -1) {
+                // BUGBroken should not delete a rack just because it has no text
+                // we need a checkbox in each rack to decide what is a rack and what is corridor
+
                 facilityModel.deleteRack(index); // i think this means if a user deletes the text of a rack, the rack goes away and this probably isn't a good idea.
               }
             } else {

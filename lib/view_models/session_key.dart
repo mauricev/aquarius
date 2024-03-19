@@ -13,6 +13,11 @@ enum LoginStatus {
 
 class ManageSession {
   final Client _client = Client();
+  // BUGfixed 2024-03-02
+  // I added FlutterSecureFileStorage because for some reason FlutterSecureStorage wasn't saving to the keychain
+  // this is true for MacOS and might relate to needing applicationSupportsSecureRestorableState on the Mac
+  // FlutterSecureFileStorage is showing in unhandled exception, reported as a bug
+  //final _storage = FlutterSecureFileStorage(const FlutterSecureStorage());
   final _storage = const FlutterSecureStorage();
 
   bool _doesUserWantToRegister = false;
@@ -37,8 +42,8 @@ class ManageSession {
     _storage.write(key: keyToSave, value: valueToSave);
   }
 
-  void deleteSecureStorage(String keyToSave) async {
-    await _storage.delete(key: keyToSave);
+  void deleteSecureStorage(String keyToDelete) async {
+    await _storage.delete(key: keyToDelete);
   }
 
   bool getDoesUserWantToRegister() {

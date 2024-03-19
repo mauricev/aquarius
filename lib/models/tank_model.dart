@@ -5,7 +5,7 @@ import '../views/consts.dart';
 
 class Tank {
   String? documentId = "bad value"; // this should never say this
-  final String facilityFk;
+  final String? facilityFk;
   String rackFk;
   int absolutePosition;
   String tankLineDocId;
@@ -14,20 +14,25 @@ class Tank {
   int? numberOfFish;
   int? fatTankPosition;
   int? generation;
+  String? genoType;
+  String? parent1;
+  String? parent2;
   final ManageSession manageSession;
   late final Notes notes;
-
   Tank({
     this.documentId,
     required this.facilityFk,
     required this.rackFk,
     required this.absolutePosition,
-    this.tankLineDocId = cTankLineLabelNotYetAssigned,
+    this.tankLineDocId = cTankLineValueNotYetAssigned,
     int? birthDate,
     this.screenPositive,
     this.numberOfFish,
     this.fatTankPosition,
     this.generation,
+    this.genoType,
+    this.parent1,
+    this.parent2,
     required this.manageSession,
   }) : birthDate = birthDate ?? returnTimeNow() {
     notes = createNotes();
@@ -84,4 +89,17 @@ class Tank {
   int? getNumberOfFish() {
     return numberOfFish;
   }
+
+  String? getGenoType() {
+    return genoType;
+  }
+
+  String? getParents() {
+    return parent1;
+  }
+
+  String? getParent2() {
+    return parent2;
+  }
+
 }

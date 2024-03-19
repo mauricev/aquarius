@@ -23,13 +23,15 @@ class TankView extends StatefulWidget {
   final int? incomingTankPosition;
   final TanksViewModel tankViewModelNoContext;
   final TanksLineViewModel tankLineViewModelNoContext;
+  final FacilityViewModel facilityViewModelNoContext;
 
   const TankView(
       {super.key,
       this.incomingRackFk,
       this.incomingTankPosition,
       required this.tankViewModelNoContext,
-      required this.tankLineViewModelNoContext});
+      required this.tankLineViewModelNoContext,
+      required this.facilityViewModelNoContext});
 
   @override
   TankViewState createState() => TankViewState();
@@ -38,38 +40,71 @@ class TankView extends StatefulWidget {
 class TankViewState extends State<TankView> {
   TextEditingController controllerForBirthDate = TextEditingController();
   TextEditingController controllerForScreenPositive = TextEditingController();
-
   TextEditingController controllerForNumberOfFish = TextEditingController();
-
   TextEditingController controllerForGeneration = TextEditingController();
-
-  TextEditingController controllerForDocId = TextEditingController();
-
-  ValueItem? selectedSingleItem;
 
   Tank? returnCurrentPhysicalTank() {
     return widget.tankViewModelNoContext.returnCurrentPhysicalTank();
   }
 
-  void _updateDocId() {
-    Tank? currentTank = returnCurrentPhysicalTank();
-
-    if (controllerForDocId.text != currentTank?.documentId) {
-      controllerForDocId.text = currentTank?.documentId ?? 'NO ID!';
-    }
-  }
-
+  // placeholder for adding to dropdowns
   void addItem(ValueItem item) {}
 
-  void updateSelectedItem(ValueItem? newSelectedItem) {
-    selectedSingleItem = newSelectedItem;
+  void updateSelectedTankLine(ValueItem? newSelectedTankLine) {
+    ValueItem replacementSelectedTankLine = const ValueItem(value: cTankLineValueNotYetAssigned,label: cTankLineLabelNotYetAssigned);
+    if (newSelectedTankLine != null) {
+      replacementSelectedTankLine = newSelectedTankLine;
+    }
+
     // here is where we save the newly selected tankline
     Tank? currentTank = returnCurrentPhysicalTank();
-    currentTank?.tankLineDocId = selectedSingleItem?.value;
+    currentTank?.tankLineDocId = replacementSelectedTankLine?.value;
     widget.tankViewModelNoContext
         .saveExistingTank((currentTank?.absolutePosition)!)
         .then((value) {
       widget.tankViewModelNoContext.callNotifyListeners();
+    });
+  }
+
+  void updateSelectedGenoType(ValueItem? newSelectedGenoType) {
+    Tank? currentTank = returnCurrentPhysicalTank();
+    currentTank?.genoType = newSelectedGenoType?.value;
+    widget.tankViewModelNoContext
+        .saveExistingTank((currentTank?.absolutePosition)!)
+        .then((value) {
+      widget.tankViewModelNoContext.callNotifyListeners();
+    });
+  }
+
+  void updateSelectedParents(List<ValueItem> newlySelectedParents) {
+
+    // there can only be 2 parents
+    if (newlySelectedParents.length > 2) {
+      print("we are removing");
+      newlySelectedParents.removeAt(2);
+    }
+
+    print("updateSelectedParents");
+    Tank? currentTank = returnCurrentPhysicalTank();
+    if (newlySelectedParents.isEmpty) {
+      print("updateSelectedParents is empty");
+      currentTank?.parent1 = null;
+      currentTank?.parent2 = null;
+    }
+    if (newlySelectedParents.length == 1) {
+      print("updateSelectedParents is 1, ${newlySelectedParents[0].label}");
+      currentTank?.parent1 = newlySelectedParents[0].label;
+      currentTank?.parent2 = null;
+    }
+    if (newlySelectedParents.length == 2) {
+      print("updateSelectedParents is 2, ${newlySelectedParents[0].label} and ${newlySelectedParents[1].label}");
+      currentTank?.parent1 = newlySelectedParents[0].label;
+      currentTank?.parent2 = newlySelectedParents[1].label;
+    }
+    widget.tankViewModelNoContext
+        .saveExistingTank((currentTank?.absolutePosition)!)
+        .then((value) {
+      //widget.tankViewModelNoContext.callNotifyListeners();
     });
   }
 
@@ -103,12 +138,10 @@ class TankViewState extends State<TankView> {
     // add listeners for the text-based widgets
     widget.tankViewModelNoContext.addListener(_updateNumberOfFishController);
     widget.tankViewModelNoContext.addListener(_updateFishGenerationController);
-    widget.tankViewModelNoContext.addListener(_updateDocId);
 
     if (widget.incomingRackFk != null && widget.incomingTankPosition != null) {
+      // parked cells don't have racks associated with them; parked rack is just 0 as a string.
       if (widget.incomingRackFk! != "0") {
-        // parked cells don't have racks associated with them; rack is just 0 as a string.
-
         int? theRackAbsolutePosition =
             await facilityModel.returnRacksAbsolutePosition(widget
                 .incomingRackFk!); // looks like we can just read this from the loaded racks
@@ -122,7 +155,14 @@ class TankViewState extends State<TankView> {
       // fixed bug, we do have to call notifylisteners after all
       widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(
           widget.incomingTankPosition!, cNotify);
+    } else {
+      await widget.tankViewModelNoContext.selectThisRackByAbsolutePosition(
+          cFacilityClickableGrid, facilityModel, kNoRackSelected, cNoNotify);
+      widget.tankViewModelNoContext
+          .selectThisTankCellConvertsVirtual(kEmptyTankIndex, cNotify);
     }
+    // what happens when rack and tank are, in fact, null?
+    // for tank, we
   }
 
   @override
@@ -157,14 +197,10 @@ class TankViewState extends State<TankView> {
     widget.tankViewModelNoContext
         .removeListener(_updateFishGenerationController);
 
-    widget.tankViewModelNoContext.removeListener(_updateDocId);
-
     controllerForBirthDate.dispose();
     controllerForScreenPositive.dispose();
     controllerForNumberOfFish.dispose();
     controllerForGeneration.dispose();
-
-    controllerForDocId.dispose();
 
     super.dispose();
   }
@@ -186,12 +222,12 @@ class TankViewState extends State<TankView> {
     );
   }
 
-  Widget simpleSearchDropdown(BuildContext context, Tank currentTank) {
+  Widget chooseTankLineDropDown(BuildContext context, Tank currentTank) {
     TanksLineViewModel tanksLineViewModel =
         Provider.of<TanksLineViewModel>(context, listen: false);
 
     // we supply a unique key to this widget to force it to redraw each time a new tank is selected
-    Key searchDropDownKey = UniqueKey();
+    Key tankLineDropDownKey = UniqueKey();
 
     ValueItem selectedTank =
         tanksLineViewModel.returnTankLineFromDocId(currentTank.tankLineDocId);
@@ -202,19 +238,105 @@ class TankViewState extends State<TankView> {
         hintStyle: TextStyle(fontSize: 10),
         hint: "Select a tank line");
     SimpleOverlaySettings overlayListSettings = const SimpleOverlaySettings(
-        dialogHeight: 300,
-        selectedItemTextStyle: TextStyle(fontSize: 10, color: Colors.black),
-        unselectedItemTextStyle: TextStyle(fontSize: 9, color: Colors.black45));
+      dialogHeight: 400,
+      selectedItemTextStyle: TextStyle(fontSize: 10, color: Colors.black),
+      unselectedItemTextStyle: TextStyle(fontSize: 9, color: Colors.black45),
+      // offsetHeight:-250 forces the dropdown to appear at a reasonable location
+      // that is, not partially off-screen
+      offsetHeight: -250,
+    );
 
     return SearchDropDown(
-      key: searchDropDownKey,
+      key: tankLineDropDownKey,
       listItems: tanksLineViewModel.convertTankLinesToValueItems(),
       onAddItem: addItem,
       addMode: false,
       deleteMode: false,
-      updateSelectedItem: updateSelectedItem,
+      updateSelectedItem: updateSelectedTankLine,
+      // this will be a list of at most two items
       selectedItem:
           selectedTank, // this doesn’t get reapplied when we change the selected tank, so we give it a unique key to force rebuilding
+      searchBarSettings: searchBarSettings,
+      overlayListSettings: overlayListSettings,
+    );
+  }
+
+  Widget chooseGenoType(BuildContext context, Tank currentTank) {
+    // we supply a unique key to this widget to force it to redraw each time a new tank is selected
+    Key genoTypeDropDownKey = UniqueKey();
+
+    TanksViewModel tanksViewModel =
+        Provider.of<TanksViewModel>(context, listen: false);
+
+    ValueItem? selectedGenoType =
+        tanksViewModel.convertGenoTypeToValueItem(currentTank.getGenoType());
+
+    SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(
+        dropdownHeight: 30,
+        dropdownWidth: 100,
+        hintStyle: TextStyle(fontSize: 10),
+        hint: "Select a genotype");
+    SimpleOverlaySettings overlayListSettings = const SimpleOverlaySettings(
+        dialogHeight: 200,
+        selectedItemTextStyle: TextStyle(fontSize: 10, color: Colors.black),
+        unselectedItemTextStyle: TextStyle(fontSize: 9, color: Colors.black45),
+        offsetHeight: -40);
+
+    return SearchDropDown(
+      key: genoTypeDropDownKey,
+      listItems: tanksViewModel.returnGenoTypes(),
+      onAddItem: addItem,
+      addMode: false,
+      deleteMode: false,
+      updateSelectedItem: updateSelectedGenoType,
+      selectedItem:
+          selectedGenoType, // this doesn’t get reapplied when we change the selected tank, so we give it a unique key to force rebuilding
+      searchBarSettings: searchBarSettings,
+      overlayListSettings: overlayListSettings,
+    );
+  }
+
+  Widget chooseParents(BuildContext context, Tank currentTank) {
+    // we supply a unique key to this widget to force it to redraw each time a new tank is selected
+    Key parentsDropDownKey = UniqueKey();
+
+    TanksLineViewModel tanksLineViewModel =
+    Provider.of<TanksLineViewModel>(context, listen: false);
+
+    ValueItem theTankToExclude =
+    tanksLineViewModel.returnTankLineFromDocId(currentTank.tankLineDocId);
+
+    List<ValueItem> theTankLines = tanksLineViewModel.convertTankLinesToValueItems();
+
+    // we exclude the current tankline; it doesn’t make sense to be a parent of itself
+    theTankLines.remove(theTankToExclude);
+
+    List<ValueItem>  selectedParents = tanksLineViewModel.returnTankLinesFromTank(currentTank);
+
+    SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(
+        dropdownHeight: 34,
+        dropdownWidth: 220,
+        boxMultiSelectedClearIconSize: 15,
+        searchBarTextStyle: TextStyle(fontSize: 10),
+        hintStyle: TextStyle(fontSize: 10),
+        boxMultiSelectedTextStyle:TextStyle(fontSize: 10),
+        hint: "Select parents");
+
+    SimpleOverlaySettings overlayListSettings = const SimpleOverlaySettings(
+        dialogHeight: 400,
+        selectedItemTextStyle: TextStyle(fontSize: 10, color: Colors.black),
+        unselectedItemTextStyle: TextStyle(fontSize: 9, color: Colors.black45),
+        offsetHeight: -250);
+
+    return MultipleSearchDropDown(
+      key: parentsDropDownKey,
+      listItems: theTankLines,
+      onAddItem: addItem,
+      addMode: false,
+      deleteMode: false,
+      updateSelectedItems: updateSelectedParents,
+      selectedItems:
+      selectedParents, // this doesn’t get reapplied when we change the selected tank, so we give it a unique key to force rebuilding
       searchBarSettings: searchBarSettings,
       overlayListSettings: overlayListSettings,
     );
@@ -232,104 +354,9 @@ class TankViewState extends State<TankView> {
     }
     return theType;
   }
-/*
-  Widget returnMultiSelectDropDown(
-      BuildContext context,
-      Tank? currentTank) {
-
-    TanksLineViewModel tanksLineViewModel =
-    Provider.of<TanksLineViewModel>(context, listen: false);
-
-    List<ValueItem> v = tanksLineViewModel.returnTankLineFromDocId((currentTank?.tankLine)!);
-
-    return MultiSelectDropDown(
-      onOptionSelected: (options) async {
-        print("options, ${options}");
-        /*try {
-          // business logic 2
-          print("selected item is ${options[0].value}");
-          currentTank?.tankLine = options[0].value;
-
-          TanksViewModel tanksViewModel =
-          Provider.of<TanksViewModel>(context, listen: false);
-
-          await tanksViewModel.saveExistingTank((currentTank?.absolutePosition)!);
-          //tanksViewModel.callNotifyListeners();
-        } catch (e) {
-          _showErrorDialog(e.toString());
-        }*/
-      },
-      // i think we would need to have a function here returning the right item and
-      // and the provider would update this item
-      // but right now it is not selecting any item
-      selectedOptions: v,
-      options: tanksLineViewModel.convertTankLinesToValueItems(),
-      selectionType: SelectionType.single,
-      chipConfig: const ChipConfig(wrapType: WrapType.scroll),
-      dropdownHeight: 400,
-      optionTextStyle: const TextStyle(fontSize: 16),
-      selectedOptionIcon: const Icon(Icons.check_circle),
-      searchEnabled: true,
-    );
-  }
-  */
-  /*
-    return TypeAheadField<String>(
-      hideOnEmpty: true,
-      hideOnLoading: true,
-      autoFlipDirection: true,
-      textFieldConfiguration: TextFieldConfiguration(
-          controller: textController,
-          onChanged: (value) async {
-            try {
-              // business logic 1
-              // BUGfixed 11.19.2023
-              currentTank?.tankLine = textController.text;
-              await tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
-
-              tanksModel.callNotifyListeners();
-            } catch (e) {
-              _showErrorDialog(e.toString());
-            }
-          }),
-      minCharsForSuggestions: 0,
-      suggestionsCallback: (String pattern) async {
-        if (pattern != "") {
-          SearchViewModel searchModel =
-              Provider.of<SearchViewModel>(context, listen: false);
-
-          // BUGfixed, this is actually an async call
-          // this may be the reason the Nemia was getting incomplete tankline names
-          await searchModel.prepareFullTankList();
-
-          return searchModel
-              .returnListOfTankLines(pattern)
-              .where((item) =>
-                  item.toLowerCase().startsWith(pattern.toLowerCase()))
-              .toList();
-        } else {
-          return [];
-        }
-      },
-      itemBuilder: (context, String suggestion) {
-        return ListTile(
-          title: Text(suggestion),
-        );
-      },
-      onSuggestionSelected: (String suggestion) async {
-        try {
-          // business logic 2
-          currentTank?.tankLine = suggestion;
-          await tanksModel.saveExistingTank((currentTank?.absolutePosition)!);
-          tanksModel.callNotifyListeners();
-        } catch (e) {
-          _showErrorDialog(e.toString());
-        }
-      },
-    );
-  }*/
 
   Widget buildInnerLabel(
+      double leftIndent,
       String labelText,
       TextEditingController? textController,
       TanksViewModel tanksModel,
@@ -339,8 +366,8 @@ class TankViewState extends State<TankView> {
     Tank? currentTank = tanksModel.returnCurrentPhysicalTank();
 
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 40,
+      padding: EdgeInsets.only(
+        left: leftIndent,
       ),
       child: Row(
         children: [
@@ -355,43 +382,52 @@ class TankViewState extends State<TankView> {
             width: (width == null) ? kStandardTextWidthDouble : width,
             child: (tanksStringsValue == TankStringsEnum.tankLine) &&
                     (currentTank != null)
-                ? simpleSearchDropdown(context, currentTank)
-                : TextField(
-                    enabled: (currentTank != null),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    keyboardType: returnTextInputType(tanksStringsValue),
-                    controller: textController,
-                    onChanged: (value) async {
-                      try {
-                        switch (tanksStringsValue) {
-                          case TankStringsEnum.tankLine:
-                            // nothing to do here because this is handled by returnAutoCompleteForTankLine above
-                            break;
+                ? chooseTankLineDropDown(context, currentTank)
+                : (tanksStringsValue == TankStringsEnum.genotype) &&
+                        (currentTank != null)
+                    ? chooseGenoType(context, currentTank) : (tanksStringsValue == TankStringsEnum.parents) &&
+                (currentTank != null)
+                ? chooseParents(context, currentTank)
+                    : TextField(
+                        enabled: (currentTank != null),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        keyboardType: returnTextInputType(tanksStringsValue),
+                        controller: textController,
+                        onChanged: (value) async {
+                          try {
+                            switch (tanksStringsValue) {
+                              case TankStringsEnum.tankLine:
+                                // nothing to do here because this is handled by simpleSearchDropdown above
+                                break;
 
-                          case TankStringsEnum.numberOfFish:
-                            if (textController?.text != "") {
-                              // business logic 4
-                              currentTank?.numberOfFish =
-                                  int.parse((textController?.text)!);
-                            }
-                            break;
+                              case TankStringsEnum.numberOfFish:
+                                if (textController?.text != "") {
+                                  // business logic 4
+                                  currentTank?.numberOfFish =
+                                      int.parse((textController?.text)!);
+                                }
+                                break;
 
-                          case TankStringsEnum.generation:
-                            if (textController?.text != "") {
-                              // business logic 5
-                              currentTank?.generation =
-                                  int.parse((textController?.text)!);
+                              case TankStringsEnum.generation:
+                                if (textController?.text != "") {
+                                  // business logic 5
+                                  currentTank?.generation =
+                                      int.parse((textController?.text)!);
+                                }
+                                break;
+                              case TankStringsEnum.genotype:
+                                // we handle this above
+                                break;
+                              case TankStringsEnum.parents:
+                              // we handle this above
+                                break;
                             }
-                            break;
-                          case TankStringsEnum.docId:
-                            break;
-                        }
-                        await tanksModel
-                            .saveExistingTank((currentTank?.absolutePosition)!);
-                      } catch (e) {
-                        _showErrorDialog(e.toString());
-                      }
-                    }),
+                            await tanksModel.saveExistingTank(
+                                (currentTank?.absolutePosition)!);
+                          } catch (e) {
+                            _showErrorDialog(e.toString());
+                          }
+                        }),
           ),
         ],
       ),
@@ -429,13 +465,20 @@ class TankViewState extends State<TankView> {
   }
 
   Widget drawDateOfBirth(
+      BuildContext context,
       TanksViewModel tankModel,
       Tank? currentTank,
       int? Function()? retrieveValue,
       void Function(int newValue)? updateValue) {
     return Row(
       children: [
-        const Text("Birthdate"),
+         Padding(
+          padding: const EdgeInsets.only(left: 15),
+          child: Text(
+            "DOB:",
+              style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ),
         const SizedBox(
           height: kIndentWidth,
         ),
@@ -457,7 +500,7 @@ class TankViewState extends State<TankView> {
       bool? Function()? retrieveValue,
       void Function(bool newValue)? updateValue) {
     return SizedBox(
-      width: 150,
+      width: 120,
       child: CheckboxListTile(
         title: Text(
           labelText,
@@ -534,16 +577,17 @@ class TankViewState extends State<TankView> {
     String numberOfFishString = currentTank?.getNumberOfFish().toString() ?? "";
     String generationString = currentTank?.generation.toString() ?? "";
     String dateOfBirthString = buildDateOfBirth(currentTank?.getBirthDate);
-    String rackFkString = currentTank?.rackFk ?? "";
-    String absolutePositionString =
-        currentTank?.absolutePosition.toString() ?? "";
 
-    FacilityViewModel facilityModel =
-        Provider.of<FacilityViewModel>(context, listen: false);
-    String rack = await facilityModel.returnRacksRelativePosition(rackFkString);
+    // BUGfixed 2024-03-05
+    // we now store the tank’s document id and no longer its rack and abs position
+    // this way the barcode works for the tank regardless of where it's located
+    String tankDocumentId = (currentTank?.documentId)!;
 
     // multiline string requires three quotes
     // last line embeds the given info into the barcode, BUG this line was part of the ZPL text
+    // BUGFixed, location information which may change if the tank is moved has been removed from
+    // the qr code (now it’s the tank id) and from the text display
+
     String zplCode = """
 ^XA
 ^FO275,30^A0N,25^FD$tankLineString^FS
@@ -552,8 +596,7 @@ class TankViewState extends State<TankView> {
 ^FO275,135^A0N,30^FD$smallTankString^FS
 ^FO275,170^A0N,30^FD$screenPositiveString^FS
 ^FO275,205^A0N,30^FDGen:F$generationString^FS
-^FO275,240^A0N,20^FDRack, $rack; Tank, $absolutePositionString^FS
-^FO20,20^BQN,2,8^FH^FDMA:$rackFkString;$absolutePositionString^FS 
+^FO20,20^BQN,2,8^FH^FDMA:$tankDocumentId^FS 
 ^XZ
 """;
     //ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
@@ -623,6 +666,34 @@ class TankViewState extends State<TankView> {
         {'confirm': false, 'tankLineDeleteOption': tankLineDeleteOption};
   }
 
+  void deleteEuthanizeTank(BuildContext context, Tank currentTank) async {
+    Map<String, dynamic> deleteTankResult = await deleteTankDialog(context);
+    if (deleteTankResult['confirm'] == true) {
+      ValueItem tankLineValueItem = widget.tankLineViewModelNoContext
+          .returnTankLineFromDocId(currentTank.tankLineDocId);
+
+      ValueItem? genoTypeValueItem = widget.tankViewModelNoContext
+          .convertGenoTypeToValueItem(currentTank.genoType);
+      String genoTypeLabel = genoTypeValueItem?.label ?? "";
+
+      widget.facilityViewModelNoContext
+          .convertFacilityFkToFacilityName(currentTank.facilityFk!)
+          .then((facilityName) {
+        widget.tankViewModelNoContext.deleteEuthanizeTank(
+            tankLineValueItem.label,
+            genoTypeValueItem?.label,
+            currentTank.parent1,
+            currentTank.parent2,
+            facilityName!,
+            currentTank.absolutePosition,
+            deleteTankResult['tankLineDeleteOption']);
+        // BUGfixed is not selecting an empty tank
+        widget.tankViewModelNoContext
+            .selectThisTankCellConvertsVirtual(kEmptyTankIndex, cNotify);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // listen is on
@@ -680,26 +751,32 @@ class TankViewState extends State<TankView> {
           ),
           Row(
             children: [
-              buildInnerLabel(
-                  "Tank Line", null, tankModel, TankStringsEnum.tankLine, 270),
-              drawDateOfBirth(tankModel, currentTank, currentTank?.getBirthDate,
+              buildInnerLabel(stdLeftIndent, "Tankline", null, tankModel,
+                  TankStringsEnum.tankLine, 260),
+              drawDateOfBirth(context,tankModel, currentTank, currentTank?.getBirthDate,
                   currentTank?.setBirthDate),
               buildCheckBox(
                   tankModel,
                   currentTank,
-                  "Screen Positive",
+                  "Screen +",
                   currentTank?.getScreenPositive,
                   currentTank?.setScreenPositive),
+              buildInnerLabel(0, "Fish #", controllerForNumberOfFish, tankModel,
+                  TankStringsEnum.numberOfFish),
             ],
           ),
           Row(
             children: [
-              buildInnerLabel("Number of Fish", controllerForNumberOfFish,
-                  tankModel, TankStringsEnum.numberOfFish),
-              buildInnerLabel("Generation", controllerForGeneration, tankModel,
+              buildInnerLabel(
+                  stdLeftIndent,
+                  "Generation",
+                  controllerForGeneration,
+                  tankModel,
                   TankStringsEnum.generation),
-              buildInnerLabel("doc id", controllerForDocId, tankModel,
-                  TankStringsEnum.docId, 200),
+              buildInnerLabel(0, "Genotype", null, tankModel,
+                  TankStringsEnum.genotype, 180),
+              buildInnerLabel(15, "Parents", null, tankModel,
+                  TankStringsEnum.parents, 260),
             ],
           ),
           Row(
@@ -709,13 +786,9 @@ class TankViewState extends State<TankView> {
                       tankModel.isThereAParkedTank())
                   ? Container()
                   : Padding(
-                      padding: const EdgeInsets.only(left: 40),
+                      padding: const EdgeInsets.only(left: 40, top: 10),
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.zero, // remove any padding
-                        ),
                         onPressed: () {
-                          // setStateRedundant?
                           setState(() {
                             // business logic 9
                             currentTank.parkIt();
@@ -744,6 +817,7 @@ class TankViewState extends State<TankView> {
                       : () {
                           currentTank.notes.loadNotes().then((_) {
                             notesDialog(context, tankModel, currentTank);
+                            // BUGBroken evaluate to decided just error or Appwrite extension
                           }).catchError((error) {});
                         },
                   child: const Text("Notes…"), // this is the button text
@@ -765,31 +839,17 @@ class TankViewState extends State<TankView> {
             ],
           ),
           const SizedBox(
-            height: 30, // separate delete button
+            height: 20,
           ),
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 40),
+                padding: const EdgeInsets.only(left: stdLeftIndent),
                 child: ElevatedButton(
                     onPressed: (currentTank == null)
                         ? null
-                        : () async {
-                            Map<String, dynamic> deleteTankResult =
-                                await deleteTankDialog(context);
-                            if (deleteTankResult['confirm'] == true) {
-                                ValueItem tankLineValueItem = widget
-                                    .tankLineViewModelNoContext
-                                    .returnTankLineFromDocId(
-                                        currentTank.tankLineDocId);
-
-                                tankModel.deleteEuthanizeTank(tankLineValueItem.label,
-                                    currentTank.absolutePosition, deleteTankResult['tankLineDeleteOption']);
-                                // BUGfixed is not selecting an empty tank
-                                widget.tankViewModelNoContext
-                                    .selectThisTankCellConvertsVirtual(
-                                        kEmptyTankIndex, cNotify);
-                              }
+                        : () {
+                            deleteEuthanizeTank(context, currentTank);
                           },
                     child: const Text("Delete/Euthanize Tank")),
               ),

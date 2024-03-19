@@ -1,13 +1,11 @@
 class TankLine {
-  String? documentId = "bad value"; // this should never say this
-  String tankline;
+  String? documentId = "bad value"; // documentId should never say this
+  String tankLine;
+  bool tankLineInUse = true;
 
   TankLine({
     this.documentId,
-    required this.tankline,
+    required this.tankLineInUse,
+    required this.tankLine,
   });
-
-  void updateTankDocumentId (String tankLineDocumentId) {
-    documentId = tankLineDocumentId;
-  }
 }
