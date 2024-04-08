@@ -1,0 +1,8 @@
+facilityModel.indexOfRackWithThisAbsolutePosition(absolutePosition);
+
+tankModel.selectThisRackByAbsolutePosition
+
+tankModel.isThisRackCellSelected
+
+facilityModel.rackList[index].relativePosition we assign this; it's not clear what happens when we don't have any racklist to save to
+

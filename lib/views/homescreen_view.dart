@@ -48,10 +48,15 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
     searchViewModel.setFacilityId(facilityViewModel.selectedFacility);
 
-    TanksViewModel tanksViewModel =
-        Provider.of<TanksViewModel>(context, listen: false);
+    TanksLiveViewModel tanksLiveViewModel =
+        Provider.of<TanksLiveViewModel>(context, listen: false);
 
-    tanksViewModel.setFacilityId(facilityViewModel.selectedFacility);
+    TanksSelectViewModel tanksSelectViewModel =
+    Provider.of<TanksSelectViewModel>(context, listen: false);
+
+    tanksLiveViewModel.setFacilityId(facilityViewModel.selectedFacility);
+    // BUGfixed new view model needs to know the facility
+    tanksSelectViewModel.setFacilityId(facilityViewModel.selectedFacility);
   }
 
   Widget facilityDropDown(BuildContext context) {
@@ -179,8 +184,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   }
 
   void loadTanksController(BuildContext context) {
-    TanksViewModel tankViewModel =
-        Provider.of<TanksViewModel>(context, listen: false);
+    TanksLiveViewModel tankLiveViewModel =
+        Provider.of<TanksLiveViewModel>(context, listen: false);
 
     TanksLineViewModel tankLinesViewModel =
         Provider.of<TanksLineViewModel>(context, listen: false);
@@ -196,7 +201,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
               builder: (context) => TankView(
                     incomingRackFk: null,
                     incomingTankPosition: null,
-                    tankViewModelNoContext: tankViewModel,
+                tankLiveViewModelNoContext: tankLiveViewModel,
                     tankLineViewModelNoContext: tankLinesViewModel,
                     facilityViewModelNoContext: facilityModel,
                   ))).then((data) {});
@@ -204,8 +209,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   }
 
   void jumpToTheTank(BuildContext context2, String tankDocumentId) {
-    TanksViewModel tankViewModel =
-        Provider.of<TanksViewModel>(context2, listen: false);
+    TanksLiveViewModel tankLiveViewModel =
+        Provider.of<TanksLiveViewModel>(context2, listen: false);
 
     TanksLineViewModel tanksLineViewModel =
         Provider.of<TanksLineViewModel>(context2, listen: false);
@@ -222,7 +227,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     // and then into another position to see if I can find the tank
     // move a second time into the other facility to see if I can still track it
 
-    tankViewModel.findTankLocationInfoByID(tankDocumentId).then((theTankMap) {
+    tankLiveViewModel.findTankLocationInfoByID(tankDocumentId).then((theTankMap) {
       // it's OK to pass rack and tank but we also need to change the facility if need be
       // we don’t need to save the old facility; it’s a permanent switch
 
@@ -240,9 +245,9 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           context,
           MaterialPageRoute(
             builder: (context) => TankView(
-              incomingRackFk: theTankMap!['rack_fk'],
-              incomingTankPosition: theTankMap!['absolute_position'],
-              tankViewModelNoContext: tankViewModel,
+              incomingRackFk: theTankMap['rack_fk'],
+              incomingTankPosition: theTankMap['absolute_position'],
+              tankLiveViewModelNoContext: tankLiveViewModel,
               tankLineViewModelNoContext: tanksLineViewModel,
               facilityViewModelNoContext: facilitiesModel,
             ),

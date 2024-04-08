@@ -76,11 +76,6 @@ final textTheme = TextTheme(
     fontSize: 14,
     height: 20 / 14,
   ),
-  // bodySmall: GoogleFonts.openSans(
-  //   fontWeight: FontWeight.w400,
-  //   fontSize: 12,
-  //   height: 16 / 12,
-  // ),
   bodySmall: GoogleFonts.openSans(
     fontWeight: FontWeight.w400,
     fontSize: 9,

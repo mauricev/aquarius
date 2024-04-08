@@ -23,7 +23,7 @@ void main() async {
   ManageSession manageSession = ManageSession();
 
   // real-world 5 of 5, comment out for web
-  /*if (defaultTargetPlatform == TargetPlatform.windows ||
+  if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS) {
 
     await windowManager.ensureInitialized();
@@ -42,7 +42,7 @@ void main() async {
       await windowManager.show();
       await windowManager.focus();
     });
-  }*/
+  }
 
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]
@@ -78,8 +78,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<FacilityViewModel>(
           create: (_) => FacilityViewModel(manageSession),
         ),
-        ChangeNotifierProvider<TanksViewModel>(
-          create: (_) => TanksViewModel(manageSession),
+        ChangeNotifierProvider<TanksLiveViewModel>(
+          create: (_) => TanksLiveViewModel(manageSession),
+        ),
+        ChangeNotifierProvider<TanksSelectViewModel>(
+          create: (_) => TanksSelectViewModel(manageSession),
         ),
         ChangeNotifierProvider<SearchViewModel>(
           create: (_) => SearchViewModel(manageSession),

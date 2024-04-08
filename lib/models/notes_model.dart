@@ -22,23 +22,6 @@ class Notes {
     return parentTank.documentId;
   }
 
-  Future<void> euthanizeNotes(String expiredTankFk) async {
-    // loop through every note changing tank_fk to expiredTankFk
-    // the note will not be orphaned but be associated with an expired tank
-
-    // there is a slight risk of a collision between an existing tank’s document it and that of the expired tank’s
-
-    for (int theIndex = 0; theIndex < notesList.length; theIndex++) {
-      // the following list is about to be deleted, so no reason to update it.
-      // notesList[theIndex]['tank_fk'] = expiredTankFk;
-      Map<String, dynamic> theNoteMap = {
-        'tank_fk': expiredTankFk,
-      };
-      await manageSession.updateDocument(theNoteMap, cNotesCollection,
-      notesList[theIndex]['document id']);
-    }
-  }
-
   // we don’t pass an index because only the first note, [0], is “live”
   Map<String, dynamic> prepareNoteMap() {
     Map<String, dynamic> theNoteMap = {
@@ -120,7 +103,6 @@ class Notes {
   Future<void> loadNotes() async {
     if (isParentTankIDValid()) {
       try {
-
         notesList.clear(); // in case we have any notes from earlier, clear them
 
         String? theParentId = returnParentTankID();

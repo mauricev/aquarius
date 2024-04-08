@@ -1,5 +1,6 @@
 import 'package:aquarius/view_models/facilities_viewmodel.dart';
 import 'package:aquarius/view_models/tanklines_viewmodel.dart';
+import 'package:aquarius/views/parent_tanks_view_common.dart';
 
 import '../views/tanks_view.dart';
 import '../view_models/search_viewmodel.dart';
@@ -82,8 +83,8 @@ class _SearchViewState extends State<SearchView> {
 
     SearchViewModel searchModel = Provider.of<SearchViewModel>(context);
 
-    TanksViewModel tankViewModel =
-    Provider.of<TanksViewModel>(context, listen: false);
+    TanksLiveViewModel tankViewModel =
+    Provider.of<TanksLiveViewModel>(context, listen: false);
 
     TanksLineViewModel tanksLineViewModel =
     Provider.of<TanksLineViewModel>(context, listen: false);
@@ -100,13 +101,14 @@ class _SearchViewState extends State<SearchView> {
 
     return GestureDetector(
       onTap: () {
+        // the user has tapped a tank; jump to it
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => TankView(
               incomingRackFk: tank.rackFk,
               incomingTankPosition: tank.absolutePosition,
-              tankViewModelNoContext: tankViewModel,
+              tankLiveViewModelNoContext: tankViewModel,
               tankLineViewModelNoContext: tanksLineViewModel,
               facilityViewModelNoContext: facilitiesViewModel,
             ),
@@ -167,9 +169,26 @@ class _SearchViewState extends State<SearchView> {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
+
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0, bottom: 15.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: chooseGenoType(context,tank),
+                  ),
+                  const Spacer(flex: 1),
+                  Expanded(
+                    flex: 3,
+                    child: chooseParents(context, tank, tankViewModel, tanksLineViewModel),
+                  ),
                   const Spacer(flex: 1),
                 ],
-              )
+              ),
             ),
           ],
         ),

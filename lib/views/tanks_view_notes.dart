@@ -5,7 +5,7 @@ import '../models/tank_model.dart';
 
 class NotesDialogBody extends StatefulWidget {
   final Tank currentTank;
-  final TanksViewModel tanksModel;
+  final TanksLiveViewModel tanksModel;
 
   const NotesDialogBody(
       {super.key, required this.tanksModel, required this.currentTank});

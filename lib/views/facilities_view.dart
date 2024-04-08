@@ -246,7 +246,7 @@ class _FacilitiesController
                     width: kGridSize,
                     child: (model.gridHeight == 0) || (model.gridWidth == 0)
                         ? Container()
-                        : FacilityGrid(tankMode: cFacilityEditableGrid),
+                        : FacilityGrid(tankMode: FacilityEditState.editable),
                   ),
                   const SizedBox(
                     height: 30,

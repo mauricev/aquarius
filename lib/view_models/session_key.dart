@@ -110,7 +110,7 @@ class ManageSession {
     setBadUserPassword(false); // controller will reset this in the then clause
 
     myPrint("we are in session, loginUser");
-    return theAccount.createEmailSession(
+    return theAccount.createEmailPasswordSession(
       email: email,
       password: password,
     );

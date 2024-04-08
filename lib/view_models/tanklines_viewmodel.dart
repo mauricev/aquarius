@@ -121,15 +121,15 @@ class TanksLineViewModel with ChangeNotifier {
       }
       return null;
     }
-    if ((theTank.parent1 != null ) && (findTankLineDocumentId(theTank.parent1!)) != null) {
-      String? tankLineFk = findTankLineDocumentId(theTank.parent1!);
-      print("returnTankLinesFromTank1, $tankLineFk");
-      parentTankLines.add(ValueItem(label: theTank.parent1!, value: tankLineFk));
+    if ((theTank.parentFemale != null ) && (findTankLineDocumentId(theTank.parentFemale!)) != null) {
+      String? tankLineFk = findTankLineDocumentId(theTank.parentFemale!);
+
+      parentTankLines.add(ValueItem(label: theTank.parentFemale!, value: tankLineFk));
     }
-    if ((theTank.parent2 != null ) && (findTankLineDocumentId(theTank.parent2!)) != null) {
-      String? tankLineFk = findTankLineDocumentId(theTank.parent2!);
-      print("returnTankLinesFromTank2, $tankLineFk");
-      parentTankLines.add(ValueItem(label: theTank.parent2!, value: tankLineFk));
+    if ((theTank.parentMale != null ) && (findTankLineDocumentId(theTank.parentMale!)) != null) {
+      String? tankLineFk = findTankLineDocumentId(theTank.parentMale!);
+
+      parentTankLines.add(ValueItem(label: theTank.parentMale!, value: tankLineFk));
     }
     return parentTankLines;
   }

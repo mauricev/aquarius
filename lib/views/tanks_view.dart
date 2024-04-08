@@ -11,6 +11,9 @@ import '../views/tanks_view_notes.dart';
 import '../models/tank_model.dart';
 import '../view_models/tanklines_viewmodel.dart';
 import 'package:simple_search_dropdown/simple_search_dropdown.dart';
+import 'parent_tank_select_view.dart';
+import 'parent_euthanized_tank_display_view.dart';
+import 'parent_tank_fetch_info.dart';
 
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
@@ -21,7 +24,7 @@ import 'package:flutter/foundation.dart'
 class TankView extends StatefulWidget {
   final String? incomingRackFk;
   final int? incomingTankPosition;
-  final TanksViewModel tankViewModelNoContext;
+  final TanksLiveViewModel tankLiveViewModelNoContext;
   final TanksLineViewModel tankLineViewModelNoContext;
   final FacilityViewModel facilityViewModelNoContext;
 
@@ -29,7 +32,7 @@ class TankView extends StatefulWidget {
       {super.key,
       this.incomingRackFk,
       this.incomingTankPosition,
-      required this.tankViewModelNoContext,
+      required this.tankLiveViewModelNoContext,
       required this.tankLineViewModelNoContext,
       required this.facilityViewModelNoContext});
 
@@ -44,68 +47,38 @@ class TankViewState extends State<TankView> {
   TextEditingController controllerForGeneration = TextEditingController();
 
   Tank? returnCurrentPhysicalTank() {
-    return widget.tankViewModelNoContext.returnCurrentPhysicalTank();
+    return widget.tankLiveViewModelNoContext.returnCurrentPhysicalTank();
+  }
+
+  void saveTank(Tank? currentTank) {
+    widget.tankLiveViewModelNoContext
+        .saveExistingTank((currentTank?.absolutePosition)!)
+        .then((value) {
+      widget.tankLiveViewModelNoContext.callNotifyListeners();
+    });
   }
 
   // placeholder for adding to dropdowns
   void addItem(ValueItem item) {}
 
   void updateSelectedTankLine(ValueItem? newSelectedTankLine) {
-    ValueItem replacementSelectedTankLine = const ValueItem(value: cTankLineValueNotYetAssigned,label: cTankLineLabelNotYetAssigned);
+    ValueItem replacementSelectedTankLine = const ValueItem(
+        value: cTankLineValueNotYetAssigned,
+        label: cTankLineLabelNotYetAssigned);
     if (newSelectedTankLine != null) {
       replacementSelectedTankLine = newSelectedTankLine;
     }
 
     // here is where we save the newly selected tankline
     Tank? currentTank = returnCurrentPhysicalTank();
-    currentTank?.tankLineDocId = replacementSelectedTankLine?.value;
-    widget.tankViewModelNoContext
-        .saveExistingTank((currentTank?.absolutePosition)!)
-        .then((value) {
-      widget.tankViewModelNoContext.callNotifyListeners();
-    });
+    currentTank?.tankLineDocId = replacementSelectedTankLine.value;
+    saveTank(currentTank);
   }
 
   void updateSelectedGenoType(ValueItem? newSelectedGenoType) {
     Tank? currentTank = returnCurrentPhysicalTank();
     currentTank?.genoType = newSelectedGenoType?.value;
-    widget.tankViewModelNoContext
-        .saveExistingTank((currentTank?.absolutePosition)!)
-        .then((value) {
-      widget.tankViewModelNoContext.callNotifyListeners();
-    });
-  }
-
-  void updateSelectedParents(List<ValueItem> newlySelectedParents) {
-
-    // there can only be 2 parents
-    if (newlySelectedParents.length > 2) {
-      print("we are removing");
-      newlySelectedParents.removeAt(2);
-    }
-
-    print("updateSelectedParents");
-    Tank? currentTank = returnCurrentPhysicalTank();
-    if (newlySelectedParents.isEmpty) {
-      print("updateSelectedParents is empty");
-      currentTank?.parent1 = null;
-      currentTank?.parent2 = null;
-    }
-    if (newlySelectedParents.length == 1) {
-      print("updateSelectedParents is 1, ${newlySelectedParents[0].label}");
-      currentTank?.parent1 = newlySelectedParents[0].label;
-      currentTank?.parent2 = null;
-    }
-    if (newlySelectedParents.length == 2) {
-      print("updateSelectedParents is 2, ${newlySelectedParents[0].label} and ${newlySelectedParents[1].label}");
-      currentTank?.parent1 = newlySelectedParents[0].label;
-      currentTank?.parent2 = newlySelectedParents[1].label;
-    }
-    widget.tankViewModelNoContext
-        .saveExistingTank((currentTank?.absolutePosition)!)
-        .then((value) {
-      //widget.tankViewModelNoContext.callNotifyListeners();
-    });
+    saveTank(currentTank);
   }
 
   void _updateNumberOfFishController() {
@@ -136,8 +109,10 @@ class TankViewState extends State<TankView> {
         Provider.of<FacilityViewModel>(context, listen: false);
 
     // add listeners for the text-based widgets
-    widget.tankViewModelNoContext.addListener(_updateNumberOfFishController);
-    widget.tankViewModelNoContext.addListener(_updateFishGenerationController);
+    widget.tankLiveViewModelNoContext
+        .addListener(_updateNumberOfFishController);
+    widget.tankLiveViewModelNoContext
+        .addListener(_updateFishGenerationController);
 
     if (widget.incomingRackFk != null && widget.incomingTankPosition != null) {
       // parked cells don't have racks associated with them; parked rack is just 0 as a string.
@@ -146,19 +121,23 @@ class TankViewState extends State<TankView> {
             await facilityModel.returnRacksAbsolutePosition(widget
                 .incomingRackFk!); // looks like we can just read this from the loaded racks
 
-        await widget.tankViewModelNoContext.selectThisRackByAbsolutePosition(
-            cFacilityClickableGrid,
-            facilityModel,
-            theRackAbsolutePosition!,
-            cNoNotify);
+        await widget.tankLiveViewModelNoContext
+            .selectThisRackByAbsolutePosition(
+                FacilityEditState.readonlyMainScreen,
+                facilityModel,
+                theRackAbsolutePosition!,
+                cNoNotify);
       }
       // fixed bug, we do have to call notifylisteners after all
-      widget.tankViewModelNoContext.selectThisTankCellConvertsVirtual(
+      widget.tankLiveViewModelNoContext.selectThisTankCellConvertsVirtual(
           widget.incomingTankPosition!, cNotify);
     } else {
-      await widget.tankViewModelNoContext.selectThisRackByAbsolutePosition(
-          cFacilityClickableGrid, facilityModel, kNoRackSelected, cNoNotify);
-      widget.tankViewModelNoContext
+      await widget.tankLiveViewModelNoContext.selectThisRackByAbsolutePosition(
+          FacilityEditState.readonlyMainScreen,
+          facilityModel,
+          kNoRackSelected,
+          cNoNotify);
+      widget.tankLiveViewModelNoContext
           .selectThisTankCellConvertsVirtual(kEmptyTankIndex, cNotify);
     }
     // what happens when rack and tank are, in fact, null?
@@ -193,8 +172,9 @@ class TankViewState extends State<TankView> {
   @override
   void dispose() {
     // BUGfixed needed to add removeListener
-    widget.tankViewModelNoContext.removeListener(_updateNumberOfFishController);
-    widget.tankViewModelNoContext
+    widget.tankLiveViewModelNoContext
+        .removeListener(_updateNumberOfFishController);
+    widget.tankLiveViewModelNoContext
         .removeListener(_updateFishGenerationController);
 
     controllerForBirthDate.dispose();
@@ -212,7 +192,7 @@ class TankViewState extends State<TankView> {
   }
 
   void notesDialog(
-      BuildContext context, TanksViewModel tanksModel, Tank currentTank) {
+      BuildContext context, TanksLiveViewModel tanksModel, Tank currentTank) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -265,8 +245,8 @@ class TankViewState extends State<TankView> {
     // we supply a unique key to this widget to force it to redraw each time a new tank is selected
     Key genoTypeDropDownKey = UniqueKey();
 
-    TanksViewModel tanksViewModel =
-        Provider.of<TanksViewModel>(context, listen: false);
+    TanksLiveViewModel tanksViewModel =
+        Provider.of<TanksLiveViewModel>(context, listen: false);
 
     ValueItem? selectedGenoType =
         tanksViewModel.convertGenoTypeToValueItem(currentTank.getGenoType());
@@ -296,49 +276,173 @@ class TankViewState extends State<TankView> {
     );
   }
 
-  Widget chooseParents(BuildContext context, Tank currentTank) {
-    // we supply a unique key to this widget to force it to redraw each time a new tank is selected
-    Key parentsDropDownKey = UniqueKey();
+  Future<bool> displayChooseParentsDialog({
+    required TankStringsEnum whichParent,
+    int? euthanizedDate,
+    String? selectedRack,
+    int? selectedTankPosition,
+    required TanksSelectViewModel tankParentSelectViewModel,
+    required TanksLineViewModel tanksLineViewModel,
+    Tank? euthanizedParentTank,
+    String? excludedTank,
+  }) async {
+    String parentString =
+        whichParent == TankStringsEnum.parentFemale ? "female" : "male";
+
+    final dialogResult = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Tank Parent $parentString'),
+          content: SizedBox(
+            width: double.infinity,
+            height: double.infinity,
+            child: (euthanizedDate != null)
+                ? ParentEuthanizedTankSelectView(
+                    incomingRackFk: selectedRack,
+                    incomingTankPosition: selectedTankPosition,
+                    tankSelectViewModelNoContext: tankParentSelectViewModel,
+                    tankLineViewModelNoContext: tanksLineViewModel,
+                    euthanizedParentTank: euthanizedParentTank)
+                : ParentTankSelectView(
+                    incomingRackFk: selectedRack,
+                    incomingTankPosition: selectedTankPosition,
+                    tankSelectViewModelNoContext: tankParentSelectViewModel,
+                    tankLineViewModelNoContext: tanksLineViewModel,
+                    excludedTank: excludedTank,
+                  ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return dialogResult ?? false;
+  }
+
+  Future<bool> chooseParentsDialog(
+      BuildContext context,
+      TankStringsEnum whichParent,
+      Tank? parentTank,
+      String excludedTank) async {
+    TanksLineViewModel tanksLineViewModel =
+        Provider.of<TanksLineViewModel>(context, listen: false);
+
+    TanksSelectViewModel tankParentSelectViewModel =
+        Provider.of<TanksSelectViewModel>(context, listen: false);
+    // FacilityViewModel facilitiesViewModel =
+    //     Provider.of<FacilityViewModel>(context, listen: false);
+
+    String? selectedRack;
+    int? selectedTankPosition;
+    int? euthanizedDate;
+
+    if (parentTank != null) {
+      selectedRack = parentTank.rackFk;
+      selectedTankPosition = parentTank.absolutePosition;
+      euthanizedDate = parentTank.euthanizedDate;
+    }
+    // we found the parent tank
+    return displayChooseParentsDialog(
+        whichParent: whichParent,
+        euthanizedDate: euthanizedDate,
+        selectedRack: selectedRack,
+        selectedTankPosition: selectedTankPosition,
+        tankParentSelectViewModel: tankParentSelectViewModel,
+        tanksLineViewModel: tanksLineViewModel,
+        euthanizedParentTank: parentTank,
+        excludedTank: excludedTank);
+  }
+
+  void saveParentTank(TankStringsEnum whichParent, Tank? currentTank) {
+    TanksSelectViewModel tanksSelectViewModel =
+        Provider.of<TanksSelectViewModel>(context, listen: false);
+
+    Tank? newParentTank = tanksSelectViewModel.returnCurrentPhysicalTank();
+    if (newParentTank != null && newParentTank.documentId != null) {
+      switch (whichParent) {
+        case TankStringsEnum.parentFemale:
+          currentTank?.parentFemale = newParentTank.documentId;
+          break;
+        case TankStringsEnum.parentMale:
+          currentTank?.parentMale = newParentTank.documentId;
+          break;
+        default:
+          break;
+      }
+      saveTank(currentTank);
+    }
+  }
+
+  Widget chooseParents(BuildContext context, TankStringsEnum whichParent,
+      TanksLiveViewModel tanksLiveViewModel) {
+    Tank? currentTank = tanksLiveViewModel.returnCurrentPhysicalTank();
 
     TanksLineViewModel tanksLineViewModel =
-    Provider.of<TanksLineViewModel>(context, listen: false);
+        Provider.of<TanksLineViewModel>(context, listen: false);
 
-    ValueItem theTankToExclude =
-    tanksLineViewModel.returnTankLineFromDocId(currentTank.tankLineDocId);
+    String initialParentLabel =
+        "${whichParent == TankStringsEnum.parentFemale ? 'Female' : 'Male'} Parent: not specified";
 
-    List<ValueItem> theTankLines = tanksLineViewModel.convertTankLinesToValueItems();
+    Tank? parentTank;
 
-    // we exclude the current tankline; it doesn’t make sense to be a parent of itself
-    theTankLines.remove(theTankToExclude);
+    return Padding(
+      padding: const EdgeInsets.only(left: 15),
+      child: ElevatedButton(
+        onPressed: (currentTank == null)
+            ? null
+            : () async {
+                bool dialogResult = await chooseParentsDialog(
+                    context, whichParent, parentTank, (currentTank.documentId)!);
 
-    List<ValueItem>  selectedParents = tanksLineViewModel.returnTankLinesFromTank(currentTank);
-
-    SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(
-        dropdownHeight: 34,
-        dropdownWidth: 220,
-        boxMultiSelectedClearIconSize: 15,
-        searchBarTextStyle: TextStyle(fontSize: 10),
-        hintStyle: TextStyle(fontSize: 10),
-        boxMultiSelectedTextStyle:TextStyle(fontSize: 10),
-        hint: "Select parents");
-
-    SimpleOverlaySettings overlayListSettings = const SimpleOverlaySettings(
-        dialogHeight: 400,
-        selectedItemTextStyle: TextStyle(fontSize: 10, color: Colors.black),
-        unselectedItemTextStyle: TextStyle(fontSize: 9, color: Colors.black45),
-        offsetHeight: -250);
-
-    return MultipleSearchDropDown(
-      key: parentsDropDownKey,
-      listItems: theTankLines,
-      onAddItem: addItem,
-      addMode: false,
-      deleteMode: false,
-      updateSelectedItems: updateSelectedParents,
-      selectedItems:
-      selectedParents, // this doesn’t get reapplied when we change the selected tank, so we give it a unique key to force rebuilding
-      searchBarSettings: searchBarSettings,
-      overlayListSettings: overlayListSettings,
+                // look at the tank that is being passed in
+                // if this tank has a euthanized date, then we don't execute the code below
+                // we need to not make any change
+                // we can't use the code below since there may be a “current” tank already saved
+                // from earlier.
+                if (dialogResult) {
+                  if (parentTank != null) {
+                    // a real parent had been selected; is it euthanized?
+                    if (parentTank?.euthanizedDate == null) {
+                      saveParentTank(whichParent, currentTank);
+                    }
+                  } else {
+                    // there was no initial selection and we OKed, so we have a new selection
+                    saveParentTank(whichParent, currentTank);
+                  }
+                }
+              },
+        style: TextButton.styleFrom(
+            foregroundColor: Colors.black,
+            textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.black,
+                ),
+            minimumSize: const Size(250, 20)),
+        child: FutureBuilder<ParentTankComponents>(
+          future: fetchParentDetails(currentTank: currentTank, whichParent: whichParent,tanksViewModel: tanksLiveViewModel,tanksLineViewModel: tanksLineViewModel),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Text(initialParentLabel);
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              parentTank = (snapshot.data as ParentTankComponents).parentTank;
+            }
+            return Text((snapshot.data as ParentTankComponents).parentLabel ?? initialParentLabel);
+          },
+        ),
+      ),
     );
   }
 
@@ -359,7 +463,7 @@ class TankViewState extends State<TankView> {
       double leftIndent,
       String labelText,
       TextEditingController? textController,
-      TanksViewModel tanksModel,
+      TanksLiveViewModel tanksModel,
       TankStringsEnum tanksStringsValue,
       [double? width]) {
     // business logic 3
@@ -385,9 +489,7 @@ class TankViewState extends State<TankView> {
                 ? chooseTankLineDropDown(context, currentTank)
                 : (tanksStringsValue == TankStringsEnum.genotype) &&
                         (currentTank != null)
-                    ? chooseGenoType(context, currentTank) : (tanksStringsValue == TankStringsEnum.parents) &&
-                (currentTank != null)
-                ? chooseParents(context, currentTank)
+                    ? chooseGenoType(context, currentTank)
                     : TextField(
                         enabled: (currentTank != null),
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -418,8 +520,9 @@ class TankViewState extends State<TankView> {
                               case TankStringsEnum.genotype:
                                 // we handle this above
                                 break;
-                              case TankStringsEnum.parents:
-                              // we handle this above
+                              case TankStringsEnum.parentFemale:
+                              case TankStringsEnum.parentMale:
+                                // we handle this above
                                 break;
                             }
                             await tanksModel.saveExistingTank(
@@ -436,7 +539,7 @@ class TankViewState extends State<TankView> {
 
   Future<void> _selectDate(
       BuildContext context,
-      TanksViewModel tankModel,
+      TanksLiveViewModel tankModel,
       Tank? currentTank,
       int? Function()? retrieveValue,
       void Function(int newValue)? updateValue) async {
@@ -466,17 +569,17 @@ class TankViewState extends State<TankView> {
 
   Widget drawDateOfBirth(
       BuildContext context,
-      TanksViewModel tankModel,
+      TanksLiveViewModel tankModel,
       Tank? currentTank,
       int? Function()? retrieveValue,
       void Function(int newValue)? updateValue) {
     return Row(
       children: [
-         Padding(
+        Padding(
           padding: const EdgeInsets.only(left: 15),
           child: Text(
             "DOB:",
-              style: Theme.of(context).textTheme.labelLarge,
+            style: Theme.of(context).textTheme.labelLarge,
           ),
         ),
         const SizedBox(
@@ -494,7 +597,7 @@ class TankViewState extends State<TankView> {
   }
 
   Widget buildCheckBox(
-      TanksViewModel tankModel,
+      TanksLiveViewModel tankModel,
       Tank? currentTank,
       String labelText,
       bool? Function()? retrieveValue,
@@ -528,7 +631,7 @@ class TankViewState extends State<TankView> {
 
   Widget buildParkedTank(BuildContext context) {
     // here we have listen on.
-    TanksViewModel tankModel = Provider.of<TanksViewModel>(context);
+    TanksLiveViewModel tankModel = Provider.of<TanksLiveViewModel>(context);
 
     if (tankModel.isThereAParkedTank()) {
       Tank? tank = tankModel.returnParkedTankedInfo();
@@ -543,6 +646,8 @@ class TankViewState extends State<TankView> {
       }
 
       return ParkedTank(
+        tanksViewModel: widget.tankLiveViewModelNoContext,
+        canDrag: true,
         height: height,
         width: width,
         tankLine: tank?.tankLineDocId,
@@ -666,29 +771,23 @@ class TankViewState extends State<TankView> {
         {'confirm': false, 'tankLineDeleteOption': tankLineDeleteOption};
   }
 
-  void deleteEuthanizeTank(BuildContext context, Tank currentTank) async {
+  void deleteEuthanizeTankDialog(BuildContext context, Tank currentTank) async {
     Map<String, dynamic> deleteTankResult = await deleteTankDialog(context);
     if (deleteTankResult['confirm'] == true) {
       ValueItem tankLineValueItem = widget.tankLineViewModelNoContext
           .returnTankLineFromDocId(currentTank.tankLineDocId);
 
-      ValueItem? genoTypeValueItem = widget.tankViewModelNoContext
-          .convertGenoTypeToValueItem(currentTank.genoType);
-      String genoTypeLabel = genoTypeValueItem?.label ?? "";
-
       widget.facilityViewModelNoContext
           .convertFacilityFkToFacilityName(currentTank.facilityFk!)
           .then((facilityName) {
-        widget.tankViewModelNoContext.deleteEuthanizeTank(
+        widget.tankLiveViewModelNoContext.deleteEuthanizeTank(
             tankLineValueItem.label,
-            genoTypeValueItem?.label,
-            currentTank.parent1,
-            currentTank.parent2,
             facilityName!,
             currentTank.absolutePosition,
             deleteTankResult['tankLineDeleteOption']);
+
         // BUGfixed is not selecting an empty tank
-        widget.tankViewModelNoContext
+        widget.tankLiveViewModelNoContext
             .selectThisTankCellConvertsVirtual(kEmptyTankIndex, cNotify);
       });
     }
@@ -697,11 +796,12 @@ class TankViewState extends State<TankView> {
   @override
   Widget build(BuildContext context) {
     // listen is on
-    TanksViewModel tankModel = Provider.of<TanksViewModel>(context);
+    TanksLiveViewModel tankLiveViewModel =
+        Provider.of<TanksLiveViewModel>(context);
 
     // we want a real physical tank here
     // business logic 8
-    Tank? currentTank = tankModel.returnCurrentPhysicalTank();
+    Tank? currentTank = tankLiveViewModel.returnCurrentPhysicalTank();
 
     return Scaffold(
       appBar: AppBar(
@@ -715,7 +815,8 @@ class TankViewState extends State<TankView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Center(
-                child: FacilityGrid(tankMode: cFacilityClickableGrid),
+                child: FacilityGrid(
+                    tankMode: FacilityEditState.readonlyMainScreen),
               ),
             ],
           ),
@@ -723,7 +824,10 @@ class TankViewState extends State<TankView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              RackGrid(),
+              RackGrid(
+                  rackWidth: kGridFullHSize,
+                  tanksViewModel: tankLiveViewModel,
+                  canCreateTank: true),
               buildParkedTank(context),
             ],
           ),
@@ -734,16 +838,16 @@ class TankViewState extends State<TankView> {
                 onPressed: (currentTank == null)
                     ? null
                     : () {
-                        tankModel.copyTank();
+                        tankLiveViewModel.copyTank();
                       },
                 child: const Text("Copy Tank Template"),
               ),
               TextButton(
                 // BUGfixed, was testing the wrong boolean
-                onPressed: (!tankModel.isTemplateInPlay)
+                onPressed: (!tankLiveViewModel.isTemplateInPlay)
                     ? null
                     : () {
-                        tankModel.clearTankTemplate();
+                        tankLiveViewModel.clearTankTemplate();
                       },
                 child: const Text("Clear Tank Template"),
               ),
@@ -751,18 +855,18 @@ class TankViewState extends State<TankView> {
           ),
           Row(
             children: [
-              buildInnerLabel(stdLeftIndent, "Tankline", null, tankModel,
-                  TankStringsEnum.tankLine, 260),
-              drawDateOfBirth(context,tankModel, currentTank, currentTank?.getBirthDate,
-                  currentTank?.setBirthDate),
+              buildInnerLabel(stdLeftIndent, "Tankline", null,
+                  tankLiveViewModel, TankStringsEnum.tankLine, 260),
+              drawDateOfBirth(context, tankLiveViewModel, currentTank,
+                  currentTank?.getBirthDate, currentTank?.setBirthDate),
               buildCheckBox(
-                  tankModel,
+                  tankLiveViewModel,
                   currentTank,
                   "Screen +",
                   currentTank?.getScreenPositive,
                   currentTank?.setScreenPositive),
-              buildInnerLabel(0, "Fish #", controllerForNumberOfFish, tankModel,
-                  TankStringsEnum.numberOfFish),
+              buildInnerLabel(0, "Fish #", controllerForNumberOfFish,
+                  tankLiveViewModel, TankStringsEnum.numberOfFish),
             ],
           ),
           Row(
@@ -771,19 +875,26 @@ class TankViewState extends State<TankView> {
                   stdLeftIndent,
                   "Generation",
                   controllerForGeneration,
-                  tankModel,
+                  tankLiveViewModel,
                   TankStringsEnum.generation),
-              buildInnerLabel(0, "Genotype", null, tankModel,
-                  TankStringsEnum.genotype, 180),
-              buildInnerLabel(15, "Parents", null, tankModel,
-                  TankStringsEnum.parents, 260),
+              buildInnerLabel(0, "Genotype", null, tankLiveViewModel,
+                  TankStringsEnum.genotype, 200),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  chooseParents(
+                      context, TankStringsEnum.parentFemale, tankLiveViewModel),
+                  chooseParents(
+                      context, TankStringsEnum.parentMale, tankLiveViewModel),
+                ],
+              ),
             ],
           ),
           Row(
             children: [
               ((currentTank?.absolutePosition == cParkedRackAbsPosition) ||
                       (currentTank == null) ||
-                      tankModel.isThereAParkedTank())
+                      tankLiveViewModel.isThereAParkedTank())
                   ? Container()
                   : Padding(
                       padding: const EdgeInsets.only(left: 40, top: 10),
@@ -792,10 +903,10 @@ class TankViewState extends State<TankView> {
                           setState(() {
                             // business logic 9
                             currentTank.parkIt();
-                            tankModel
+                            tankLiveViewModel
                                 .saveExistingTank(cParkedRackAbsPosition)
                                 .then((value) {
-                              widget.tankViewModelNoContext
+                              widget.tankLiveViewModelNoContext
                                   .selectThisTankCellConvertsVirtual(
                                       cParkedRackAbsPosition, cNotify);
                             });
@@ -816,11 +927,12 @@ class TankViewState extends State<TankView> {
                       ? null
                       : () {
                           currentTank.notes.loadNotes().then((_) {
-                            notesDialog(context, tankModel, currentTank);
+                            notesDialog(
+                                context, tankLiveViewModel, currentTank);
                             // BUGBroken evaluate to decided just error or Appwrite extension
                           }).catchError((error) {});
                         },
-                  child: const Text("Notes…"), // this is the button text
+                  child: const Text("Notes…"),
                 ),
               ),
               SizedBox(
@@ -849,7 +961,7 @@ class TankViewState extends State<TankView> {
                     onPressed: (currentTank == null)
                         ? null
                         : () {
-                            deleteEuthanizeTank(context, currentTank);
+                            deleteEuthanizeTankDialog(context, currentTank);
                           },
                     child: const Text("Delete/Euthanize Tank")),
               ),

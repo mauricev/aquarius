@@ -15,17 +15,14 @@ extension _ViewPrepareLogin
     AquariusViewModel model = Provider.of<AquariusViewModel>(context);
 
     return FutureBuilder(
-      future: model.modelRetrieveSession(), // retrieves the session
+      future: model.modelRetrieveSession(),
       builder: (ctx, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
 
           if (snapshot.hasError) {
-
-            // Return the widget for login screens
             return registerLoginScreens(context, model);
           } else if (snapshot.hasData) {
 
-            // Navigate to the home screen route
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                 context,

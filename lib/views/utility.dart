@@ -4,15 +4,16 @@ import '../view_models/facilities_viewmodel.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
 import '../view_models/tanks_viewmodel.dart';
+import 'tanks_view_rackgrid.dart';
 
 void myPrint(String printThis) {
   //print(printThis);
 }
 
-Stack returnTankWithOverlaidText(TanksViewModel tankModel, TanksLineViewModel tanksLineViewModel, int tankPosition, String imagePath) {
+Stack returnTankWithOverlaidText(TanksViewModel tankViewModel, TanksLineViewModel tanksLineViewModel, int tankPosition, String imagePath) {
   const cMaxAbbreviatedLength = 5;
 
-  Tank? tankItself = tankModel.returnPhysicalTankWithThisAbsolutePosition(tankPosition);
+  Tank? tankItself = tankViewModel.returnPhysicalTankWithThisAbsolutePosition(tankPosition);
 
   int length = 0;
   String abbreviatedTankLine = "";
@@ -95,7 +96,7 @@ double returnHeight(FacilityViewModel facilityModel) {
 }
 
 double returnWidth(FacilityViewModel facilityModel) {
-  return (kGridHSize / facilityModel.maxTanks);
+  return (rackGridWidth / facilityModel.maxTanks);
 }
 
 int returnTimeNow() {

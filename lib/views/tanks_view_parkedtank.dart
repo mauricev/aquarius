@@ -7,6 +7,8 @@ import '../models/tank_model.dart';
 import '../views/utility.dart';
 
 class ParkedTank extends StatelessWidget {
+  final TanksViewModel tanksViewModel;
+  final bool canDrag;
   final double height;
   final double width;
   final String? tankLine;
@@ -18,6 +20,8 @@ class ParkedTank extends StatelessWidget {
 
   const ParkedTank({
     super.key,
+    required this.tanksViewModel,
+    this.canDrag = true,
     this.height = 0,
     this.width = 0,
     this.tankLine,
@@ -28,10 +32,7 @@ class ParkedTank extends StatelessWidget {
     this.generation,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    TanksViewModel tankModel =
-    Provider.of<TanksViewModel>(context, listen: false);
+  Widget parkedContainer(BuildContext context) {
 
     TanksLineViewModel tanksLineViewModel =
     Provider.of<TanksLineViewModel>(context, listen: false);
@@ -41,52 +42,55 @@ class ParkedTank extends StatelessWidget {
     // so if we had this function search virtual tanks, we need a guard for the parked tank position
 
     int tankID =
-    tankModel.tankIdWithThisAbsolutePositionOnlyPhysical(cParkedAbsolutePosition);
+    tanksViewModel.tankIdWithThisAbsolutePositionOnlyPhysical(cParkedAbsolutePosition);
 
-    Tank? thisTank =
-    tankModel.returnPhysicalTankWithThisAbsolutePosition(cParkedAbsolutePosition);
-
-    // i think we can pass the tank to the receiver
-    // how do we swap tanks
-    // we need a second temporary rack
-    // change rack id of receiver to 0 and abs position to -3
-    // then change parked rack’s fk to this rack and position to is new position
-    // then go back and change
-
-    return Draggable(
-      feedback: Container(
+    return InkWell(
+      child: Container(
         height: height,
         width: width,
         decoration: BoxDecoration(
           border: Border.all(),
-          color: Colors.red,
+          // we should test tankid here and if it's not in the list, then we should draw transparent; otherwise it should be gray
+          color: (tankID !=
+              kEmptyTankIndex) // if we are in tankmode (not editable) and there is no text, we get grayed out
+              ? (tanksViewModel.returnIsThisTankSelectedWithVirtual(cParkedAbsolutePosition))
+              ? Colors.lightGreen[800]
+              : Colors.grey // this grid cell has a tank
+              : Colors
+              .transparent, // this grid cell does not have a tank, but we need a third state here
         ),
+        child: tanksViewModel.isThisTankPhysicalAndFat(cParkedAbsolutePosition) ? returnTankWithOverlaidText(tanksViewModel, tanksLineViewModel, cParkedAbsolutePosition, "assets/tank_fat.png") : returnTankWithOverlaidText(tanksViewModel, tanksLineViewModel, cParkedAbsolutePosition, "assets/tank_thin.png"),
       ),
-      data: thisTank, // we pass this tank to the draggable target
-      child: InkWell(
-        child: Container(
+      onTap: () {
+        if (tankID != kEmptyTankIndex) {
+          // we only want to select actual tanks at the moment
+          tanksViewModel.selectThisTankCellConvertsVirtual(cParkedAbsolutePosition,cNotify);
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    Tank? thisTank =
+    tanksViewModel.returnPhysicalTankWithThisAbsolutePosition(cParkedAbsolutePosition);
+
+    if (canDrag) {
+      return Draggable(
+        feedback: Container(
           height: height,
           width: width,
           decoration: BoxDecoration(
             border: Border.all(),
-            // we should test tankid here and if it's not in the list, then we should draw transparent; otherwise it should be gray
-            color: (tankID !=
-                kEmptyTankIndex) // if we are in tankmode (not editable) and there is no text, we get grayed out
-                ? (tankModel.returnIsThisTankSelectedWithVirtual(cParkedAbsolutePosition))
-                ? Colors.lightGreen[800]
-                : Colors.grey // this grid cell has a tank
-                : Colors
-                .transparent, // this grid cell does not have a tank, but we need a third state here
+            color: Colors.red,
           ),
-          child: tankModel.isThisTankPhysicalAndFat(cParkedAbsolutePosition) ? returnTankWithOverlaidText(tankModel, tanksLineViewModel, cParkedAbsolutePosition, "assets/tank_fat.png") : returnTankWithOverlaidText(tankModel, tanksLineViewModel, cParkedAbsolutePosition, "assets/tank_thin.png"),
         ),
-        onTap: () {
-          if (tankID != kEmptyTankIndex) {
-            // we only want to select actual tanks at the moment
-            tankModel.selectThisTankCellConvertsVirtual(cParkedAbsolutePosition,cNotify);
-          }
-        },
-      ),
-    );
+        data: thisTank, // we pass this tank to the draggable target
+        child: parkedContainer(context),
+      );
+    } else {
+      return parkedContainer(context);
+    }
   }
 }

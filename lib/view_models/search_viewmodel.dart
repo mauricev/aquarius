@@ -6,6 +6,7 @@ import 'package:appwrite/appwrite.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
 import '../view_models/tanklines_viewmodel.dart';
+import 'tanks_viewmodel_common.dart';
 
 class SearchViewModel with ChangeNotifier {
   final ManageSession
@@ -27,7 +28,7 @@ class SearchViewModel with ChangeNotifier {
     this.facilityFk = facilityFk;
   }
 
-  void addTankFromDatabase(
+  /*void addTankFromDatabase(
       String documentId,
       String? facilityFk,
       String rackFk,
@@ -51,7 +52,7 @@ class SearchViewModel with ChangeNotifier {
         generation: generation,
         manageSession: _manageSession);
     tankListFull.add(aTank);
-  }
+  }*/
 
   void clearTanksFullList() {
     tankListFull.clear();
@@ -96,7 +97,13 @@ class SearchViewModel with ChangeNotifier {
           theTank.data['screen_positive'],
           theTank.data['number_of_fish'],
           theTank.data['fat_tank_position'],
-          theTank.data['generation']);
+          theTank.data['generation'],
+          theTank.data['genotype'],
+        theTank.data['parent_female'],
+        theTank.data['parent_male'],
+          _manageSession,
+          tankListFull
+      );
     }
   }
 

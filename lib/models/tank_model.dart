@@ -15,8 +15,9 @@ class Tank {
   int? fatTankPosition;
   int? generation;
   String? genoType;
-  String? parent1;
-  String? parent2;
+  String? parentFemale;
+  String? parentMale;
+  int? euthanizedDate;
   final ManageSession manageSession;
   late final Notes notes;
   Tank({
@@ -31,8 +32,9 @@ class Tank {
     this.fatTankPosition,
     this.generation,
     this.genoType,
-    this.parent1,
-    this.parent2,
+    this.parentFemale,
+    this.parentMale,
+    this.euthanizedDate,
     required this.manageSession,
   }) : birthDate = birthDate ?? returnTimeNow() {
     notes = createNotes();
@@ -93,13 +95,4 @@ class Tank {
   String? getGenoType() {
     return genoType;
   }
-
-  String? getParents() {
-    return parent1;
-  }
-
-  String? getParent2() {
-    return parent2;
-  }
-
 }
