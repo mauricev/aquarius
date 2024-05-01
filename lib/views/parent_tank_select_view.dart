@@ -8,7 +8,7 @@ import '../views/consts.dart';
 import '../views/tanks_view_parkedtank.dart';
 import '../views/tanks_view_rackgrid.dart';
 import '../models/tank_model.dart';
-import '../view_models/tanklines_viewmodel.dart';
+import '../view_models/tankitems_viewmodel.dart';
 import 'parent_tanks_view_common.dart';
 
 class ParentTankSelectView extends StatefulWidget {

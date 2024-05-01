@@ -6,7 +6,6 @@ import 'facilities_viewmodel.dart';
 import '../views/consts.dart';
 import '../views/utility.dart';
 import '../models/tank_model.dart';
-import 'package:simple_search_dropdown/simple_search_dropdown.dart';
 import 'tanks_viewmodel_common.dart';
 
 // two new classes
@@ -16,8 +15,6 @@ class TanksViewModel with ChangeNotifier {
   final ManageSession manageSession;
 
   List<Tank> tankList = <Tank>[];
-  List<ValueItem<dynamic>> genoTypeList =
-      <ValueItem<dynamic>>[]; // this is a list of different genotypes
 
   int selectedRack = kNoRackSelected; // this is a rack cell, not a tank cell
   int selectedTankCell = kEmptyTankIndex;
@@ -33,39 +30,6 @@ class TanksViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  /*void addTankFromDatabase(
-    String documentId,
-    String facilityFk,
-    String rackFk,
-    int absolutePosition,
-    String tankLine,
-    int birthDate,
-    bool? screenPositive,
-    int? numberOfFish,
-    int? fatTankPosition,
-    int? generation,
-    String? genotype,
-    String? parentFemale,
-    String? parentMale,
-  ) {
-    Tank aTank = Tank(
-        documentId: documentId,
-        facilityFk: facilityFk,
-        rackFk: rackFk,
-        absolutePosition: absolutePosition,
-        tankLineDocId: tankLine,
-        birthDate: birthDate,
-        screenPositive: screenPositive,
-        numberOfFish: numberOfFish,
-        fatTankPosition: fatTankPosition,
-        generation: generation,
-        genoType: genotype,
-        parentFemale: parentFemale,
-        parentMale: parentMale,
-        manageSession: manageSession);
-    tankList.add(aTank);
-  }*/
-
   // problem creating tank from the above is that it is saving the rack and we a dedicated function for this
   // we could
 
@@ -74,44 +38,7 @@ class TanksViewModel with ChangeNotifier {
         .clear(); // does not matter because we have the parked rack already saved, so it just gets read back in
   }
 
-  Future<void> _buildGenoTypesList() async {
-    /*List<String>? genoTypeQuery = [
-      Query.notEqual("genotype", [""]) // empty string brings back all genotypes
-    ];*/
-
-    models.DocumentList? theGenoTypeList =
-        await manageSession.queryDocument(cGenoTypeCollection, null);
-
-    for (int theIndex = 0;
-        theIndex < theGenoTypeList.documents.length;
-        theIndex++) {
-      models.Document theGenoTypeDocument = theGenoTypeList.documents[theIndex];
-      ValueItem genoType = ValueItem(
-          label: theGenoTypeDocument.data['genotype'],
-          value: theGenoTypeDocument.data["\$id"]);
-      genoTypeList.add(genoType);
-    }
-  }
-
-  List<ValueItem<dynamic>> returnGenoTypes() {
-    return genoTypeList;
-  }
-
-  ValueItem? convertGenoTypeToValueItem(String? genoType) {
-    // the initial genotype is null, not empty string
-    if (genoType == null) return null;
-
-    for (int theIndex = 0; theIndex <= genoTypeList.length; theIndex++) {
-      if (genoTypeList[theIndex].value == genoType) {
-        return genoTypeList[theIndex];
-      }
-    }
-    return null;
-  }
-
-  TanksViewModel(this.manageSession) {
-    _buildGenoTypesList();
-  }
+  TanksViewModel(this.manageSession);
 
   Future<Map<String, dynamic>?> findTankLocationInfoByID(
       String tankDocId) async {

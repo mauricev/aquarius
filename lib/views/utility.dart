@@ -1,4 +1,4 @@
-import 'package:aquarius/view_models/tanklines_viewmodel.dart';
+import '../view_models/tankitems_viewmodel.dart';
 import 'package:flutter/material.dart';
 import '../view_models/facilities_viewmodel.dart';
 import '../views/consts.dart';
@@ -20,7 +20,7 @@ Stack returnTankWithOverlaidText(TanksViewModel tankViewModel, TanksLineViewMode
 
   if (tankItself != null) {
     // BUGfixed previous code was using tankLineDocId instead of actual tankline
-    String tankLine = tanksLineViewModel.returnTankLineFromDocId(tankItself.tankLineDocId).label;
+    String tankLine = tanksLineViewModel.returnTankItemFromDocId(tankItself.tankLineDocId).label;
     length = tankLine.length;
     if (length < cMaxAbbreviatedLength) {
       abbreviatedTankLine = tankLine.substring(0, length);
@@ -122,6 +122,17 @@ String buildDateOfBirth(int? Function()? retrieveValue) {
   }
   return dobText;
 }
+
+/*String returnGenoType(BuildContext context, Tank currentTank) {
+
+  TanksSelectViewModel tanksSelectViewModel =
+  Provider.of<TanksSelectViewModel>(context, listen: false);
+
+  ValueItem? selectedGenoType = tanksSelectViewModel
+      .convertGenoTypeToValueItem(currentTank.getGenoType());
+
+  return selectedGenoType?.label ?? cGenoTypeNotSpecified;
+}*/
 
 Future<bool> confirmActionSpecifiedInMessage(BuildContext context, String message) async {
   return await showDialog<bool>(

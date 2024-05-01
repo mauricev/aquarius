@@ -1,4 +1,4 @@
-import 'package:aquarius/view_models/tanklines_viewmodel.dart';
+import 'package:aquarius/view_models/tankitems_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/tanks_viewmodel.dart';

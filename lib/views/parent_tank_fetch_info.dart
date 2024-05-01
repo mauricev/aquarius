@@ -1,7 +1,7 @@
 import '../view_models/tanks_viewmodel.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
-import '../view_models/tanklines_viewmodel.dart';
+import '../view_models/tankitems_viewmodel.dart';
 
 class ParentTankComponents {
   String? parentLabel;
@@ -43,7 +43,7 @@ Future<ParentTankComponents> fetchParentDetails({
   String? tankLine;
   if (parentTankComponents.parentTank != null && parentTankComponents.parentTank?.tankLineDocId != null) {
     if (parentTankComponents.parentTank?.euthanizedDate == null) {
-      tankLine = tanksLineViewModel.returnTankLineFromDocId((parentTankComponents.parentTank?.tankLineDocId)!).label;
+      tankLine = tanksLineViewModel.returnTankItemFromDocId((parentTankComponents.parentTank?.tankLineDocId)!).label;
     } else {
       tankLine = parentTankComponents.parentTank?.tankLineDocId; // euthanized tanks have an embedded tankline
     }

@@ -57,11 +57,11 @@ class FacilityViewModel with ChangeNotifier {
   Future<List<Map<String, String>>> getFacilityNames2() async {
     List<Map<String, String>> facilitiesNameList = [];
 
-   /* List<String>? query = [
+    /*List<String>? query = [
       Query.notEqual(
           "facility_name", [""]) // empty string brings back all facilities
-    ];
-*/
+    ];*/
+
     /*List<String>? query = [
       Query.equal(
           "facility_name", ["Alberto’s zebrafish place"]) // empty string brings back all facilities

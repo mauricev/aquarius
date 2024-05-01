@@ -9,7 +9,7 @@ import 'view_models/tanks_viewmodel.dart';
 import 'view_models/search_viewmodel.dart';
 import 'views/consts.dart';
 import 'package:flutter/services.dart';
-import 'view_models/tanklines_viewmodel.dart';
+import 'view_models/tankitems_viewmodel.dart';
 
 // 5 of 6 remove for real-world web
 import 'package:window_manager/window_manager.dart';
@@ -23,7 +23,8 @@ void main() async {
   ManageSession manageSession = ManageSession();
 
   // real-world 5 of 5, comment out for web
-  if (defaultTargetPlatform == TargetPlatform.windows ||
+  //*
+   if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS) {
 
     await windowManager.ensureInitialized();
@@ -43,7 +44,7 @@ void main() async {
       await windowManager.focus();
     });
   }
-
+//*/
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]
   )
@@ -88,7 +89,10 @@ class MyApp extends StatelessWidget {
           create: (_) => SearchViewModel(manageSession),
         ),
         ChangeNotifierProvider<TanksLineViewModel>(
-          create: (_) => TanksLineViewModel(manageSession),
+          create: (_) => TanksLineViewModel(manageSession: manageSession),
+        ),
+        ChangeNotifierProvider<GenoTypeViewModel>(
+        create: (_) => GenoTypeViewModel(manageSession: manageSession),
         ),
       ],
       child: MaterialApp(

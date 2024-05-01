@@ -1,5 +1,5 @@
 import 'package:aquarius/view_models/facilities_viewmodel.dart';
-import 'package:aquarius/view_models/tanklines_viewmodel.dart';
+import 'package:aquarius/view_models/tankitems_viewmodel.dart';
 import 'package:aquarius/views/parent_tanks_view_common.dart';
 
 import '../views/tanks_view.dart';
@@ -75,11 +75,6 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget searchedItem(context, Tank tank, int index) {
-    // we will build a container of items;
-    // must be tappable.
-    // we need more info; we need the facility, rack and document id to pass onto the other controller
-    // what will display
-    // 1) tankline, 2) dob 3) smalltank 4) screen positive, 5) generation, 6)
 
     SearchViewModel searchModel = Provider.of<SearchViewModel>(context);
 
@@ -92,7 +87,7 @@ class _SearchViewState extends State<SearchView> {
     FacilityViewModel facilitiesViewModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
-    ValueItem theTankLineValueItem = tanksLineViewModel.returnTankLineFromDocId((tank.tankLineDocId));
+    ValueItem theTankLineValueItem = tanksLineViewModel.returnTankItemFromDocId((tank.tankLineDocId));
 
     int? birthDate = tank.getBirthDate();
     int? breedingDate = searchModel.computeBreedingDate(birthDate);

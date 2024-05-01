@@ -9,7 +9,7 @@ import '../views/tanks_view_parkedtank.dart';
 import '../views/tanks_view_rackgrid.dart';
 import '../views/tanks_view_notes.dart';
 import '../models/tank_model.dart';
-import '../view_models/tanklines_viewmodel.dart';
+import '../view_models/tankitems_viewmodel.dart';
 import 'package:simple_search_dropdown/simple_search_dropdown.dart';
 import 'parent_tank_select_view.dart';
 import 'parent_euthanized_tank_display_view.dart';
@@ -210,7 +210,7 @@ class TankViewState extends State<TankView> {
     Key tankLineDropDownKey = UniqueKey();
 
     ValueItem selectedTank =
-        tanksLineViewModel.returnTankLineFromDocId(currentTank.tankLineDocId);
+        tanksLineViewModel.returnTankItemFromDocId(currentTank.tankLineDocId);
 
     SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(
         dropdownHeight: 34,
@@ -228,7 +228,7 @@ class TankViewState extends State<TankView> {
 
     return SearchDropDown(
       key: tankLineDropDownKey,
-      listItems: tanksLineViewModel.convertTankLinesToValueItems(),
+      listItems: tanksLineViewModel.convertTankItemsToValueItems(),
       onAddItem: addItem,
       addMode: false,
       deleteMode: false,
@@ -245,11 +245,11 @@ class TankViewState extends State<TankView> {
     // we supply a unique key to this widget to force it to redraw each time a new tank is selected
     Key genoTypeDropDownKey = UniqueKey();
 
-    TanksLiveViewModel tanksViewModel =
-        Provider.of<TanksLiveViewModel>(context, listen: false);
+    GenoTypeViewModel genoTypeViewModel =
+        Provider.of<GenoTypeViewModel>(context, listen: false);
 
     ValueItem? selectedGenoType =
-        tanksViewModel.convertGenoTypeToValueItem(currentTank.getGenoType());
+    genoTypeViewModel.returnTankItemFromDocId(currentTank.getGenoType());
 
     SimpleSearchbarSettings searchBarSettings = const SimpleSearchbarSettings(
         dropdownHeight: 30,
@@ -264,7 +264,7 @@ class TankViewState extends State<TankView> {
 
     return SearchDropDown(
       key: genoTypeDropDownKey,
-      listItems: tanksViewModel.returnGenoTypes(),
+      listItems: genoTypeViewModel.returnTankItemListAsValueItemList(),
       onAddItem: addItem,
       addMode: false,
       deleteMode: false,
@@ -667,7 +667,11 @@ class TankViewState extends State<TankView> {
         Provider.of<TanksLineViewModel>(context, listen: false);
 
     ValueItem theTankLineValueItem = tanksLineViewModel
-        .returnTankLineFromDocId((currentTank?.tankLineDocId)!);
+        .returnTankItemFromDocId((currentTank?.tankLineDocId)!);
+
+    GenoTypeViewModel genoTypeViewModel =
+    Provider.of<GenoTypeViewModel>(context, listen: false);
+
     //BUGFixed was using value and not label. 2023_12_27
     String tankLineString = theTankLineValueItem.label;
 
@@ -675,13 +679,18 @@ class TankViewState extends State<TankView> {
         ? "screen positive"
         : "screen negative";
 
-    String smallTankString = (currentTank?.getSmallTank() ?? false)
-        ? "$cThinTank tank"
-        : "$cFatTank tank";
+    // added in 3.2
+    String? genoType = currentTank?.getGenoType();
+    ValueItem genoTypeValueItem = genoTypeViewModel.returnTankItemFromDocId(genoType);
+    String genoTypeString = genoTypeValueItem.label;
 
-    String numberOfFishString = currentTank?.getNumberOfFish().toString() ?? "";
-    String generationString = currentTank?.generation.toString() ?? "";
-    String dateOfBirthString = buildDateOfBirth(currentTank?.getBirthDate);
+    if (genoTypeString != cGenoTypeNotSpecified) {
+      genoTypeString = "genotype: $genoTypeString";
+    }
+
+    String? numberOfFishString = currentTank?.getNumberOfFish().toString();
+    String? generationString = currentTank?.generation.toString();
+    String? dateOfBirthString = buildDateOfBirth(currentTank?.getBirthDate);
 
     // BUGfixed 2024-03-05
     // we now store the tank’s document id and no longer its rack and abs position
@@ -698,7 +707,7 @@ class TankViewState extends State<TankView> {
 ^FO275,30^A0N,25^FD$tankLineString^FS
 ^FO275,65^A0N,30^FDDOB:$dateOfBirthString^FS
 ^FO275,100^A0N,30^FDCount:$numberOfFishString^FS
-^FO275,135^A0N,30^FD$smallTankString^FS
+^FO275,135^A0N,30^FD$genoTypeString^FS
 ^FO275,170^A0N,30^FD$screenPositiveString^FS
 ^FO275,205^A0N,30^FDGen:F$generationString^FS
 ^FO20,20^BQN,2,8^FH^FDMA:$tankDocumentId^FS 
@@ -775,7 +784,7 @@ class TankViewState extends State<TankView> {
     Map<String, dynamic> deleteTankResult = await deleteTankDialog(context);
     if (deleteTankResult['confirm'] == true) {
       ValueItem tankLineValueItem = widget.tankLineViewModelNoContext
-          .returnTankLineFromDocId(currentTank.tankLineDocId);
+          .returnTankItemFromDocId(currentTank.tankLineDocId);
 
       widget.facilityViewModelNoContext
           .convertFacilityFkToFacilityName(currentTank.facilityFk!)

@@ -1,4 +1,4 @@
-import 'package:aquarius/view_models/tanklines_viewmodel.dart';
+import 'package:aquarius/view_models/tankitems_viewmodel.dart';
 import '../view_models/search_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +12,7 @@ import '../views/utility.dart';
 import '../views/consts.dart';
 import '../views/login_view.dart';
 import '../view_models/tanks_viewmodel.dart';
-import '../views/tanklines_view.dart';
+import '../views/tankitems_view.dart';
 import '../view_models/facilities_stream_controller.dart';
 
 class HomeScreenView extends StatefulWidget {
@@ -52,7 +52,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
         Provider.of<TanksLiveViewModel>(context, listen: false);
 
     TanksSelectViewModel tanksSelectViewModel =
-    Provider.of<TanksSelectViewModel>(context, listen: false);
+        Provider.of<TanksSelectViewModel>(context, listen: false);
 
     tanksLiveViewModel.setFacilityId(facilityViewModel.selectedFacility);
     // BUGfixed new view model needs to know the facility
@@ -90,7 +90,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                   // BUGFixed 2024-03-07, added block around if
                   if (selectedValue == item['facility_fk']) {
                     isSelectedValueValid = true;
-                }
+                  }
                   dropdownItems.add(DropdownMenuItem<String>(
                     value: item['facility_fk'],
                     child: Text(item['facility_name'].toString()),
@@ -176,8 +176,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           } else {
             informViewModelsOfTheFacility(context); // do we need to call this?
           }
-          facilityStreamController
-              .add("update"); // this should trigger a rebuild of the facility dropdown
+          facilityStreamController.add(
+              "update"); // this should trigger a rebuild of the facility dropdown
         });
       });
     });
@@ -190,21 +190,26 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     TanksLineViewModel tankLinesViewModel =
         Provider.of<TanksLineViewModel>(context, listen: false);
 
+    GenoTypeViewModel genoTypesViewModel =
+        Provider.of<GenoTypeViewModel>(context, listen: false);
+
     FacilityViewModel facilityModel =
         Provider.of<FacilityViewModel>(context, listen: false);
 
     // TankView depends on having the list of tanklines
-    tankLinesViewModel.buildTankLinesList().then((data) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => TankView(
-                    incomingRackFk: null,
-                    incomingTankPosition: null,
-                tankLiveViewModelNoContext: tankLiveViewModel,
-                    tankLineViewModelNoContext: tankLinesViewModel,
-                    facilityViewModelNoContext: facilityModel,
-                  ))).then((data) {});
+    tankLinesViewModel.buildTankItemsList().then((data) {
+      genoTypesViewModel.buildTankItemsList().then((data) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => TankView(
+                      incomingRackFk: null,
+                      incomingTankPosition: null,
+                      tankLiveViewModelNoContext: tankLiveViewModel,
+                      tankLineViewModelNoContext: tankLinesViewModel,
+                      facilityViewModelNoContext: facilityModel,
+                    ))).then((data) {});
+      });
     });
   }
 
@@ -227,7 +232,9 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     // and then into another position to see if I can find the tank
     // move a second time into the other facility to see if I can still track it
 
-    tankLiveViewModel.findTankLocationInfoByID(tankDocumentId).then((theTankMap) {
+    tankLiveViewModel
+        .findTankLocationInfoByID(tankDocumentId)
+        .then((theTankMap) {
       // it's OK to pass rack and tank but we also need to change the facility if need be
       // we don’t need to save the old facility; it’s a permanent switch
 
@@ -314,12 +321,17 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     TanksLineViewModel tankLinesViewModel =
         Provider.of<TanksLineViewModel>(context, listen: false);
 
+    GenoTypeViewModel genoTypesViewModel =
+        Provider.of<GenoTypeViewModel>(context, listen: false);
+
     // SearchViewModel needs the tanklines of the current facility
     // so it needs TanksLineViewModel to build the mapping of the facility’s tanks to the tanklines
-    tankLinesViewModel.buildTankLinesList().then((data) {
-      searchModel.buildInitialSearchList(tankLinesViewModel).then((data) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const SearchView()));
+    tankLinesViewModel.buildTankItemsList().then((data) {
+      genoTypesViewModel.buildTankItemsList().then((data) {
+        searchModel.buildInitialSearchList(tankLinesViewModel).then((data) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const SearchView()));
+        });
       });
     });
   }
@@ -328,10 +340,22 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     TanksLineViewModel tankLinesViewModel =
         Provider.of<TanksLineViewModel>(context, listen: false);
 
-    tankLinesViewModel.buildTankLinesList().then((data) {
+    tankLinesViewModel.buildTankItemsList().then((data) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const TanksLineView()),
+        MaterialPageRoute(builder: (context) => const TanksItemView(whichTankItemType: TankItemType.eTankLine)),
+      );
+    });
+  }
+
+  void loadGenoTypesView(BuildContext context) {
+    GenoTypeViewModel genoTypeViewModel =
+        Provider.of<GenoTypeViewModel>(context, listen: false);
+
+    genoTypeViewModel.buildTankItemsList().then((data) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TanksItemView(whichTankItemType: TankItemType.eGenoType)),
       );
     });
   }
@@ -479,6 +503,13 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           children: [
             loadCommonButton(context, loadTankLinesView,
                 facilityViewModel.pretendFacilityIsIrrelevant, "Tanklines"),
+          ],
+        ),
+        buildOuterLabelHeadlineSmall(context, "GenoTypes"),
+        Row(
+          children: [
+            loadCommonButton(context, loadGenoTypesView,
+                facilityViewModel.pretendFacilityIsIrrelevant, "GenoTypes"),
           ],
         ),
         const SizedBox(

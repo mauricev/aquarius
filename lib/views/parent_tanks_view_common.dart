@@ -4,7 +4,7 @@ import '../view_models/tanks_viewmodel.dart';
 import 'utility.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
-import '../view_models/tanklines_viewmodel.dart';
+import '../view_models/tankitems_viewmodel.dart';
 import 'package:simple_search_dropdown/simple_search_dropdown.dart';
 import 'parent_tank_fetch_info.dart';
 
@@ -53,13 +53,20 @@ Widget drawDateOfBirth(
 }
 
 Widget chooseGenoType(BuildContext context, Tank currentTank) {
-  TanksSelectViewModel tanksSelectViewModel =
-  Provider.of<TanksSelectViewModel>(context, listen: false);
 
-  ValueItem? selectedGenoType = tanksSelectViewModel
-      .convertGenoTypeToValueItem(currentTank.getGenoType());
+  GenoTypeViewModel tankGenoTypeViewModel =
+  Provider.of<GenoTypeViewModel>(context, listen: false);
 
-  String genoType = selectedGenoType?.label ?? "genotype not specified";
+  String? genoTypeFk = currentTank.getGenoType();
+  ValueItem? selectedGenoType = tankGenoTypeViewModel
+      .returnTankItemFromDocId(genoTypeFk);
+
+  // BUGFixed wasn't displaying anything if genotype was not specified 2024-04-30
+  String genoType = "genotype not specified";
+  if (genoTypeFk != null ) {
+    genoType = selectedGenoType.label;
+  }
+
   return Text(
     genoType,
     style: Theme.of(context).textTheme.bodySmall,
@@ -127,7 +134,7 @@ Widget chooseTankLineDropDown(BuildContext context, Tank currentTank) {
       Provider.of<TanksLineViewModel>(context, listen: false);
 
   ValueItem selectedTank =
-      tanksLineViewModel.returnTankLineFromDocId(currentTank.tankLineDocId);
+      tanksLineViewModel.returnTankItemFromDocId(currentTank.tankLineDocId);
   String tankLine = "tankline not yet specified";
   if (selectedTank.label != "") {
     tankLine = selectedTank.label;

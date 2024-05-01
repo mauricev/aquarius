@@ -5,7 +5,7 @@ import 'package:appwrite/models.dart' as models;
 import 'package:appwrite/appwrite.dart';
 import '../views/consts.dart';
 import '../models/tank_model.dart';
-import '../view_models/tanklines_viewmodel.dart';
+import '../view_models/tankitems_viewmodel.dart';
 import 'tanks_viewmodel_common.dart';
 
 class SearchViewModel with ChangeNotifier {
@@ -132,7 +132,7 @@ class SearchViewModel with ChangeNotifier {
 
     for (Tank tank in tankListFull) {
       if (tank.tankLineDocId.isNotEmpty) {
-        ValueItem? tankLine = tanksLineViewModel?.returnTankLineFromDocId(tank.tankLineDocId);
+        ValueItem? tankLine = tanksLineViewModel?.returnTankItemFromDocId(tank.tankLineDocId);
         if (tankLine != null) {
           uniqueTankLines.add(tankLine);
         }

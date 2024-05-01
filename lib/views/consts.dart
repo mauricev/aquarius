@@ -2,27 +2,27 @@ const int kGridFullHSize = 650;
 const int kGridDialogHSize = 590;
 const int kGridVSize = 500;
 const String kProgramName = 'Aquarius';
-const String kVersion = "3.1.0";
+const String kVersion = "3.2.0";
 
 const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";
 
 // this will change for local, real-world output
 // 1 of 5
-const String kIPAddress = 'http://192.168.1.91:8080/v1';
-//const String kIPAddress = 'https://aquarius-appwrite-at-peredalab.org/v1';
+//const String kIPAddress = 'http://192.168.1.91:8080/v1';
+const String kIPAddress = 'https://aquarius-appwrite-at-peredalab.org/v1';
 
 //local
 // 2 of 5
-const String kProjectId = '6477fda3e6695f938f0d';
+//const String kProjectId = '6477fda3e6695f938f0d';
 
 //real-world
-//const String kProjectId = '648fc20504d0ed7a089d';
+const String kProjectId = '648fc20504d0ed7a089d';
 
 // set to true or false accordingly
 // 3 of 5
-const kRunningLocal = true;
-//const kRunningLocal = false;
+//const kRunningLocal = true;
+const kRunningLocal = false;
 
 // 4 of 5, zebra printing
 // 5 of 5, main (window code for iPad, but disable for web)
@@ -89,15 +89,15 @@ const cNewFacility = true;
 const String cFacilityNameKey = "faciltyNameKey";
 const String cParkedTankFacility = "no associated facility";
 
-const int cNewTankline = -1;
-const int cInvalidTankLine = -1;
-const bool cTankLineNotInUse = false;
+const int cNewTankItem = -1;
+const int cInvalidTankItem = -1;
+const bool cTankItemNotInUse = false;
 
-const bool cTankLineToBeEdited = false;
-const bool cTankLineToBeCreated = true;
-const bool cTankLineDialogCancelled = false;
-const bool cTankLineDialogOKed = true;
-enum TankLineStatusEnum { eTankLineBlank, eTankLineInUse, eTankLineReadyToEdit }
+const bool cTankItemToBeEdited = false;
+const bool cTankItemToBeCreated = true;
+const bool cTankItemDialogCancelled = false;
+const bool cTankItemDialogOKed = true;
+enum TankItemStatusEnum { eTankItemBlank, eTankItemInUse, eTankItemReadyToEdit }
 
 const String cEuthanizeTank = 'euthanize';
 const String cDeleteTank = 'delete';
@@ -105,7 +105,47 @@ const String cDeleteTank = 'delete';
 const String cTankLineValueNotYetAssigned = "not yet assigned"; // value is document id
 const String cTankLineLabelNotYetAssigned = ""; // label actual tank line text
 
-const int cTankLineMaxLength = 60;
+const String cGenoTypeValueNotYetAssigned = "not yet assigned"; // value is document id
+const String cGenoTypeLabelNotYetAssigned = ""; // label actual tank line text
+
+const int cTankItemMaxLength = 60;
 const int cNoFishSelected = 0;
 
 const double stdLeftIndent = 40;
+
+const String cGenoTypeNotSpecified = "genotype not specified";
+
+enum TankItemType {eTankLine, eGenoType }
+
+const String cCreateTankLines = "Create Tanklines";
+const String cCreateGenoTypes = "Add Genotypes";
+
+const String cCreateNewTankLines = "Create New Tankline…";
+const String cCreateNewGenoTypes = "Create New Genotype…";
+
+const String cNewTankLine = 'New Tankline';
+const String cNewGenotype = 'New Genotype';
+
+const String cEditTankLines = "Edit TankLines";
+const String cEditGenotypes = "Edit Genotypes";
+
+const String cEditTankLine = "Edit TankLine";
+const String cEditGenotype = "Edit Genotype";
+
+const String cModifyTankLine = "Tanklines (tap to modify)";
+const String cModifyGenotype = "Genotypes (tap to modify)";
+
+const String cDeleteTankLines = "Delete TankLines";
+const String cDeleteGenotypes = "Delete Genotypes";
+
+const String cDeleteTankLine = "Delete TankLine";
+const String cDeleteGenotype = "Delete Genotype";
+
+const String cTankLineInUse = 'This TankLine is in Use';
+const String cGenoTypeInUse = 'This Genotype is in Use';
+
+const String cTankLineCantBeBlank = "Tankline can’t be blank";
+const String cGenoTypeCantBeBlank = "Genotype can’t be blank";
+
+const String cTankLineExisting = "That’s an existing tankline";
+const String cGenoTypeExisting = "That’s an existing genotype";
