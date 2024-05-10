@@ -7,13 +7,15 @@ import '../views/facilities_view.dart';
 import '../view_models/facilities_viewmodel.dart';
 import 'search_view.dart';
 import 'tanks_view.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import '../views/utility.dart';
 import '../views/consts.dart';
 import '../views/login_view.dart';
 import '../view_models/tanks_viewmodel.dart';
 import '../views/tankitems_view.dart';
 import '../view_models/facilities_stream_controller.dart';
+import 'scanner_view.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 
 class HomeScreenView extends StatefulWidget {
   const HomeScreenView({super.key});
@@ -26,7 +28,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   // when the app starts and managesession is initialized, we read from local storage any saved facility
   // we can then assign it to the dropdown and everything else
 
-  void informViewModelsOfTheFacility(BuildContext context) {
+  /*void informViewModelsOfTheFacility(BuildContext context) {
     // we are going to tell the other models what the facility is; it has already been selected
 
     FacilityViewModel facilityViewModel =
@@ -57,7 +59,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     tanksLiveViewModel.setFacilityId(facilityViewModel.selectedFacility);
     // BUGfixed new view model needs to know the facility
     tanksSelectViewModel.setFacilityId(facilityViewModel.selectedFacility);
-  }
+  }*/
 
   Widget facilityDropDown(BuildContext context) {
     FacilityViewModel facilityViewModel =
@@ -212,7 +214,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       });
     });
   }
-
+/*
   void jumpToTheTank(BuildContext context2, String tankDocumentId) {
     TanksLiveViewModel tankLiveViewModel =
         Provider.of<TanksLiveViewModel>(context2, listen: false);
@@ -303,13 +305,13 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       },
     );
   }
-
+*/
   void loadQRCodeController(BuildContext context) {
     //jumpToTheTank(context, "65e69dc4108a18427361"); // hardcoded test
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return displayCameraForReadingQrCode(context);
+        return ScannerView();
       },
     );
   }
@@ -490,9 +492,8 @@ class _HomeScreenViewState extends State<HomeScreenView> {
             // we the button for loadQRCodeController to be enabled only if a facility is selected
             // and we are on ios, new function isAFacilitySelectedAndOnIos
             loadCommonButton(context, loadQRCodeController,
-                //facilityViewModel.isAFacilitySelectedAndOnIos,
                 () {
-              return true;
+              return (defaultTargetPlatform == TargetPlatform.iOS);
             }, "Scan a Tank’s Barcode…"),
             loadCommonButton(context, loadSearchController,
                 facilityViewModel.isAFacilitySelected, "Search For a Tank…"),

@@ -243,7 +243,7 @@ class _FacilitiesController
                     child: buildOuterLabel(context, "Assign Racks (top view)"),
                   ),
                   SizedBox(
-                    width: kGridSize,
+                    width: kGridWSize,
                     child: (model.gridHeight == 0) || (model.gridWidth == 0)
                         ? Container()
                         : FacilityGrid(tankMode: FacilityEditState.editable),

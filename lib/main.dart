@@ -12,39 +12,16 @@ import 'package:flutter/services.dart';
 import 'view_models/tankitems_viewmodel.dart';
 
 // 5 of 6 remove for real-world web
-import 'package:window_manager/window_manager.dart';
+//import 'package:window_manager/window_manager.dart';
 
-import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform;
+//import 'package:flutter/foundation.dart'
+//    show TargetPlatform, defaultTargetPlatform;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   ManageSession manageSession = ManageSession();
 
-  // real-world 5 of 5, comment out for web
-  //*
-   if (defaultTargetPlatform == TargetPlatform.windows ||
-      defaultTargetPlatform == TargetPlatform.macOS) {
-
-    await windowManager.ensureInitialized();
-
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(810, 1080), // 10.2 inch iPad portrait size
-      minimumSize: Size(810, 1080), //BUGfixed
-      maximumSize: Size(810, 1080), //BUGfixed
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.normal, // BUGfixed, had been TitleBarStyle.hidden, but this hides the draggable part of the window under Windows
-    );
-
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  }
-//*/
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]
   )

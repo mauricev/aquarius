@@ -1,6 +1,6 @@
 const int kGridFullHSize = 650;
 const int kGridDialogHSize = 590;
-const int kGridVSize = 500;
+const int kGridVSize = 480;
 const String kProgramName = 'Aquarius';
 const String kVersion = "3.2.0";
 
@@ -8,24 +8,22 @@ const int cParkedRackAbsPosition = -2;
 const String cParkedRackFkAddress = "0";
 
 // this will change for local, real-world output
-// 1 of 5
+// 1 of 4
 //const String kIPAddress = 'http://192.168.1.91:8080/v1';
 const String kIPAddress = 'https://aquarius-appwrite-at-peredalab.org/v1';
 
 //local
-// 2 of 5
+// 2 of 4
 //const String kProjectId = '6477fda3e6695f938f0d';
-
 //real-world
 const String kProjectId = '648fc20504d0ed7a089d';
 
 // set to true or false accordingly
-// 3 of 5
+// 3 of 4
 //const kRunningLocal = true;
 const kRunningLocal = false;
 
-// 4 of 5, zebra printing
-// 5 of 5, main (window code for iPad, but disable for web)
+// 4 of 4, zebra printing
 
 const String kDatabaseId = '63eefc50e6d7b0cb4c4e';
 
@@ -42,7 +40,8 @@ const double kHalfWidth  = 100;
 const double kNumberWidth = 50;
 const double kIndentWidth = 20.0;
 
-const double kGridSize = 170;
+const double kGridWSize = 170;
+const double kGridHSize = 140;
 
 enum TankStringsEnum { tankLine, numberOfFish, generation, genotype, parentMale, parentFemale }
 

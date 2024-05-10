@@ -5,9 +5,11 @@ import '../views/consts.dart';
 import '../models/tank_model.dart';
 import '../view_models/tanks_viewmodel.dart';
 import 'tanks_view_rackgrid.dart';
+import 'package:provider/provider.dart';
+import '../view_models/search_viewmodel.dart';
 
 void myPrint(String printThis) {
-  //print(printThis);
+  print(printThis);
 }
 
 Stack returnTankWithOverlaidText(TanksViewModel tankViewModel, TanksLineViewModel tanksLineViewModel, int tankPosition, String imagePath) {
@@ -123,17 +125,6 @@ String buildDateOfBirth(int? Function()? retrieveValue) {
   return dobText;
 }
 
-/*String returnGenoType(BuildContext context, Tank currentTank) {
-
-  TanksSelectViewModel tanksSelectViewModel =
-  Provider.of<TanksSelectViewModel>(context, listen: false);
-
-  ValueItem? selectedGenoType = tanksSelectViewModel
-      .convertGenoTypeToValueItem(currentTank.getGenoType());
-
-  return selectedGenoType?.label ?? cGenoTypeNotSpecified;
-}*/
-
 Future<bool> confirmActionSpecifiedInMessage(BuildContext context, String message) async {
   return await showDialog<bool>(
     context: context,
@@ -159,4 +150,37 @@ Future<bool> confirmActionSpecifiedInMessage(BuildContext context, String messag
     },
   ) ??
       false;
+}
+
+void informViewModelsOfTheFacility(BuildContext context) {
+  // we are going to tell the other models what the facility is; it has already been selected
+
+  FacilityViewModel facilityViewModel =
+  Provider.of<FacilityViewModel>(context, listen: false);
+
+  // this fetches the facility info
+  // I am passing the facility to itself. How does that make any sense?
+  // getFacilityInfo will also be called when a new facility is being created.
+  // so we call getFacilityInfo with an empty facility, and that new facility has not been selected
+  // another facility may or may not be selected. so getFacilityInfo doesn’t change the
+  // selected facility; it just loads up some info on the newly created facility.
+  // when the facility dropdown is set selected, then we select the facility and then call this
+  // method, which in turn apprises facilityViewModel of the newly selected facility
+
+  facilityViewModel.getFacilityInfo(facilityViewModel.selectedFacility);
+
+  SearchViewModel searchViewModel =
+  Provider.of<SearchViewModel>(context, listen: false);
+
+  searchViewModel.setFacilityId(facilityViewModel.selectedFacility);
+
+  TanksLiveViewModel tanksLiveViewModel =
+  Provider.of<TanksLiveViewModel>(context, listen: false);
+
+  TanksSelectViewModel tanksSelectViewModel =
+  Provider.of<TanksSelectViewModel>(context, listen: false);
+
+  tanksLiveViewModel.setFacilityId(facilityViewModel.selectedFacility);
+  // BUGfixed new view model needs to know the facility
+  tanksSelectViewModel.setFacilityId(facilityViewModel.selectedFacility);
 }

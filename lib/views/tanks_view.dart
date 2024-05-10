@@ -19,7 +19,7 @@ import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
 
 // for local, comment out
-//import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
+import 'package:flutter_zebra_sdk/flutter_zebra_sdk.dart';
 
 class TankView extends StatefulWidget {
   final String? incomingRackFk;
@@ -603,7 +603,7 @@ class TankViewState extends State<TankView> {
       bool? Function()? retrieveValue,
       void Function(bool newValue)? updateValue) {
     return SizedBox(
-      width: 120,
+      width: 140,
       child: CheckboxListTile(
         title: Text(
           labelText,
@@ -713,7 +713,7 @@ class TankViewState extends State<TankView> {
 ^FO20,20^BQN,2,8^FH^FDMA:$tankDocumentId^FS 
 ^XZ
 """;
-    //ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
+    ZebraSdk.printZPLOverTCPIP('10.49.98.105', data: zplCode);
   }
 
   Future<Map<String, dynamic>> deleteTankDialog(BuildContext context) async {
@@ -945,22 +945,12 @@ class TankViewState extends State<TankView> {
                 ),
               ),
               SizedBox(
-                width: 390, //space for the note
+                width: 370, //space for the note
                 child: Text(currentTank?.notes.returnCurrentNoteText() ??
                     "No current note"),
               ),
-              ElevatedButton(
-                  onPressed: (currentTank == null) ||
-                          (defaultTargetPlatform != TargetPlatform.iOS)
-                      ? null
-                      : () {
-                          printTank(context, currentTank);
-                        },
-                  child: const Text("Print")),
+
             ],
-          ),
-          const SizedBox(
-            height: 20,
           ),
           Row(
             children: [
@@ -972,7 +962,23 @@ class TankViewState extends State<TankView> {
                         : () {
                             deleteEuthanizeTankDialog(context, currentTank);
                           },
+                    style: TextButton.styleFrom(
+                        minimumSize: const Size(210, 20)),
                     child: const Text("Delete/Euthanize Tank")),
+              ),
+              const SizedBox(
+                width: 230,
+              ),
+              ElevatedButton(
+                onPressed: (currentTank == null) ||
+                    (defaultTargetPlatform != TargetPlatform.iOS)
+                    ? null
+                    : () {
+                  printTank(context, currentTank);
+                },
+                style: TextButton.styleFrom(
+                    minimumSize: const Size(250, 20)),
+                child: const Text("Print"),
               ),
             ],
           ),

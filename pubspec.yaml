@@ -37,11 +37,10 @@ dependencies:
   intl: ^0.19.0
   device_info_plus: ^10.1.0
   flutter_zebra_sdk: ^0.0.4+1
-  mobile_scanner: ^4.0.1
+  mobile_scanner: ^5.1.0
   flutter_launcher_icons: ^0.13.1
-  window_manager: ^0.3.8
   simple_search_dropdown: ^4.4.1
-  fl_chart: ^0.67.0
+  fl_chart: ^0.68.0
 
 dev_dependencies:
   flutter_test:

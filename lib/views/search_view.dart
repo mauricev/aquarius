@@ -303,6 +303,28 @@ class _SearchViewState extends State<SearchView> {
                 ((searchSelection == cTankLineSearch)
                     ? 5
                     : 7) /
+                12 -
+                // BUGfixed fixed layout when keyboard shows 2024-05-10
+                MediaQuery.of(context).viewInsets.bottom,
+            width: MediaQuery.of(context).size.width * 5 / 6,
+
+            child: Center(
+              child: ListView.builder(
+                itemCount: searchModel.tankListSearched.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return searchedItem(
+                      context, searchModel.tankListSearched[index], index);
+                },
+              ),
+            ),
+
+          ),
+          /*
+          SizedBox(
+            height: MediaQuery.of(context).size.height *
+                ((searchSelection == cTankLineSearch)
+                    ? 5
+                    : 7) /
                 12,
             width: MediaQuery.of(context).size.width * 5 / 6,
 
@@ -317,6 +339,7 @@ class _SearchViewState extends State<SearchView> {
             ),
 
           ),
+           */
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

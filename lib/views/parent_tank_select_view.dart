@@ -162,7 +162,7 @@ class ParentTankSelectViewState extends State<ParentTankSelectView> {
           ],
         ),
         const SizedBox(
-          height: 20,
+          height: 10,
         ),
         Row(
           children: [
@@ -171,7 +171,7 @@ class ParentTankSelectViewState extends State<ParentTankSelectView> {
           ],
         ),
         const SizedBox(
-          height: 20,
+          height: 10,
         ),
         Row(
           children: [

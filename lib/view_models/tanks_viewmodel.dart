@@ -49,8 +49,11 @@ class TanksViewModel with ChangeNotifier {
     models.DocumentList? theTankList =
         await manageSession.queryDocument(cTankCollection, tankQuery);
 
+    // BUGFixed 2024-03-06 we now throw an exception so we can alert the user
+    // this is particular for when we are scanning an old-style QR code
+    // that referenced rack and tank position rather than the tank document id
     if (theTankList.documents.isEmpty) {
-      return null;
+      throw Exception("I can’t find this tank");
     }
     models.Document theTank = theTankList.documents[0];
 
@@ -378,7 +381,10 @@ class TanksLiveViewModel extends TanksViewModel {
 
   bool get isTemplateInPlay => _isTemplateInPlay;
 
-  TanksLiveViewModel(super.manageSession);
+  TanksLiveViewModel(super.manageSession) {
+    // BUGFixed somehow this got erased when I split this class up. 2024-05-06
+    _tankTemplate = Tank(facilityFk: '0',rackFk: '',absolutePosition: 0, manageSession: manageSession);
+  }
 
   void addNewTank(
       int absolutePosition,

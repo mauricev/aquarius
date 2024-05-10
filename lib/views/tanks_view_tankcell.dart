@@ -178,6 +178,7 @@ class _TankLiveCellState extends State<TankLiveCell> {
   @override
   Widget build(BuildContext context) {
 
+    // this has listen set to true
     TanksLiveViewModel tankLiveViewModelFromProvider = Provider.of<TanksLiveViewModel>(context);
 
     TanksLineViewModel tanksLineViewModel = Provider.of<TanksLineViewModel>(context, listen: false);

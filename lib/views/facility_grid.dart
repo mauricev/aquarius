@@ -91,6 +91,11 @@ class FacilityGridCell extends StatelessWidget {
         child: TextField(
           controller: controllerForRelativePosition,
           enabled: tankMode == FacilityEditState.editable,
+          // BUGFixed made this facility grid smaller and font size too
+          // 2024-05-10
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.black,
+              ),
           onChanged: (value) {
             int index = facilityModel
                 .indexOfRackWithThisAbsolutePosition(absolutePosition);
@@ -138,8 +143,8 @@ class FacilityGrid extends StatelessWidget {
       FacilityViewModel facilityViewModel, FacilityEditState tankMode) {
     List<Widget> gridAcross = <FacilityGridCell>[];
 
-    double height = kGridSize / facilityViewModel.gridHeight;
-    double width = kGridSize / facilityViewModel.gridWidth;
+    double height = kGridHSize / facilityViewModel.gridHeight;
+    double width = kGridWSize / facilityViewModel.gridWidth;
 
     int offset = 0;
     for (int theIndex = 1;
@@ -181,7 +186,7 @@ class FacilityGrid extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: kGridSize,
+          width: kGridWSize,
           child: (facilityEditState == FacilityEditState.editable)
               ? RadioListTile<int>(
                   title: const Text('Pick me if this side is the entrance',

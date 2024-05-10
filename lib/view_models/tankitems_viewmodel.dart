@@ -19,8 +19,6 @@ abstract class TankItemsViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  // we could preflight the list; in the command below, we could
-
   void addTankItemFromDatabase(
       String documentId, bool tankLineInUse,
       String tankItemName) {
